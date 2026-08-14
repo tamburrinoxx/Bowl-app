@@ -46,8 +46,8 @@ export default function NewTournamentPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      setError("You need to be signed in as a host to create a tournament.");
       setSaving(false);
+      router.push("/login");
       return;
     }
 
