@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  /* Lane wood + scoreboard palette */
+  --walnut: #1b1410;       /* dark lane-wood background */
+  --walnut-mid: #6b4a2f;   /* card/divider wood tone */
+  --chalk: #f4e9d8;        /* chalk-cream text/panels */
+  --pindeck-red: #c4402a;  /* live / urgent status */
+  --scoreboard-amber: #e8a93b; /* handicap + score numbers */
+  --verified-green: #2e7d5b;   /* verified status */
+  --flag-orange: #cc7722;      /* flagged status */
+
+  --background: var(--walnut);
+  --foreground: var(--chalk);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-walnut: var(--walnut);
+  --color-walnut-mid: var(--walnut-mid);
+  --color-chalk: var(--chalk);
+  --color-pindeck-red: var(--pindeck-red);
+  --color-scoreboard-amber: var(--scoreboard-amber);
+  --color-verified-green: var(--verified-green);
+  --color-flag-orange: var(--flag-orange);
+  --font-display: "Oswald", "Arial Narrow", Impact, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-score: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      rgba(244, 233, 216, 0.02) 0px,
+      rgba(244, 233, 216, 0.02) 1px,
+      transparent 1px,
+      transparent 48px
+    );
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.font-score {
+  font-family: var(--font-score);
+  font-variant-numeric: tabular-nums;
+}
+
+.scoresheet-cell {
+  border: 1px solid rgba(244, 233, 216, 0.15);
+}
