@@ -46,7 +46,7 @@ export default function ScoreEntryPanel({
 
   if (!entries.length) {
     return (
-      <p className="text-chalk/50 font-score text-sm border border-walnut-mid rounded-md p-4">
+      <p className="text-ink-soft text-sm rounded-2xl bg-white/50 p-5">
         Add entries before posting scores.
       </p>
     );
@@ -55,14 +55,14 @@ export default function ScoreEntryPanel({
   return (
     <form
       onSubmit={submit}
-      className="flex flex-wrap items-end gap-3 border border-walnut-mid rounded-md p-4"
+      className="flex flex-wrap items-end gap-4 rounded-2xl bg-white/50 p-5"
     >
       <label className="block">
-        <span className="font-score text-xs uppercase text-chalk/60 block mb-1">Entry</span>
+        <span className="text-xs font-medium text-ink-soft block mb-1.5">Entry</span>
         <select
           value={entryId}
           onChange={(e) => setEntryId(e.target.value)}
-          className="bg-walnut border border-walnut-mid rounded-md px-3 py-2 text-chalk"
+          className="glass-input px-4 py-2.5 text-ink"
         >
           {entries.map((entry) => (
             <option key={entry.id} value={entry.id}>
@@ -73,11 +73,11 @@ export default function ScoreEntryPanel({
       </label>
 
       <label className="block">
-        <span className="font-score text-xs uppercase text-chalk/60 block mb-1">Game #</span>
+        <span className="text-xs font-medium text-ink-soft block mb-1.5">Game #</span>
         <select
           value={gameNumber}
           onChange={(e) => setGameNumber(Number(e.target.value))}
-          className="bg-walnut border border-walnut-mid rounded-md px-3 py-2 text-chalk"
+          className="glass-input px-4 py-2.5 text-ink"
         >
           {Array.from({ length: gamesPerSquad }, (_, i) => i + 1).map((n) => (
             <option key={n} value={n}>
@@ -88,7 +88,7 @@ export default function ScoreEntryPanel({
       </label>
 
       <label className="block">
-        <span className="font-score text-xs uppercase text-chalk/60 block mb-1">Score</span>
+        <span className="text-xs font-medium text-ink-soft block mb-1.5">Score</span>
         <input
           type="number"
           min={0}
@@ -96,19 +96,19 @@ export default function ScoreEntryPanel({
           required
           value={score}
           onChange={(e) => setScore(e.target.value)}
-          className="w-24 font-score bg-walnut border border-walnut-mid rounded-md px-3 py-2 text-chalk"
+          className="glass-input w-24 font-score px-4 py-2.5 text-ink"
         />
       </label>
 
       <button
         type="submit"
         disabled={saving}
-        className="font-display bg-scoreboard-amber text-walnut px-5 py-2 rounded-md hover:brightness-110 disabled:opacity-50"
+        className="pill-button bg-accent text-white px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
       >
         {saving ? "Posting…" : "Post Score"}
       </button>
 
-      {message && <span className="font-score text-xs text-chalk/60">{message}</span>}
+      {message && <span className="text-xs text-ink-soft">{message}</span>}
     </form>
   );
 }
