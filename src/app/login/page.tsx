@@ -57,7 +57,6 @@ export default function LoginPage() {
       return;
     }
 
-    // Email confirmation is required before a session exists
     setBusy(false);
     setMessage(
       "Check your email to confirm your account, then come back and sign in."
@@ -90,13 +89,13 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-walnut text-chalk px-6 py-12 flex items-center justify-center">
-      <div className="w-full max-w-sm">
-        <p className="font-score text-scoreboard-amber text-sm mb-2 text-center">
-          HOST ACCESS
+    <main className="min-h-screen flex items-center justify-center px-6 py-12">
+      <div className="w-full max-w-sm glass-panel p-8">
+        <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 text-center uppercase">
+          Host Access
         </p>
-        <h1 className="font-display text-3xl mb-8 text-center">
-          {mode === "signup" ? "Create Host Account" : "Sign In"}
+        <h1 className="font-display text-3xl text-ink mb-8 text-center">
+          {mode === "signup" ? "Create Account" : "Welcome Back"}
         </h1>
 
         <form
@@ -105,7 +104,7 @@ export default function LoginPage() {
         >
           {mode === "signup" && (
             <div>
-              <label className="font-score text-xs uppercase text-chalk/60 block mb-1">
+              <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
                 Name
               </label>
               <input
@@ -119,7 +118,7 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label className="font-score text-xs uppercase text-chalk/60 block mb-1">
+            <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
               Email
             </label>
             <input
@@ -133,7 +132,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="font-score text-xs uppercase text-chalk/60 block mb-1">
+            <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
               Password
             </label>
             <input
@@ -148,13 +147,13 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p className="text-pindeck-red font-score text-sm border border-pindeck-red/40 rounded p-3">
+            <p className="text-danger text-sm bg-danger/10 border border-danger/20 rounded-2xl p-3">
               {error}
             </p>
           )}
 
           {message && (
-            <p className="text-verified-green font-score text-sm border border-verified-green/40 rounded p-3">
+            <p className="text-success text-sm bg-success/10 border border-success/20 rounded-2xl p-3">
               {message}
             </p>
           )}
@@ -162,7 +161,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={busy}
-            className="font-display w-full bg-scoreboard-amber text-walnut text-lg py-3 rounded-md hover:brightness-110 transition disabled:opacity-50"
+            className="pill-button w-full bg-accent text-white text-base py-3.5 hover:brightness-110 disabled:opacity-50"
           >
             {busy ? "Working…" : mode === "signup" ? "Create Account" : "Sign In"}
           </button>
@@ -174,7 +173,7 @@ export default function LoginPage() {
             setError(null);
             setMessage(null);
           }}
-          className="font-score text-xs text-chalk/50 hover:text-chalk block mx-auto mt-6"
+          className="text-sm text-accent font-medium block mx-auto mt-6"
         >
           {mode === "signup"
             ? "Already have an account? Sign in"
@@ -186,4 +185,4 @@ export default function LoginPage() {
 }
 
 const inputClass =
-  "w-full bg-walnut border border-walnut-mid rounded-md px-3 py-2 text-chalk placeholder:text-chalk/30 focus:outline-none focus:ring-2 focus:ring-scoreboard-amber";
+  "glass-input w-full px-4 py-3 text-ink placeholder:text-ink-soft/60 text-base";
