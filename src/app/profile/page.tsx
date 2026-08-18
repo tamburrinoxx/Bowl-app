@@ -138,21 +138,21 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-walnut text-chalk flex items-center justify-center">
-        <p className="font-score text-chalk/50">Loading…</p>
+      <main className="min-h-screen flex items-center justify-center">
+        <p className="text-ink-soft">Loading…</p>
       </main>
     );
   }
 
   if (!profile) {
     return (
-      <main className="min-h-screen bg-walnut text-chalk px-6 py-12 flex items-center justify-center">
-        <div className="w-full max-w-sm">
-          <p className="font-score text-scoreboard-amber text-sm mb-2 text-center">
-            BOWLER PROFILE
+      <main className="min-h-screen flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-sm glass-panel p-8">
+          <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 text-center uppercase">
+            Bowler Profile
           </p>
-          <h1 className="font-display text-3xl mb-8 text-center">
-            {mode === "signup" ? "Create Your Profile" : "Sign In"}
+          <h1 className="font-display text-3xl text-ink mb-8 text-center">
+            {mode === "signup" ? "Create Your Profile" : "Welcome Back"}
           </h1>
 
           <form
@@ -162,7 +162,7 @@ export default function ProfilePage() {
             {mode === "signup" && (
               <>
                 <div>
-                  <label className="font-score text-xs uppercase text-chalk/60 block mb-1">
+                  <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
                     Name
                   </label>
                   <input
@@ -174,7 +174,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="font-score text-xs uppercase text-chalk/60 block mb-1">
+                  <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
                     Home center
                   </label>
                   <input
@@ -185,7 +185,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="font-score text-xs uppercase text-chalk/60 block mb-1">
+                  <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
                     USBC ID (optional)
                   </label>
                   <input
@@ -199,7 +199,7 @@ export default function ProfilePage() {
             )}
 
             <div>
-              <label className="font-score text-xs uppercase text-chalk/60 block mb-1">
+              <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
                 Email
               </label>
               <input
@@ -213,7 +213,7 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="font-score text-xs uppercase text-chalk/60 block mb-1">
+              <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
                 Password
               </label>
               <input
@@ -228,13 +228,13 @@ export default function ProfilePage() {
             </div>
 
             {error && (
-              <p className="text-pindeck-red font-score text-sm border border-pindeck-red/40 rounded p-3">
+              <p className="text-danger text-sm bg-danger/10 border border-danger/20 rounded-2xl p-3">
                 {error}
               </p>
             )}
 
             {message && (
-              <p className="text-verified-green font-score text-sm border border-verified-green/40 rounded p-3">
+              <p className="text-success text-sm bg-success/10 border border-success/20 rounded-2xl p-3">
                 {message}
               </p>
             )}
@@ -242,7 +242,7 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={busy}
-              className="font-display w-full bg-scoreboard-amber text-walnut text-lg py-3 rounded-md hover:brightness-110 transition disabled:opacity-50"
+              className="pill-button w-full bg-accent text-white text-base py-3.5 hover:brightness-110 disabled:opacity-50"
             >
               {busy ? "Working…" : mode === "signup" ? "Create Profile" : "Sign In"}
             </button>
@@ -254,7 +254,7 @@ export default function ProfilePage() {
               setError(null);
               setMessage(null);
             }}
-            className="font-score text-xs text-chalk/50 hover:text-chalk block mx-auto mt-6"
+            className="text-sm text-accent font-medium block mx-auto mt-6"
           >
             {mode === "signup"
               ? "Already have a profile? Sign in"
@@ -266,52 +266,56 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-walnut text-chalk px-6 py-12">
+    <main className="min-h-screen px-6 py-12">
       <div className="mx-auto max-w-2xl">
-        <div className="flex items-baseline justify-between border-b border-walnut-mid pb-6 mb-8">
+        <div className="glass-panel p-8 mb-6 flex items-baseline justify-between">
           <div>
-            <p className="font-score text-scoreboard-amber text-sm mb-1">BOWLER PROFILE</p>
-            <h1 className="font-display text-4xl">{profile.full_name}</h1>
+            <p className="font-score text-accent text-xs font-semibold tracking-wide mb-1 uppercase">
+              Bowler Profile
+            </p>
+            <h1 className="font-display text-4xl text-ink">{profile.full_name}</h1>
             {profile.home_center && (
-              <p className="font-score text-chalk/50 text-sm mt-1">{profile.home_center}</p>
+              <p className="text-ink-soft text-sm mt-1">{profile.home_center}</p>
             )}
           </div>
           <button
             onClick={handleSignOut}
-            className="font-score text-xs text-chalk/50 hover:text-chalk"
+            className="text-sm text-accent font-medium"
           >
             Sign out
           </button>
         </div>
 
-        <section>
-          <h2 className="font-display text-xl text-scoreboard-amber mb-3">
-            Pattern Averages
-          </h2>
+        <section className="glass-panel p-8">
+          <h2 className="font-display text-xl text-ink mb-4">Pattern Averages</h2>
           {averages.length ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {averages.map((avg) => (
                 <div
                   key={avg.id}
-                  className="flex items-center justify-between border border-walnut-mid rounded-md px-4 py-3"
+                  className="flex items-center justify-between rounded-2xl bg-white/50 px-5 py-4"
                 >
                   <div>
-                    <p className="font-body">{avg.oil_patterns?.name ?? "Unknown pattern"}</p>
-                    <p className="font-score text-xs text-chalk/50">
+                    <p className="text-ink font-medium">
+                      {avg.oil_patterns?.name ?? "Unknown pattern"}
+                    </p>
+                    <p className="text-ink-soft text-xs mt-0.5">
                       {avg.games_counted} games
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-score text-scoreboard-amber text-lg">{avg.average}</p>
+                    <p className="font-score text-accent text-lg font-semibold">
+                      {avg.average}
+                    </p>
                     {avg.verified && (
-                      <p className="font-score text-xs text-verified-green">verified</p>
+                      <p className="text-success text-xs font-medium">verified</p>
                     )}
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-chalk/50 font-score text-sm border border-walnut-mid rounded-md p-4">
+            <p className="text-ink-soft text-sm rounded-2xl bg-white/50 p-5">
               No pattern averages yet. These build up as you bowl in tracked tournaments.
             </p>
           )}
@@ -322,4 +326,4 @@ export default function ProfilePage() {
 }
 
 const inputClass =
-  "w-full bg-walnut border border-walnut-mid rounded-md px-3 py-2 text-chalk placeholder:text-chalk/30 focus:outline-none focus:ring-2 focus:ring-scoreboard-amber";
+  "glass-input w-full px-4 py-3 text-ink placeholder:text-ink-soft/60 text-base";
