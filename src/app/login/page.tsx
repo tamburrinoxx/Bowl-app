@@ -57,6 +57,7 @@ export default function LoginPage() {
       return;
     }
 
+    // Email confirmation is required before a session exists
     setBusy(false);
     setMessage(
       "Check your email to confirm your account, then come back and sign in."
@@ -186,5 +187,3 @@ export default function LoginPage() {
 
 const inputClass =
   "w-full bg-walnut border border-walnut-mid rounded-md px-3 py-2 text-chalk placeholder:text-chalk/30 focus:outline-none focus:ring-2 focus:ring-scoreboard-amber";
-
-open -e ~/Desktop/bowl-app/src/app/host/tournaments/new/page.tsx
