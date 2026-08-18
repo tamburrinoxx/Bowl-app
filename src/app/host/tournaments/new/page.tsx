@@ -103,14 +103,16 @@ export default function NewTournamentPage() {
   }
 
   return (
-    <main className="min-h-screen bg-walnut text-chalk px-6 py-12">
+    <main className="min-h-screen px-6 py-12">
       <div className="mx-auto max-w-2xl">
-        <p className="font-score text-scoreboard-amber text-sm mb-2">HOST / NEW EVENT</p>
-        <h1 className="font-display text-4xl md:text-5xl mb-8 border-b border-walnut-mid pb-6">
+        <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 uppercase">
+          Host / New Event
+        </p>
+        <h1 className="font-display text-4xl md:text-5xl text-ink mb-8">
           Set Up a Tournament
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="glass-panel p-8 space-y-6">
           <Field label="Tournament name">
             <input
               required
@@ -148,11 +150,11 @@ export default function NewTournamentPage() {
             </Field>
           </div>
 
-          <fieldset className="border border-walnut-mid rounded-md p-4">
-            <legend className="font-score text-scoreboard-amber text-xs px-2 uppercase tracking-wide">
+          <div className="rounded-2xl bg-white/50 p-5">
+            <p className="text-accent text-xs font-semibold uppercase tracking-wide mb-3">
               Oil pattern (drives pattern-specific handicaps)
-            </legend>
-            <div className="grid grid-cols-3 gap-4 mt-2">
+            </p>
+            <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2">
                 <Field label="Pattern name">
                   <input
@@ -173,11 +175,11 @@ export default function NewTournamentPage() {
                 />
               </Field>
             </div>
-            <p className="text-xs text-chalk/50 mt-2">
+            <p className="text-xs text-ink-soft mt-3">
               Bowlers&apos; handicaps for this event will be pulled from their average on this
               exact pattern, not their overall average.
             </p>
-          </fieldset>
+          </div>
 
           {form.format === "handicap" && (
             <div className="grid grid-cols-3 gap-4">
@@ -247,7 +249,7 @@ export default function NewTournamentPage() {
           </div>
 
           {error && (
-            <p className="text-pindeck-red font-score text-sm border border-pindeck-red/40 rounded p-3">
+            <p className="text-danger text-sm bg-danger/10 border border-danger/20 rounded-2xl p-3">
               {error}
             </p>
           )}
@@ -255,7 +257,7 @@ export default function NewTournamentPage() {
           <button
             type="submit"
             disabled={saving}
-            className="font-display w-full bg-scoreboard-amber text-walnut text-lg py-3 rounded-md hover:brightness-110 transition disabled:opacity-50"
+            className="pill-button w-full bg-accent text-white text-base py-3.5 hover:brightness-110 disabled:opacity-50"
           >
             {saving ? "Creating…" : "Create Tournament"}
           </button>
@@ -268,7 +270,7 @@ export default function NewTournamentPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="font-score text-xs uppercase tracking-wide text-chalk/60 block mb-1">
+      <span className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
         {label}
       </span>
       {children}
@@ -277,4 +279,4 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputClass =
-  "w-full bg-walnut border border-walnut-mid rounded-md px-3 py-2 text-chalk placeholder:text-chalk/30 focus:outline-none focus:ring-2 focus:ring-scoreboard-amber";
+  "glass-input w-full px-4 py-3 text-ink placeholder:text-ink-soft/60 text-base";
