@@ -32,39 +32,39 @@ export default async function HostTournamentPage({
 
   if (!tournament) {
     return (
-      <main className="min-h-screen bg-walnut text-chalk flex items-center justify-center">
-        <p className="font-score">Tournament not found.</p>
+      <main className="min-h-screen flex items-center justify-center">
+        <p className="text-ink-soft">Tournament not found.</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-walnut text-chalk px-6 py-12">
+    <main className="min-h-screen px-6 py-12">
       <div className="mx-auto max-w-5xl">
-        <div className="flex items-baseline justify-between border-b border-walnut-mid pb-6 mb-8">
+        <div className="glass-panel p-8 mb-6 flex items-baseline justify-between">
           <div>
-            <p className="font-score text-scoreboard-amber text-sm mb-1">
-              {tournament.center_name?.toUpperCase() ?? "HOST DASHBOARD"}
+            <p className="font-score text-accent text-xs font-semibold tracking-wide mb-1 uppercase">
+              {tournament.center_name ?? "Host Dashboard"}
             </p>
-            <h1 className="font-display text-4xl md:text-5xl">{tournament.name}</h1>
+            <h1 className="font-display text-4xl md:text-5xl text-ink">{tournament.name}</h1>
           </div>
-          <span className="font-score text-xs uppercase border border-walnut-mid rounded-full px-3 py-1">
+          <span className="text-xs font-semibold uppercase rounded-full bg-white/60 px-4 py-1.5 text-ink-soft">
             {tournament.status.replace("_", " ")}
           </span>
         </div>
 
-        <section className="mb-10">
-          <h2 className="font-display text-xl text-scoreboard-amber mb-3">Entries</h2>
-          <div className="space-y-2">
+        <section className="glass-panel p-8 mb-6">
+          <h2 className="font-display text-xl text-ink mb-4">Entries</h2>
+          <div className="space-y-3">
             {entries?.length ? (
               entries.map((entry) => (
                 <div
                   key={entry.id}
-                  className="flex items-center justify-between border border-walnut-mid rounded-md px-4 py-3"
+                  className="flex items-center justify-between rounded-2xl bg-white/50 px-5 py-4"
                 >
                   <div>
-                    <p className="font-body">{entry.entry_name}</p>
-                    <p className="font-score text-xs text-chalk/50">
+                    <p className="text-ink font-medium">{entry.entry_name}</p>
+                    <p className="text-ink-soft text-xs mt-0.5">
                       avg {entry.locked_average ?? "—"} · hdcp {entry.locked_handicap ?? "—"}
                     </p>
                   </div>
@@ -72,55 +72,57 @@ export default async function HostTournamentPage({
                 </div>
               ))
             ) : (
-              <p className="text-chalk/50 font-score text-sm">
+              <p className="text-ink-soft text-sm rounded-2xl bg-white/50 p-5">
                 No entries yet. Bowlers sign up, or add them manually below.
               </p>
             )}
           </div>
         </section>
 
-        <section className="mb-10">
-          <h2 className="font-display text-xl text-scoreboard-amber mb-3">Enter Scores</h2>
+        <section className="glass-panel p-8 mb-6">
+          <h2 className="font-display text-xl text-ink mb-4">Enter Scores</h2>
           <ScoreEntryPanel
             entries={entries ?? []}
             gamesPerSquad={tournament.games_per_squad}
           />
         </section>
 
-        <section>
-          <h2 className="font-display text-xl text-scoreboard-amber mb-3">Standings</h2>
-          <div className="overflow-x-auto border border-walnut-mid rounded-md">
-            <table className="w-full font-score text-sm">
+        <section className="glass-panel p-8">
+          <h2 className="font-display text-xl text-ink mb-4">Standings</h2>
+          <div className="overflow-x-auto rounded-2xl bg-white/50">
+            <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-chalk/50 uppercase text-xs">
-                  <th className="scoresheet-cell px-3 py-2">Pos</th>
-                  <th className="scoresheet-cell px-3 py-2">Entry</th>
-                  <th className="scoresheet-cell px-3 py-2 text-right">Games</th>
-                  <th className="scoresheet-cell px-3 py-2 text-right">Scratch</th>
-                  <th className="scoresheet-cell px-3 py-2 text-right">Hdcp</th>
-                  <th className="scoresheet-cell px-3 py-2 text-right text-scoreboard-amber">
-                    Total
-                  </th>
+                <tr className="text-left text-ink-soft uppercase text-xs">
+                  <th className="px-4 py-3">Pos</th>
+                  <th className="px-4 py-3">Entry</th>
+                  <th className="px-4 py-3 text-right">Games</th>
+                  <th className="px-4 py-3 text-right">Scratch</th>
+                  <th className="px-4 py-3 text-right">Hdcp</th>
+                  <th className="px-4 py-3 text-right text-accent">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {standings?.map((row, i) => (
-                  <tr key={row.entry_id}>
-                    <td className="scoresheet-cell px-3 py-2">{i + 1}</td>
-                    <td className="scoresheet-cell px-3 py-2 font-body">{row.entry_name}</td>
-                    <td className="scoresheet-cell px-3 py-2 text-right">{row.games_played}</td>
-                    <td className="scoresheet-cell px-3 py-2 text-right">{row.scratch_total}</td>
-                    <td className="scoresheet-cell px-3 py-2 text-right">
+                  <tr key={row.entry_id} className="border-t border-black/5">
+                    <td className="px-4 py-3 text-ink">{i + 1}</td>
+                    <td className="px-4 py-3 text-ink font-medium">{row.entry_name}</td>
+                    <td className="px-4 py-3 text-right font-score text-ink">
+                      {row.games_played}
+                    </td>
+                    <td className="px-4 py-3 text-right font-score text-ink">
+                      {row.scratch_total}
+                    </td>
+                    <td className="px-4 py-3 text-right font-score text-ink">
                       {row.locked_handicap ?? 0}
                     </td>
-                    <td className="scoresheet-cell px-3 py-2 text-right text-scoreboard-amber font-bold">
+                    <td className="px-4 py-3 text-right font-score text-accent font-bold">
                       {row.handicap_total}
                     </td>
                   </tr>
                 ))}
                 {!standings?.length && (
                   <tr>
-                    <td colSpan={6} className="px-3 py-6 text-center text-chalk/40">
+                    <td colSpan={6} className="px-4 py-8 text-center text-ink-soft">
                       No games posted yet.
                     </td>
                   </tr>
