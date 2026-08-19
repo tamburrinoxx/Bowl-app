@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import type { Profile, PatternAverage, OilPattern } from "@/types";
+import type { Profile, PatternAverage, OilPattern, Session, SessionGame, BowlerNote } from "@/types";
+import { aggregateStats } from "@/lib/bowling";
+
+type SessionWithGames = Session & { session_games: SessionGame[] };
 
 export default function ProfilePage() {
   const supabase = createClient();
@@ -12,6 +16,9 @@ export default function ProfilePage() {
   const [averages, setAverages] = useState<(PatternAverage & { oil_patterns: OilPattern })[]>(
     []
   );
+  const [sessions, setSessions] = useState<SessionWithGames[]>([]);
+  const [notes, setNotes] = useState<BowlerNote[]>([]);
+  const [newNote, setNewNote] = useState("");
 
   const [mode, setMode] = useState<"signin" | "signup">("signup");
   const [email, setEmail] = useState("");
@@ -53,6 +60,21 @@ export default function ProfilePage() {
         .select("*, oil_patterns(*)")
         .eq("bowler_id", user.id);
       setAverages(avgRows ?? []);
+
+      const { data: sessionRows } = await supabase
+        .from("sessions")
+        .select("*, session_games(*)")
+        .eq("bowler_id", user.id)
+        .order("played_at", { ascending: false })
+        .limit(5);
+      setSessions((sessionRows as SessionWithGames[]) ?? []);
+
+      const { data: noteRows } = await supabase
+        .from("bowler_notes")
+        .select("*")
+        .eq("bowler_id", user.id)
+        .order("created_at", { ascending: false });
+      setNotes(noteRows ?? []);
     }
 
     setLoading(false);
@@ -134,6 +156,44 @@ export default function ProfilePage() {
     await supabase.auth.signOut();
     setProfile(null);
     setAverages([]);
+    setSessions([]);
+    setNotes([]);
+  }
+
+  async function addNote(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newNote.trim() || !profile) return;
+
+    const { data, error: noteErr } = await supabase
+      .from("bowler_notes")
+      .insert({ bowler_id: profile.id, content: newNote.trim() })
+      .select()
+      .single();
+
+    if (!noteErr && data) {
+      setNotes((prev) => [data, ...prev]);
+      setNewNote("");
+    }
+  }
+
+  async function toggleNote(note: BowlerNote) {
+    const { error: noteErr } = await supabase
+      .from("bowler_notes")
+      .update({ done: !note.done })
+      .eq("id", note.id);
+
+    if (!noteErr) {
+      setNotes((prev) =>
+        prev.map((n) => (n.id === note.id ? { ...n, done: !n.done } : n))
+      );
+    }
+  }
+
+  async function deleteNote(id: string) {
+    const { error: noteErr } = await supabase.from("bowler_notes").delete().eq("id", id);
+    if (!noteErr) {
+      setNotes((prev) => prev.filter((n) => n.id !== id));
+    }
   }
 
   if (loading) {
@@ -265,6 +325,11 @@ export default function ProfilePage() {
     );
   }
 
+  const allGames = sessions.flatMap((s) =>
+    (s.session_games ?? []).map((g) => g.frame_data)
+  );
+  const stats = aggregateStats(allGames);
+
   return (
     <main className="min-h-screen px-6 py-12">
       <div className="mx-auto max-w-2xl">
@@ -278,15 +343,74 @@ export default function ProfilePage() {
               <p className="text-ink-soft text-sm mt-1">{profile.home_center}</p>
             )}
           </div>
-          <button
-            onClick={handleSignOut}
-            className="text-sm text-accent font-medium"
-          >
+          <button onClick={handleSignOut} className="text-sm text-accent font-medium">
             Sign out
           </button>
         </div>
 
-        <section className="glass-panel p-8">
+        <Link
+          href="/profile/score"
+          className="glass-panel p-6 mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
+        >
+          <div>
+            <p className="font-display text-xl text-ink mb-1">Log a Session</p>
+            <p className="text-ink-soft text-sm">Enter frame-by-frame scores for 3 games.</p>
+          </div>
+          <span className="text-accent text-2xl font-light">→</span>
+        </Link>
+
+        <section className="glass-panel p-8 mb-6">
+          <h2 className="font-display text-xl text-ink mb-4">Recent Stats</h2>
+          {stats.gamesCounted ? (
+            <div className="grid grid-cols-3 gap-3">
+              <StatBox label="Strike %" value={`${stats.strikePct}%`} />
+              <StatBox label="Spare %" value={`${stats.sparePct}%`} />
+              <StatBox label="Open %" value={`${stats.openPct}%`} />
+              <StatBox label="Avg Score" value={String(stats.avgScore)} />
+              <StatBox label="High Game" value={String(stats.highGame)} />
+              <StatBox label="Games Logged" value={String(stats.gamesCounted)} />
+            </div>
+          ) : (
+            <p className="text-ink-soft text-sm rounded-2xl bg-white/5 p-5">
+              Log a session to start tracking your stats.
+            </p>
+          )}
+        </section>
+
+        <section className="glass-panel p-8 mb-6">
+          <h2 className="font-display text-xl text-ink mb-4">
+            Last {sessions.length || 5} Leagues / Tournaments
+          </h2>
+          {sessions.length ? (
+            <div className="space-y-3">
+              {sessions.map((s) => {
+                const games = s.session_games ?? [];
+                const total = games.reduce((sum, g) => sum + g.scratch_score, 0);
+                return (
+                  <div
+                    key={s.id}
+                    className="flex items-center justify-between rounded-2xl bg-white/5 px-5 py-4"
+                  >
+                    <div>
+                      <p className="text-ink font-medium">{s.label}</p>
+                      <p className="text-ink-soft text-xs mt-0.5">
+                        {new Date(s.played_at).toLocaleDateString()} ·{" "}
+                        {games.map((g) => g.scratch_score).join(" / ")}
+                      </p>
+                    </div>
+                    <p className="font-score text-accent text-lg font-semibold">{total}</p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-ink-soft text-sm rounded-2xl bg-white/5 p-5">
+              No sessions logged yet.
+            </p>
+          )}
+        </section>
+
+        <section className="glass-panel p-8 mb-6">
           <h2 className="font-display text-xl text-ink mb-4">Pattern Averages</h2>
           {averages.length ? (
             <div className="space-y-3">
@@ -320,8 +444,71 @@ export default function ProfilePage() {
             </p>
           )}
         </section>
+
+        <section className="glass-panel p-8">
+          <h2 className="font-display text-xl text-ink mb-4">Notes to Work On</h2>
+          <form onSubmit={addNote} className="flex gap-2 mb-4">
+            <input
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              placeholder="e.g. Slow down my approach"
+              className="glass-input flex-1 px-4 py-2.5 text-ink placeholder:text-ink-soft/60"
+            />
+            <button
+              type="submit"
+              className="pill-button bg-accent text-on-accent px-5 py-2.5 hover:brightness-110"
+            >
+              Add
+            </button>
+          </form>
+          {notes.length ? (
+            <div className="space-y-2">
+              {notes.map((note) => (
+                <div
+                  key={note.id}
+                  className="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-3"
+                >
+                  <button
+                    onClick={() => toggleNote(note)}
+                    className={`w-5 h-5 rounded-full border shrink-0 ${
+                      note.done
+                        ? "bg-accent border-accent"
+                        : "border-ink-soft"
+                    }`}
+                  />
+                  <p
+                    className={`flex-1 text-sm ${
+                      note.done ? "text-ink-soft line-through" : "text-ink"
+                    }`}
+                  >
+                    {note.content}
+                  </p>
+                  <button
+                    onClick={() => deleteNote(note.id)}
+                    className="text-ink-soft text-xs hover:text-danger"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-ink-soft text-sm rounded-2xl bg-white/5 p-5">
+              Nothing here yet — jot down what to focus on next practice.
+            </p>
+          )}
+        </section>
       </div>
     </main>
+  );
+}
+
+function StatBox({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl bg-white/5 p-4 text-center">
+      <p className="font-score text-accent text-xl font-bold">{value}</p>
+      <p className="text-ink-soft text-xs mt-1">{label}</p>
+    </div>
   );
 }
 

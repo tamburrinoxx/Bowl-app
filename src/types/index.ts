@@ -80,6 +80,31 @@ export interface Game {
   verified: boolean;
 }
 
+export interface Session {
+  id: string;
+  bowler_id: string;
+  label: string;
+  oil_pattern_id: string | null;
+  played_at: string;
+  created_at: string;
+}
+
+export interface SessionGame {
+  id: string;
+  session_id: string;
+  game_number: number;
+  frame_data: { rolls: number[] }[];
+  scratch_score: number;
+}
+
+export interface BowlerNote {
+  id: string;
+  bowler_id: string;
+  content: string;
+  done: boolean;
+  created_at: string;
+}
+
 export interface StandingsRow {
   entry_id: string;
   tournament_id: string;
