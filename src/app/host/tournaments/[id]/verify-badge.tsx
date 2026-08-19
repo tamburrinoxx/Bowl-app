@@ -5,9 +5,9 @@ import { createClient } from "@/lib/supabase/client";
 import type { VerificationStatus } from "@/types";
 
 const STYLES: Record<VerificationStatus, string> = {
-  verified: "bg-verified-green/20 text-verified-green border-verified-green/40",
-  pending: "bg-chalk/10 text-chalk/60 border-chalk/20",
-  flagged: "bg-flag-orange/20 text-flag-orange border-flag-orange/40",
+  verified: "bg-success/15 text-success",
+  pending: "bg-black/5 text-ink-soft",
+  flagged: "bg-warning/15 text-warning",
 };
 
 export default function VerifyBadge({
@@ -32,9 +32,9 @@ export default function VerifyBadge({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3">
       <span
-        className={`font-score text-xs uppercase px-2 py-1 rounded border ${STYLES[current]}`}
+        className={`text-xs font-semibold uppercase px-3 py-1.5 rounded-full ${STYLES[current]}`}
       >
         {current}
       </span>
@@ -42,7 +42,7 @@ export default function VerifyBadge({
         <button
           disabled={busy}
           onClick={() => setStatus("verified")}
-          className="font-score text-xs text-verified-green hover:underline disabled:opacity-40"
+          className="text-xs text-success font-medium disabled:opacity-40"
         >
           Verify
         </button>
@@ -51,7 +51,7 @@ export default function VerifyBadge({
         <button
           disabled={busy}
           onClick={() => setStatus("flagged")}
-          className="font-score text-xs text-flag-orange hover:underline disabled:opacity-40"
+          className="text-xs text-warning font-medium disabled:opacity-40"
         >
           Flag
         </button>
