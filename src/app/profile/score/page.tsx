@@ -1,82 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { FrameData } from "@/lib/bowling";
-import { scoreGame, isFrameComplete, gameStats } from "@/lib/bowling";
+import {
+  scoreGame,
+  isFrameComplete,
+  gameStats,
+  cumulativeScores,
+  frameMarks,
+} from "@/lib/bowling";
+
+const ALL_PINS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const PIN_ROWS = [
+  [7, 8, 9, 10],
+  [4, 5, 6],
+  [2, 3],
+  [1],
+];
 
 function emptyGame(): FrameData[] {
   return Array.from({ length: 10 }, () => ({ rolls: [] }));
 }
 
-function FrameInputs({
-  frame,
-  frameNumber,
-  onChange,
-}: {
-  frame: FrameData;
-  frameNumber: number;
-  onChange: (rolls: number[]) => void;
-}) {
+/** Which physical pins are still standing, given the pins knocked down on each roll so far this frame. */
+function computeStandingPins(pinLog: number[][], frameNumber: number): number[] {
+  let standing = [...ALL_PINS];
   const isTenth = frameNumber === 10;
-  const r1 = frame.rolls[0];
-  const r2 = frame.rolls[1];
-  const r3 = frame.rolls[2];
-
-  function setRoll(index: number, raw: string) {
-    if (raw === "") {
-      const rolls = frame.rolls.slice(0, index);
-      onChange(rolls);
-      return;
+  for (const knocked of pinLog) {
+    standing = standing.filter((p) => !knocked.includes(p));
+    if (standing.length === 0 && isTenth) {
+      standing = [...ALL_PINS]; // fresh rack for a bonus ball
     }
-    const val = Math.max(0, Math.min(10, Number(raw)));
-    const rolls = frame.rolls.slice(0, index);
-    rolls[index] = val;
-    onChange(rolls);
   }
-
-  const showRoll2 = isTenth ? r1 !== undefined : r1 !== undefined && r1 < 10;
-  const showRoll3 =
-    isTenth && r1 !== undefined && r2 !== undefined && (r1 === 10 || r1 + r2 === 10);
-
-  const roll2Max = isTenth ? (r1 === 10 ? 10 : 10 - (r1 ?? 0)) : 10 - (r1 ?? 0);
-
-  return (
-    <div className="flex flex-col items-center gap-1 shrink-0">
-      <span className="text-[10px] text-ink-soft">{frameNumber}</span>
-      <div className="flex gap-1">
-        <input
-          type="number"
-          min={0}
-          max={10}
-          value={r1 ?? ""}
-          onChange={(e) => setRoll(0, e.target.value)}
-          className="w-9 h-9 text-center glass-input text-ink text-sm"
-        />
-        {showRoll2 && (
-          <input
-            type="number"
-            min={0}
-            max={roll2Max}
-            value={r2 ?? ""}
-            onChange={(e) => setRoll(1, e.target.value)}
-            className="w-9 h-9 text-center glass-input text-ink text-sm"
-          />
-        )}
-        {showRoll3 && (
-          <input
-            type="number"
-            min={0}
-            max={10}
-            value={r3 ?? ""}
-            onChange={(e) => setRoll(2, e.target.value)}
-            className="w-9 h-9 text-center glass-input text-ink text-sm"
-          />
-        )}
-      </div>
-    </div>
-  );
+  return standing;
 }
 
 export default function ScoreEntryPage() {
@@ -87,8 +45,20 @@ export default function ScoreEntryPage() {
   const [playedAt, setPlayedAt] = useState(() => new Date().toISOString().slice(0, 10));
   const [games, setGames] = useState<FrameData[][]>([emptyGame(), emptyGame(), emptyGame()]);
   const [activeGame, setActiveGame] = useState(0);
+  const [pinLog, setPinLog] = useState<number[][]>([]);
+  const [selected, setSelected] = useState<Set<number>>(new Set());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const currentGame = games[activeGame];
+  const currentFrameIndex = currentGame.findIndex((f, i) => !isFrameComplete(f, i + 1));
+  const gameFinished = currentFrameIndex === -1;
+  const frameNumber = currentFrameIndex + 1;
+
+  useEffect(() => {
+    setPinLog([]);
+    setSelected(new Set());
+  }, [activeGame, currentFrameIndex]);
 
   function updateFrame(gameIdx: number, frameIdx: number, rolls: number[]) {
     setGames((prev) => {
@@ -98,10 +68,31 @@ export default function ScoreEntryPage() {
     });
   }
 
-  const gameComplete = (g: FrameData[]) =>
-    g.every((f, i) => isFrameComplete(f, i + 1));
+  function commitRoll(pins: number[]) {
+    const newPinLog = [...pinLog, pins];
+    setPinLog(newPinLog);
+    setSelected(new Set());
+    const newRolls = newPinLog.map((k) => k.length);
+    updateFrame(activeGame, currentFrameIndex, newRolls);
+  }
 
+  function togglePin(pin: number) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(pin)) next.delete(pin);
+      else next.add(pin);
+      return next;
+    });
+  }
+
+  const gameComplete = (g: FrameData[]) => g.every((f, i) => isFrameComplete(f, i + 1));
   const allComplete = games.every(gameComplete);
+
+  const standingPins = gameFinished ? [] : computeStandingPins(pinLog, frameNumber);
+  const canStrike = standingPins.length === 10;
+  const cumulative = cumulativeScores(currentGame);
+  const stats = gameStats(currentGame);
+  const finalScore = gameComplete(currentGame) ? scoreGame(currentGame) : null;
 
   async function handleSave() {
     if (!label.trim()) {
@@ -128,11 +119,7 @@ export default function ScoreEntryPage() {
 
     const { data: session, error: sessionErr } = await supabase
       .from("sessions")
-      .insert({
-        bowler_id: user.id,
-        label: label.trim(),
-        played_at: playedAt,
-      })
+      .insert({ bowler_id: user.id, label: label.trim(), played_at: playedAt })
       .select()
       .single();
 
@@ -150,7 +137,6 @@ export default function ScoreEntryPage() {
     }));
 
     const { error: gamesErr } = await supabase.from("session_games").insert(rows);
-
     setSaving(false);
 
     if (gamesErr) {
@@ -161,20 +147,16 @@ export default function ScoreEntryPage() {
     router.push("/profile");
   }
 
-  const currentGame = games[activeGame];
-  const runningScore = gameComplete(currentGame) ? scoreGame(currentGame) : null;
-  const stats = gameStats(currentGame);
-
   return (
     <main className="min-h-screen px-6 py-12">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-2xl">
         <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 uppercase">
           Log a Session
         </p>
         <h1 className="font-display text-4xl text-ink mb-8">Enter Your Scores</h1>
 
-        <div className="glass-panel p-8 mb-6">
-          <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="glass-panel p-6 mb-6">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
                 Session name
@@ -198,58 +180,127 @@ export default function ScoreEntryPage() {
               />
             </div>
           </div>
+        </div>
 
-          <div className="flex gap-2 mb-6">
-            {[0, 1, 2].map((i) => {
-              const complete = gameComplete(games[i]);
+        <div className="flex gap-2 mb-4">
+          {[0, 1, 2].map((i) => (
+            <button
+              key={i}
+              onClick={() => setActiveGame(i)}
+              className={`pill-button px-5 py-2 text-sm ${
+                activeGame === i ? "bg-accent text-on-accent" : "bg-white/5 text-ink-soft"
+              }`}
+            >
+              Game {i + 1} {gameComplete(games[i]) ? "✓" : ""}
+            </button>
+          ))}
+        </div>
+
+        {/* Scoresheet grid */}
+        <div className="glass-panel p-4 mb-4 overflow-x-auto">
+          <div className="flex min-w-max">
+            {currentGame.map((frame, i) => {
+              const marks = frameMarks(frame, i + 1);
+              const isActive = i === currentFrameIndex;
               return (
-                <button
+                <div
                   key={i}
-                  onClick={() => setActiveGame(i)}
-                  className={`pill-button px-5 py-2 text-sm ${
-                    activeGame === i
-                      ? "bg-accent text-on-accent"
-                      : "bg-white/5 text-ink-soft"
+                  className={`flex-1 min-w-[52px] border-r border-white/10 last:border-r-0 ${
+                    isActive ? "bg-accent/10" : ""
                   }`}
                 >
-                  Game {i + 1} {complete ? "✓" : ""}
-                </button>
+                  <p className="text-[10px] text-ink-soft text-center pt-1">{i + 1}</p>
+                  <div className="flex justify-center gap-0.5 h-5 items-center">
+                    {marks.length ? (
+                      marks.map((m, j) => (
+                        <span key={j} className="text-xs font-score text-ink">
+                          {m}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-ink-soft/30">·</span>
+                    )}
+                  </div>
+                  <p className="text-sm font-score text-accent text-center font-bold pb-1">
+                    {cumulative[i] ?? ""}
+                  </p>
+                </div>
               );
             })}
           </div>
+        </div>
 
-          <div className="overflow-x-auto pb-2">
-            <div className="flex gap-2 min-w-max">
-              {currentGame.map((frame, i) => (
-                <FrameInputs
-                  key={i}
-                  frame={frame}
-                  frameNumber={i + 1}
-                  onChange={(rolls) => updateFrame(activeGame, i, rolls)}
-                />
-              ))}
+        {/* Pin deck */}
+        <div className="glass-panel p-6 mb-4">
+          {gameFinished ? (
+            <div className="text-center py-8">
+              <p className="text-ink-soft text-sm uppercase tracking-wide mb-1">Game Score</p>
+              <p className="font-score text-4xl text-accent font-bold">{finalScore}</p>
             </div>
-          </div>
-
-          <div className="flex items-center gap-6 mt-6 rounded-2xl bg-white/5 px-5 py-4">
-            <div>
-              <p className="text-xs text-ink-soft uppercase tracking-wide">Game Score</p>
-              <p className="font-score text-2xl text-accent font-bold">
-                {runningScore ?? "—"}
+          ) : (
+            <>
+              <p className="text-center text-ink-soft text-xs uppercase tracking-wide mb-4">
+                Frame {frameNumber} · Tap pins knocked down
               </p>
-            </div>
-            <div>
-              <p className="text-xs text-ink-soft uppercase tracking-wide">Strikes</p>
-              <p className="font-score text-lg text-ink">{stats.strikes}</p>
-            </div>
-            <div>
-              <p className="text-xs text-ink-soft uppercase tracking-wide">Spares</p>
-              <p className="font-score text-lg text-ink">{stats.spares}</p>
-            </div>
-            <div>
-              <p className="text-xs text-ink-soft uppercase tracking-wide">Opens</p>
-              <p className="font-score text-lg text-ink">{stats.opens}</p>
-            </div>
+              <div className="flex flex-col items-center gap-3 mb-6">
+                {PIN_ROWS.map((row, ri) => (
+                  <div key={ri} className="flex gap-3">
+                    {row.map((pin) => {
+                      const isStanding = standingPins.includes(pin);
+                      const isSelected = selected.has(pin);
+                      return (
+                        <button
+                          key={pin}
+                          disabled={!isStanding}
+                          onClick={() => togglePin(pin)}
+                          className={`w-12 h-12 rounded-full text-sm font-semibold transition-colors ${
+                            !isStanding
+                              ? "bg-white/5 text-ink-soft/20"
+                              : isSelected
+                              ? "bg-accent text-on-accent"
+                              : "bg-white/10 text-ink hover:bg-white/15"
+                          }`}
+                        >
+                          {pin}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-3">
+                {canStrike && (
+                  <button
+                    onClick={() => commitRoll(standingPins)}
+                    className="pill-button flex-1 bg-white/10 text-ink py-3 hover:bg-white/15"
+                  >
+                    Strike
+                  </button>
+                )}
+                <button
+                  onClick={() => commitRoll(Array.from(selected))}
+                  className="pill-button flex-1 bg-accent text-on-accent py-3 hover:brightness-110"
+                >
+                  Next
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center gap-6 mb-6 rounded-2xl bg-white/5 px-5 py-4">
+          <div>
+            <p className="text-xs text-ink-soft uppercase tracking-wide">Strikes</p>
+            <p className="font-score text-lg text-ink">{stats.strikes}</p>
+          </div>
+          <div>
+            <p className="text-xs text-ink-soft uppercase tracking-wide">Spares</p>
+            <p className="font-score text-lg text-ink">{stats.spares}</p>
+          </div>
+          <div>
+            <p className="text-xs text-ink-soft uppercase tracking-wide">Opens</p>
+            <p className="font-score text-lg text-ink">{stats.opens}</p>
           </div>
         </div>
 

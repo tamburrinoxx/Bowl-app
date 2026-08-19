@@ -48,6 +48,78 @@ export function scoreGame(frames: FrameData[]): number {
   return total;
 }
 
+/** Cumulative score after each frame, matching a real scoresheet (blank/null until bonus rolls are known). */
+export function cumulativeScores(frames: FrameData[]): (number | null)[] {
+  const rolls = frames.flatMap((f) => f.rolls);
+  const results: (number | null)[] = [];
+  let total = 0;
+  let idx = 0;
+  for (let frame = 0; frame < 10; frame++) {
+    const frameNumber = frame + 1;
+    const f = frames[frame] ?? { rolls: [] };
+    if (!isFrameComplete(f, frameNumber)) {
+      results.push(null);
+      continue;
+    }
+    if (rolls[idx] === 10) {
+      const bonus1 = rolls[idx + 1];
+      const bonus2 = rolls[idx + 2];
+      const needsTwoBonus = frameNumber < 10;
+      if (bonus1 === undefined || (needsTwoBonus && bonus1 !== 10 && bonus2 === undefined)) {
+        results.push(null);
+        continue;
+      }
+      total += 10 + (bonus1 ?? 0) + (bonus2 ?? 0);
+      idx += 1;
+    } else if ((rolls[idx] ?? 0) + (rolls[idx + 1] ?? 0) === 10) {
+      const bonus1 = rolls[idx + 2];
+      if (frameNumber < 10 && bonus1 === undefined) {
+        results.push(null);
+        continue;
+      }
+      total += 10 + (bonus1 ?? 0);
+      idx += 2;
+    } else {
+      total += (rolls[idx] ?? 0) + (rolls[idx + 1] ?? 0);
+      idx += 2;
+    }
+    results.push(total);
+  }
+  return results;
+}
+
+/** Short display marks for a frame: "X" strike, "/" spare, "-" miss, or the pin count. */
+export function frameMarks(frame: FrameData, frameNumber: number): string[] {
+  const r = frame.rolls;
+  const isTenth = frameNumber === 10;
+
+  if (!isTenth) {
+    const marks: string[] = [];
+    if (r[0] === 10) return ["X"];
+    if (r[0] !== undefined) marks.push(r[0] === 0 ? "-" : String(r[0]));
+    if (r[1] !== undefined) {
+      marks.push(r[0] + r[1] === 10 ? "/" : r[1] === 0 ? "-" : String(r[1]));
+    }
+    return marks;
+  }
+
+  const marks: string[] = [];
+  for (let i = 0; i < r.length; i++) {
+    const val = r[i];
+    if (val === 10) {
+      marks.push("X");
+      continue;
+    }
+    const prev = r[i - 1];
+    if (i > 0 && prev !== undefined && prev !== 10 && prev + val === 10) {
+      marks.push("/");
+    } else {
+      marks.push(val === 0 ? "-" : String(val));
+    }
+  }
+  return marks;
+}
+
 export interface GameStats {
   strikes: number;
   spares: number;
