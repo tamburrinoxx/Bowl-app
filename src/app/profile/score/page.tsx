@@ -240,24 +240,24 @@ export default function ScoreEntryPage() {
           ) : (
             <>
               <p className="text-center text-ink-soft text-xs uppercase tracking-wide mb-4">
-                Frame {frameNumber} · Tap pins knocked down
+                Frame {frameNumber} · Tap pins still standing
               </p>
               <div className="flex flex-col items-center gap-3 mb-6">
                 {PIN_ROWS.map((row, ri) => (
                   <div key={ri} className="flex gap-3">
                     {row.map((pin) => {
-                      const isStanding = standingPins.includes(pin);
+                      const isAvailable = standingPins.includes(pin);
                       const isSelected = selected.has(pin);
                       return (
                         <button
                           key={pin}
-                          disabled={!isStanding}
+                          disabled={!isAvailable}
                           onClick={() => togglePin(pin)}
                           className={`w-12 h-12 rounded-full text-sm font-semibold transition-colors ${
-                            !isStanding
+                            !isAvailable
                               ? "bg-white/5 text-ink-soft/20"
                               : isSelected
-                              ? "bg-accent text-on-accent"
+                              ? "bg-white/15 text-ink border-2 border-ink-soft"
                               : "bg-white/10 text-ink hover:bg-white/15"
                           }`}
                         >
@@ -273,14 +273,16 @@ export default function ScoreEntryPage() {
                 {canStrike && (
                   <button
                     onClick={() => commitRoll(standingPins)}
-                    className="pill-button flex-1 bg-white/10 text-ink py-3 hover:bg-white/15"
+                    className="pill-button flex-1 bg-accent text-on-accent py-3 hover:brightness-110"
                   >
                     Strike
                   </button>
                 )}
                 <button
-                  onClick={() => commitRoll(Array.from(selected))}
-                  className="pill-button flex-1 bg-accent text-on-accent py-3 hover:brightness-110"
+                  onClick={() =>
+                    commitRoll(standingPins.filter((p) => !selected.has(p)))
+                  }
+                  className="pill-button flex-1 bg-white/10 text-ink py-3 hover:bg-white/15"
                 >
                   Next
                 </button>
