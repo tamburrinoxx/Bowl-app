@@ -3,6 +3,7 @@ import type { Entry, StandingsRow, Tournament } from "@/types";
 import Link from "next/link";
 import AddEntryPanel from "./add-entry-panel";
 import ScoreEntryPanel from "./score-entry-panel";
+import StatusSwitch from "./status-switch";
 import VerifyBadge from "./verify-badge";
 
 export default async function HostTournamentPage({
@@ -71,6 +72,11 @@ export default async function HostTournamentPage({
           </p>
           <span className="text-accent text-sm font-medium shrink-0 ml-4">Open →</span>
         </Link>
+
+        <section className="glass-panel p-8 mb-6">
+          <h2 className="font-display text-xl text-ink mb-4">Status</h2>
+          <StatusSwitch tournamentId={tournament.id} status={tournament.status} />
+        </section>
 
         <section className="glass-panel p-8 mb-6">
           <h2 className="font-display text-xl text-ink mb-4">Entries</h2>

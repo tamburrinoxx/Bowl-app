@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { StandingsRow, Tournament } from "@/types";
+import BowlerPanel from "./bowler-panel";
 
 export default async function PublicTournamentPage({
   params,
@@ -54,6 +55,14 @@ export default async function PublicTournamentPage({
             {tournament.status.replace("_", " ")}
           </span>
         </div>
+
+        <BowlerPanel
+          tournamentId={tournament.id}
+          tournamentStatus={tournament.status}
+          gamesPerSquad={tournament.games_per_squad}
+          handicapBase={tournament.handicap_base}
+          handicapPercent={tournament.handicap_percent}
+        />
 
         <section className="glass-panel p-8">
           <h2 className="font-display text-xl text-ink mb-4">Standings</h2>
