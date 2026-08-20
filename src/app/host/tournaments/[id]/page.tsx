@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Entry, StandingsRow, Tournament } from "@/types";
 import Link from "next/link";
+import AddEntryPanel from "./add-entry-panel";
 import ScoreEntryPanel from "./score-entry-panel";
 import VerifyBadge from "./verify-badge";
 
@@ -85,10 +86,20 @@ export default async function HostTournamentPage({
               ))
             ) : (
               <p className="text-ink-soft text-sm rounded-2xl bg-white/5 p-5">
-                No entries yet. Bowlers sign up, or add them manually below.
+                No entries yet — add one below.
               </p>
             )}
           </div>
+        </section>
+
+        <section className="glass-panel p-8 mb-6">
+          <h2 className="font-display text-xl text-ink mb-4">Add Entry</h2>
+          <AddEntryPanel
+            tournamentId={tournament.id}
+            eventType={tournament.event_type}
+            handicapBase={tournament.handicap_base}
+            handicapPercent={tournament.handicap_percent}
+          />
         </section>
 
         <section className="glass-panel p-8 mb-6">
@@ -135,7 +146,7 @@ export default async function HostTournamentPage({
                 {!standings?.length && (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-ink-soft">
-                      No games posted yet.
+                      No entries yet — add one above to start scoring.
                     </td>
                   </tr>
                 )}

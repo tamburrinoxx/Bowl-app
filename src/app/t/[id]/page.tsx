@@ -103,7 +103,7 @@ export default async function PublicTournamentPage({
                 {!standings?.length && (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-ink-soft">
-                      No games posted yet. Check back once scoring starts.
+                      No entries yet. Check back once bowlers are signed up.
                     </td>
                   </tr>
                 )}
