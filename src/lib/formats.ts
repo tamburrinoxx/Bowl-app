@@ -51,6 +51,38 @@ function largestPowerOfTwo(n: number): number {
   return Math.max(2, p);
 }
 
+export interface Timing {
+  squads: number;
+  bowlersPerLane: number;
+  entriesPerLane: number;
+  minutesPerGame: number;
+  minutesPerBakerGame: number;
+  overheadMin: number;
+}
+
+/** Shared venue math so presets and the recommender agree on timing. */
+export function estimateTiming(input: {
+  entrySize: number;
+  entries: number;
+  lanes: number;
+}): Timing {
+  const entries = Math.max(1, Math.floor(input.entries));
+  const lanes = Math.max(1, Math.floor(input.lanes));
+  const entrySize = Math.max(1, Math.floor(input.entrySize));
+  const bowlers = entries * entrySize;
+  const squads = Math.max(1, Math.ceil(bowlers / (lanes * COMFORTABLE_PER_LANE)));
+  const bowlersPerLane = Math.ceil(bowlers / squads / lanes);
+  const entriesPerLane = Math.max(1, Math.ceil(entries / squads / lanes));
+  return {
+    squads,
+    bowlersPerLane,
+    entriesPerLane,
+    minutesPerGame: bowlersPerLane * MIN_PER_GAME_PER_BOWLER,
+    minutesPerBakerGame: entriesPerLane * MIN_PER_GAME_PER_BOWLER,
+    overheadMin: OVERHEAD_MIN,
+  };
+}
+
 export function planTournament(
   inputs: FormatInputs,
   overrideGames?: number,
