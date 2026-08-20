@@ -43,6 +43,12 @@ export default async function HostTournamentPage({
   return (
     <main className="min-h-screen px-6 py-12">
       <div className="mx-auto max-w-5xl">
+        <Link
+          href="/host/tournaments"
+          className="text-accent mb-4 inline-block text-sm hover:brightness-110"
+        >
+          ← Your tournaments
+        </Link>
         <div className="glass-panel p-8 mb-6 flex items-baseline justify-between">
           <div>
             <p className="font-score text-accent text-xs font-semibold tracking-wide mb-1 uppercase">

@@ -53,7 +53,7 @@ export default function LoginPage() {
     if (data.session && data.user) {
       await ensureHostProfile(data.user.id, fullName, email);
       setBusy(false);
-      router.push("/host/tournaments/new");
+      router.push("/host/tournaments");
       return;
     }
 
@@ -85,7 +85,7 @@ export default function LoginPage() {
     }
 
     setBusy(false);
-    router.push("/host/tournaments/new");
+    router.push("/host/tournaments");
   }
 
   return (
