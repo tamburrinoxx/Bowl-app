@@ -45,6 +45,7 @@ export interface Tournament {
   center_name: string | null;
   entry_fee: number | null;
   prize_fund: number | null;
+  entry_size: number;
   handicap_base: number;
   handicap_percent: number;
   games_per_squad: number;

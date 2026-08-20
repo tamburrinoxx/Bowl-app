@@ -29,12 +29,20 @@ export default async function HostTournamentsPage() {
         </p>
         <div className="mb-8 flex items-baseline justify-between gap-4">
           <h1 className="font-display text-4xl text-ink">Your Tournaments</h1>
-          <Link
-            href="/host/tournaments/new"
-            className="pill-button bg-accent text-on-accent shrink-0 px-5 py-2.5 text-sm hover:brightness-110"
-          >
-            New
-          </Link>
+          <div className="flex shrink-0 items-center gap-3">
+            <Link
+              href="/host/tournaments/new"
+              className="text-ink-soft text-sm hover:text-ink"
+            >
+              Manual
+            </Link>
+            <Link
+              href="/host/tournaments/wizard"
+              className="pill-button bg-accent text-on-accent px-5 py-2.5 text-sm hover:brightness-110"
+            >
+              Build one
+            </Link>
+          </div>
         </div>
 
         {tournaments?.length ? (
