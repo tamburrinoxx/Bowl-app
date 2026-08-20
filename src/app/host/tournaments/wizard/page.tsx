@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { parseRequest } from "@/lib/parseRequest";
+import { FORMAT_PRESETS, planPreset, type FormatPreset } from "@/lib/presets";
 import {
   planTournament,
   formatDuration,
@@ -48,21 +50,59 @@ export default function TournamentWizard() {
   const [skillSpread, setSkillSpread] = useState<SkillSpread>("wide");
   const [finishStyle, setFinishStyle] = useState<FinishStyle>("dramatic");
   const [gamesOverride, setGamesOverride] = useState<number | null>(null);
+  const [freeText, setFreeText] = useState("");
+  const [understood, setUnderstood] = useState<string[] | null>(null);
+  const [presetId, setPresetId] = useState<string | null>(null);
+
+  function buildFromText() {
+    if (!freeText.trim()) return;
+    const r = parseRequest(freeText);
+    setPresetId(null);
+    setEntrySize(r.inputs.entrySize);
+    setEntries(String(r.inputs.entries));
+    setLanes(String(r.inputs.lanes));
+    setHours(String(r.inputs.hours));
+    setSkillSpread(r.inputs.skillSpread);
+    setFinishStyle(r.inputs.finishStyle);
+    setGamesOverride(r.games);
+    setUnderstood(r.understood);
+    setStep(5);
+  }
+
+  function pickPreset(preset: FormatPreset) {
+    setPresetId(preset.id);
+    setUnderstood(null);
+    setEntrySize(preset.entrySize);
+    setEntries(String(preset.suggestedEntries));
+    setHours(String(preset.suggestedHours));
+    setGamesOverride(null);
+    setStep(5);
+  }
+
+  const preset = presetId
+    ? (FORMAT_PRESETS.find((p) => p.id === presetId) ?? null)
+    : null;
 
   const plan = useMemo(
     () =>
-      planTournament(
-        {
-          entrySize,
-          entries: Number(entries) || 1,
-          lanes: Number(lanes) || 1,
-          hours: Number(hours) || 1,
-          skillSpread,
-          finishStyle,
-        },
-        gamesOverride ?? undefined,
-      ),
-    [entrySize, entries, lanes, hours, skillSpread, finishStyle, gamesOverride],
+      preset
+        ? planPreset(preset, {
+            entries: Number(entries) || 1,
+            lanes: Number(lanes) || 1,
+            hours: Number(hours) || 1,
+          })
+        : planTournament(
+            {
+              entrySize,
+              entries: Number(entries) || 1,
+              lanes: Number(lanes) || 1,
+              hours: Number(hours) || 1,
+              skillSpread,
+              finishStyle,
+            },
+            gamesOverride ?? undefined,
+          ),
+    [preset, entrySize, entries, lanes, hours, skillSpread, finishStyle, gamesOverride],
   );
 
   async function save() {
@@ -153,6 +193,56 @@ export default function TournamentWizard() {
         <div className="glass-panel space-y-6 p-8">
           {step === 0 && (
             <>
+              <Field label="Describe it in a sentence">
+                <textarea
+                  rows={2}
+                  value={freeText}
+                  onChange={(e) => setFreeText(e.target.value)}
+                  placeholder="24 bowlers, 12 lanes, 4 hours, handicap, stepladder finals"
+                  className="glass-input w-full px-4 py-2.5 text-ink"
+                />
+              </Field>
+              <button
+                type="button"
+                onClick={buildFromText}
+                disabled={!freeText.trim() || !name.trim()}
+                className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-40"
+              >
+                Build from this
+              </button>
+
+              <div>
+                <p className="text-ink-soft mb-3 text-xs font-medium uppercase tracking-wide">
+                  Or pick a format
+                </p>
+                <div className="space-y-2">
+                  {FORMAT_PRESETS.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      disabled={!name.trim()}
+                      onClick={() => pickPreset(p)}
+                      className="w-full rounded-2xl bg-white/5 p-4 text-left transition-colors hover:bg-white/8 disabled:opacity-40"
+                    >
+                      <div className="flex items-baseline justify-between gap-3">
+                        <span className="text-ink font-medium">{p.name}</span>
+                        <span className="text-accent font-score shrink-0 text-xs">
+                          {p.tagline}
+                        </span>
+                      </div>
+                      <span className="text-ink-soft mt-1 block text-xs">
+                        {p.description}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-ink-soft text-xs">
+                Name it first, then describe it or pick a format — or skip both
+                and step through the questions.
+              </p>
+
               <Field label="Tournament name">
                 <input
                   autoFocus
@@ -307,16 +397,45 @@ export default function TournamentWizard() {
                 ))}
               </div>
 
-              <Field label="Qualifying games">
-                <input
-                  type="number"
-                  min={1}
-                  max={12}
-                  value={gamesOverride ?? plan.qualifyingGames}
-                  onChange={(e) => setGamesOverride(Number(e.target.value))}
-                  className="glass-input font-score w-24 px-4 py-2.5 text-ink"
-                />
-              </Field>
+              {preset ? (
+                <div className="rounded-2xl bg-white/5 p-5">
+                  <p className="text-ink text-sm font-medium">{preset.name}</p>
+                  <p className="text-ink-soft mt-1 text-xs">
+                    Preset formats are fixed. Adjust entries, lanes, or hours on
+                    the earlier steps and the estimate follows.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setPresetId(null)}
+                    className="text-accent mt-2 text-xs hover:brightness-110"
+                  >
+                    Customize instead →
+                  </button>
+                </div>
+              ) : (
+                <Field label="Qualifying games">
+                  <input
+                    type="number"
+                    min={1}
+                    max={12}
+                    value={gamesOverride ?? plan.qualifyingGames}
+                    onChange={(e) => setGamesOverride(Number(e.target.value))}
+                    className="glass-input font-score w-24 px-4 py-2.5 text-ink"
+                  />
+                </Field>
+              )}
+
+              {understood && (
+                <div className="rounded-2xl bg-white/5 p-5">
+                  <p className="text-ink-soft mb-2 text-xs font-medium uppercase tracking-wide">
+                    Understood from your description
+                  </p>
+                  <p className="text-ink text-sm">{understood.join(" · ")}</p>
+                  <p className="text-ink-soft mt-2 text-xs">
+                    Anything missing fell back to a default — go Back and check.
+                  </p>
+                </div>
+              )}
 
               {plan.notes.map((n, i) => (
                 <p key={i} className="text-ink-soft text-xs">
