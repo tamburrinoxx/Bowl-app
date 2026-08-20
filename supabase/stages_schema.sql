@@ -1,0 +1,2 @@
+-- Multi-stage tournament schema. Run after schema.sql.
+-- (Paste the same SQL you ran in the Supabase editor here so the repo stays canonical.)

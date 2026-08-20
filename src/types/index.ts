@@ -115,3 +115,40 @@ export interface StandingsRow {
   scratch_total: number;
   handicap_total: number;
 }
+
+export type StageType =
+  | "qualifying"
+  | "eliminator"
+  | "round_robin"
+  | "bracket"
+  | "stepladder";
+
+export type ScoringMode = "individual" | "baker";
+
+export type AdvanceRule = "total_pins" | "pins_plus_bonus" | "match_wins";
+
+export interface TournamentStage {
+  id: string;
+  tournament_id: string;
+  stage_number: number;
+  name: string;
+  stage_type: StageType;
+  scoring_mode: ScoringMode;
+  games: number | null;
+  cut_per_game: number | null;
+  advance_count: number | null;
+  advance_rule: AdvanceRule;
+  bonus_pins_per_win: number;
+  carry_pins: boolean;
+}
+
+export interface StageStandingsRow {
+  stage_id: string | null;
+  entry_id: string;
+  tournament_id: string;
+  entry_name: string;
+  locked_handicap: number | null;
+  games_played: number;
+  scratch_total: number;
+  handicap_total: number;
+}
