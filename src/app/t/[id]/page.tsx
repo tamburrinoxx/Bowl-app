@@ -1,7 +1,9 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { StandingsRow, Tournament } from "@/types";
 import BowlerPanel from "./bowler-panel";
+import { formatMoney } from "@/lib/payouts";
 
 export default async function PublicTournamentPage({
   params,
@@ -23,6 +25,17 @@ export default async function PublicTournamentPage({
     .eq("tournament_id", id)
     .order("handicap_total", { ascending: false })
     .returns<StandingsRow[]>();
+
+  const { data: payouts } = await supabase
+    .from("tournament_payouts")
+    .select("position, amount")
+    .eq("tournament_id", id)
+    .order("position");
+
+  const paidSpots = payouts?.length ?? 0;
+  const payoutFor = new Map(
+    (payouts ?? []).map((p) => [p.position, Number(p.amount)]),
+  );
 
   if (!tournament) {
     return (
@@ -76,11 +89,26 @@ export default async function PublicTournamentPage({
                   <th className="px-4 py-3 text-right">Scratch</th>
                   <th className="px-4 py-3 text-right">Hdcp</th>
                   <th className="px-4 py-3 text-right text-accent">Total</th>
+                  <th className="px-4 py-3 text-right">Winnings</th>
                 </tr>
               </thead>
               <tbody>
                 {standings?.map((row, i) => (
-                  <tr key={row.entry_id} className="border-t border-white/10">
+                  <Fragment key={row.entry_id}>
+                  {paidSpots > 0 && i === paidSpots && (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-1">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-accent/60 h-px flex-1" />
+                          <span className="text-accent text-xs font-semibold uppercase">
+                            Cash line — top {paidSpots} paid
+                          </span>
+                          <div className="bg-accent/60 h-px flex-1" />
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  <tr className="border-t border-white/10">
                     <td className="px-4 py-3 text-ink">{i + 1}</td>
                     <td className="px-4 py-3 text-ink font-medium">
                       {row.entry_name}
@@ -107,11 +135,15 @@ export default async function PublicTournamentPage({
                     <td className="px-4 py-3 text-right font-score text-accent font-bold">
                       {row.handicap_total}
                     </td>
+                    <td className="px-4 py-3 text-right font-score text-ink">
+                      {payoutFor.has(i + 1) ? formatMoney(payoutFor.get(i + 1) ?? 0) : "—"}
+                    </td>
                   </tr>
+                  </Fragment>
                 ))}
                 {!standings?.length && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-ink-soft">
+                    <td colSpan={7} className="px-4 py-8 text-center text-ink-soft">
                       No entries yet. Check back once bowlers are signed up.
                     </td>
                   </tr>

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Entry, StandingsRow, Tournament } from "@/types";
 import { Fragment } from "react";
 import Link from "next/link";
+import { formatMoney } from "@/lib/payouts";
 import AddEntryPanel from "./add-entry-panel";
 import PayoutsPanel from "./payouts-panel";
 import ScoreEntryPanel from "./score-entry-panel";
@@ -42,6 +43,9 @@ export default async function HostTournamentPage({
     .order("position");
 
   const paidSpots = payouts?.length ?? 0;
+  const payoutFor = new Map(
+    (payouts ?? []).map((p) => [p.position, Number(p.amount)]),
+  );
 
   if (!tournament) {
     return (
@@ -155,6 +159,7 @@ export default async function HostTournamentPage({
                   <th className="px-4 py-3 text-right">Scratch</th>
                   <th className="px-4 py-3 text-right">Hdcp</th>
                   <th className="px-4 py-3 text-right text-accent">Total</th>
+                  <th className="px-4 py-3 text-right">Winnings</th>
                 </tr>
               </thead>
               <tbody>
@@ -162,7 +167,7 @@ export default async function HostTournamentPage({
                   <Fragment key={row.entry_id}>
                   {paidSpots > 0 && i === paidSpots && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-1">
+                      <td colSpan={7} className="px-4 py-1">
                         <div className="flex items-center gap-3">
                           <div className="bg-accent/60 h-px flex-1" />
                           <span className="text-accent text-xs font-semibold uppercase">
@@ -188,12 +193,15 @@ export default async function HostTournamentPage({
                     <td className="px-4 py-3 text-right font-score text-accent font-bold">
                       {row.handicap_total}
                     </td>
+                    <td className="px-4 py-3 text-right font-score text-ink">
+                      {payoutFor.has(i + 1) ? formatMoney(payoutFor.get(i + 1) ?? 0) : "—"}
+                    </td>
                   </tr>
                   </Fragment>
                 ))}
                 {!standings?.length && (
                   <tr>
-                    <td colSpan={6} className="px-4 py-8 text-center text-ink-soft">
+                    <td colSpan={7} className="px-4 py-8 text-center text-ink-soft">
                       No entries yet — add one above to start scoring.
                     </td>
                   </tr>
