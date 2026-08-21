@@ -33,9 +33,10 @@ export default function BowlerPanel({
   const [entryName, setEntryName] = useState("");
   const [myGames, setMyGames] = useState<MyGame[]>([]);
   const [average, setAverage] = useState("");
-  const [score, setScore] = useState("");
+  const [drafts, setDrafts] = useState<Record<number, string>>({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -79,7 +80,13 @@ export default function BowlerPanel({
           .select("id, game_number, scratch_score")
           .eq("entry_id", mine.entry_id)
           .order("game_number");
-        if (!cancelled) setMyGames((games as MyGame[]) ?? []);
+        if (!cancelled) {
+          const list = (games as MyGame[]) ?? [];
+          setMyGames(list);
+          const seeded: Record<number, string> = {};
+          for (const g of list) seeded[g.game_number] = String(g.scratch_score);
+          setDrafts(seeded);
+        }
       }
 
       if (!cancelled) setLoading(false);
@@ -91,7 +98,6 @@ export default function BowlerPanel({
     };
   }, [supabase, tournamentId]);
 
-  const nextGame = myGames.length + 1;
   const avgNum = average.trim() === "" ? null : Number(average);
   const computedHandicap =
     avgNum === null || Number.isNaN(avgNum)
@@ -139,32 +145,45 @@ export default function BowlerPanel({
     router.refresh();
   }
 
-  async function postScore() {
-    if (!entryId || !score) return;
+  async function saveAll() {
     setBusy(true);
     setMessage(null);
+    setIsError(false);
 
-    const { data: game, error } = await supabase
-      .from("games")
-      .insert({
+    const rows = Object.entries(drafts)
+      .filter(([, v]) => v !== "" && !Number.isNaN(Number(v)))
+      .map(([n, v]) => ({
         entry_id: entryId,
         bowler_id: userId,
-        game_number: nextGame,
-        scratch_score: Number(score),
-      })
-      .select("id, game_number, scratch_score")
-      .single();
+        game_number: Number(n),
+        scratch_score: Number(v),
+      }));
+
+    if (!rows.length) {
+      setBusy(false);
+      return;
+    }
+
+    const { error } = await supabase
+      .from("games")
+      .upsert(rows, { onConflict: "entry_id,bowler_id,game_number" });
 
     setBusy(false);
 
     if (error) {
+      setIsError(true);
       setMessage(error.message);
       return;
     }
 
-    setMyGames((g) => [...g, game as MyGame]);
-    setScore("");
-    setMessage(`Game ${nextGame} posted.`);
+    const { data: games } = await supabase
+      .from("games")
+      .select("id, game_number, scratch_score")
+      .eq("entry_id", entryId)
+      .order("game_number");
+
+    setMyGames((games as MyGame[]) ?? []);
+    setMessage(`Saved ${rows.length} ${rows.length === 1 ? "game" : "games"}.`);
     router.refresh();
   }
 
@@ -253,75 +272,67 @@ export default function BowlerPanel({
     );
   }
 
-  const scratchTotal = myGames.reduce((s, g) => s + g.scratch_score, 0);
+  const scratchTotal = Object.values(drafts).reduce(
+    (sum, v) => sum + (v === "" || Number.isNaN(Number(v)) ? 0 : Number(v)),
+    0,
+  );
+  const filled = Object.values(drafts).filter((v) => v !== "").length;
 
   return (
     <div className="glass-panel mb-6 p-8">
       <h2 className="font-display text-ink mb-4 text-xl">Your scores</h2>
 
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 flex flex-wrap gap-3">
         {Array.from({ length: gamesPerSquad }, (_, i) => i + 1).map((n) => {
-          const g = myGames.find((x) => x.game_number === n);
+          const posted = myGames.some((x) => x.game_number === n);
           return (
-            <div
-              key={n}
-              className={`rounded-2xl px-5 py-3 text-center ${
-                g ? "bg-accent/15" : "bg-white/5"
-              }`}
-            >
-              <span className="text-ink-soft block text-xs">Game {n}</span>
-              <span
-                className={`font-score block text-2xl ${
-                  g ? "text-accent" : "text-ink-soft"
-                }`}
-              >
-                {g ? g.scratch_score : "—"}
+            <label key={n} className="block">
+              <span className="text-ink-soft mb-1.5 block text-center text-xs">
+                Game {n}
               </span>
-            </div>
+              <input
+                type="number"
+                min={0}
+                max={300}
+                inputMode="numeric"
+                value={drafts[n] ?? ""}
+                onChange={(e) =>
+                  setDrafts((d) => ({ ...d, [n]: e.target.value }))
+                }
+                className={`glass-input font-score w-20 px-3 py-2.5 text-center text-xl text-ink ${
+                  posted ? "ring-accent/40 ring-1" : ""
+                }`}
+              />
+            </label>
           );
         })}
       </div>
 
-      {myGames.length > 0 && (
-        <p className="text-ink-soft mb-4 text-sm">
-          Scratch total{" "}
-          <span className="font-score text-ink">{scratchTotal}</span> across{" "}
-          {myGames.length} {myGames.length === 1 ? "game" : "games"}.
+      <div className="flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          onClick={saveAll}
+          disabled={busy || filled === 0}
+          className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-40"
+        >
+          {busy ? "Saving…" : "Save scores"}
+        </button>
+        {filled > 0 && (
+          <p className="text-ink-soft text-sm">
+            Scratch total{" "}
+            <span className="font-score text-ink">{scratchTotal}</span> across{" "}
+            {filled} {filled === 1 ? "game" : "games"}.
+          </p>
+        )}
+      </div>
+
+      {message && (
+        <p
+          className={`mt-3 text-sm ${isError ? "text-red-400" : "text-ink-soft"}`}
+        >
+          {message}
         </p>
       )}
-
-      {nextGame <= gamesPerSquad ? (
-        <div className="flex flex-wrap items-end gap-4">
-          <label className="block">
-            <span className="text-ink-soft mb-1.5 block text-xs font-medium">
-              Game {nextGame} score
-            </span>
-            <input
-              type="number"
-              min={0}
-              max={300}
-              value={score}
-              onChange={(e) => setScore(e.target.value)}
-              className="glass-input font-score w-24 px-4 py-2.5 text-ink"
-            />
-          </label>
-          <button
-            type="button"
-            onClick={postScore}
-            disabled={busy || !score}
-            className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
-          >
-            {busy ? "Posting…" : "Post"}
-          </button>
-        </div>
-      ) : (
-        <p className="text-ink-soft text-sm">
-          All {gamesPerSquad} games posted. You&apos;re done — watch the
-          standings below.
-        </p>
-      )}
-
-      {message && <p className="text-ink-soft mt-3 text-xs">{message}</p>}
     </div>
   );
 }
