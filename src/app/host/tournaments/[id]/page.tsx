@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Entry, StandingsRow, Tournament } from "@/types";
+import { Fragment } from "react";
 import Link from "next/link";
 import AddEntryPanel from "./add-entry-panel";
+import PayoutsPanel from "./payouts-panel";
 import ScoreEntryPanel from "./score-entry-panel";
 import StatusSwitch from "./status-switch";
 import VerifyBadge from "./verify-badge";
@@ -32,6 +34,14 @@ export default async function HostTournamentPage({
     .eq("tournament_id", id)
     .order("handicap_total", { ascending: false })
     .returns<StandingsRow[]>();
+
+  const { data: payouts } = await supabase
+    .from("tournament_payouts")
+    .select("position, amount")
+    .eq("tournament_id", id)
+    .order("position");
+
+  const paidSpots = payouts?.length ?? 0;
 
   if (!tournament) {
     return (
@@ -122,6 +132,17 @@ export default async function HostTournamentPage({
           />
         </section>
 
+        <section className="glass-panel p-8 mb-6">
+          <h2 className="font-display text-xl text-ink mb-4">Payouts</h2>
+          <PayoutsPanel
+            tournamentId={tournament.id}
+            entryCount={entries?.length ?? 0}
+            entryFee={tournament.entry_fee}
+            prizeFund={tournament.prize_fund}
+            cashersRatio={tournament.cashers_ratio ?? 5}
+          />
+        </section>
+
         <section className="glass-panel p-8">
           <h2 className="font-display text-xl text-ink mb-4">Standings</h2>
           <div className="overflow-x-auto rounded-2xl bg-white/5">
@@ -138,7 +159,21 @@ export default async function HostTournamentPage({
               </thead>
               <tbody>
                 {standings?.map((row, i) => (
-                  <tr key={row.entry_id} className="border-t border-white/10">
+                  <Fragment key={row.entry_id}>
+                  {paidSpots > 0 && i === paidSpots && (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-1">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-accent/60 h-px flex-1" />
+                          <span className="text-accent text-xs font-semibold uppercase">
+                            Cash line — top {paidSpots} paid
+                          </span>
+                          <div className="bg-accent/60 h-px flex-1" />
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  <tr className="border-t border-white/10">
                     <td className="px-4 py-3 text-ink">{i + 1}</td>
                     <td className="px-4 py-3 text-ink font-medium">{row.entry_name}</td>
                     <td className="px-4 py-3 text-right font-score text-ink">
@@ -154,6 +189,7 @@ export default async function HostTournamentPage({
                       {row.handicap_total}
                     </td>
                   </tr>
+                  </Fragment>
                 ))}
                 {!standings?.length && (
                   <tr>
