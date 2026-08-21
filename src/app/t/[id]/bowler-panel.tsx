@@ -61,24 +61,31 @@ export default function BowlerPanel({
 
       if (!cancelled && profile?.full_name) setEntryName(profile.full_name);
 
-      const { data: links } = await supabase
-        .from("entry_bowlers")
-        .select("entry_id, entries!inner(id, tournament_id)")
-        .eq("bowler_id", user.id);
+      const { data: tEntries } = await supabase
+        .from("entries")
+        .select("id")
+        .eq("tournament_id", tournamentId);
 
-      const mine = (links ?? []).find(
-        (l: { entries?: { tournament_id?: string } }) =>
-          l.entries?.tournament_id === tournamentId,
-      ) as { entry_id: string } | undefined;
+      const entryIds = (tEntries ?? []).map((r) => r.id);
+
+      let mineId: string | null = null;
+      if (entryIds.length) {
+        const { data: links } = await supabase
+          .from("entry_bowlers")
+          .select("entry_id")
+          .eq("bowler_id", user.id)
+          .in("entry_id", entryIds);
+        mineId = links?.[0]?.entry_id ?? null;
+      }
 
       if (cancelled) return;
 
-      if (mine) {
-        setEntryId(mine.entry_id);
+      if (mineId) {
+        setEntryId(mineId);
         const { data: games } = await supabase
           .from("games")
           .select("id, game_number, scratch_score")
-          .eq("entry_id", mine.entry_id)
+          .eq("entry_id", mineId)
           .order("game_number");
         if (!cancelled) {
           const list = (games as MyGame[]) ?? [];
