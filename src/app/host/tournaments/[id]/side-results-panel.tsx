@@ -167,7 +167,16 @@ function HighGamePot({
   const sold = buyers.reduce((s, b) => s + b.quantity, 0);
   const fund = sold * Number(pot.buy_in);
   const games = Math.max(1, gamesPerSquad);
-  const perGame = Math.round(fund / games / 5) * 5;
+  // Allocate sequentially so the games sum to exactly the fund. Rounding
+  // each game independently would over- or under-pay the pot.
+  const perGame: number[] = [];
+  let left = fund;
+  for (let i = 0; i < games; i++) {
+    const remaining = games - i;
+    const share = remaining === 1 ? left : Math.round(left / remaining / 5) * 5;
+    perGame.push(Math.max(0, share));
+    left -= share;
+  }
   const inPot = new Map(buyers.map((b) => [b.entryId, b]));
 
   const rows = Array.from({ length: games }, (_, i) => i + 1).map((n) => {
@@ -191,7 +200,7 @@ function HighGamePot({
 
   return (
     <div>
-      <PotHeader pot={pot} fund={fund} sold={sold} note={`${formatMoney(perGame)} per game`} />
+      <PotHeader pot={pot} fund={fund} sold={sold} note={`${formatMoney(perGame[0])} per game`} />
       {buyers.length === 0 ? (
         <p className="text-ink-soft rounded-2xl bg-white/5 p-4 text-sm">
           Nobody in this pot yet.
@@ -210,7 +219,13 @@ function HighGamePot({
             <tbody>
               {rows.map((r) => {
                 const live = r.leaders.length > 0;
-                const split = live ? Math.round(perGame / r.leaders.length / 5) * 5 : 0;
+                const pool = perGame[r.game - 1] ?? 0;
+                // Ties split the game's pool exactly; the odd $5 goes to the
+                // first name so the total still matches.
+                const n = r.leaders.length || 1;
+                const each = Math.floor(pool / n / 5) * 5;
+                const extra = pool - each * n;
+                const split = each;
                 return (
                   <tr
                     key={r.game}
@@ -227,7 +242,11 @@ function HighGamePot({
                       {r.score || "—"}
                     </td>
                     <td className="font-score text-accent px-4 py-2 text-right">
-                      {live ? formatMoney(split) : "—"}
+                      {live
+                        ? n > 1
+                          ? `${formatMoney(split)} ea${extra ? ` +${formatMoney(extra)}` : ""}`
+                          : formatMoney(pool)
+                        : "—"}
                     </td>
                   </tr>
                 );
