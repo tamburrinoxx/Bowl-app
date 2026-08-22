@@ -3,14 +3,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import { formatMoney } from "@/lib/payouts";
+import { buildGroups } from "@/lib/bracketPots";
 import type { Entry } from "@/types";
 import VerifyBadge from "./verify-badge";
 
 interface SidePot {
   id: string;
   name: string;
+  pot_type: string;
   buy_in: number;
+  bracket_size: number;
   allow_multiple: boolean;
 }
 
@@ -45,7 +49,7 @@ export default function CheckInPanel({
   const load = useCallback(async () => {
     const { data: potData } = await supabase
       .from("side_pots")
-      .select("id, name, buy_in, allow_multiple")
+      .select("id, name, pot_type, buy_in, bracket_size, allow_multiple")
       .eq("tournament_id", tournamentId)
       .order("sort_order")
       .order("created_at");
@@ -228,6 +232,46 @@ export default function CheckInPanel({
           </tbody>
         </table>
       </div>
+
+      {pots
+        .filter((p) => p.pot_type === "brackets")
+        .map((p) => {
+          const buys = entries
+            .map((e) => ({
+              entryId: e.id,
+              quantity: sold[key(p.id, e.id)]?.quantity ?? 0,
+            }))
+            .filter((b) => b.quantity > 0);
+          const plan = buildGroups(buys, p.bracket_size || 8);
+          const slots = buys.reduce((s, b) => s + b.quantity, 0);
+          return (
+            <div
+              key={p.id}
+              className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white/5 p-5"
+            >
+              <div>
+                <p className="text-ink text-sm font-medium">{p.name}</p>
+                <p className="text-ink-soft text-xs">
+                  {slots} slots from {buys.length} bowlers ·{" "}
+                  {plan.groups.length
+                    ? `${plan.groups.length} full bracket${plan.groups.length === 1 ? "" : "s"}`
+                    : `need ${p.bracket_size || 8} different bowlers`}
+                  {plan.leftover ? ` · ${plan.leftover} unseated` : ""}
+                </p>
+              </div>
+              <Link
+                href={`/host/tournaments/${tournamentId}/brackets`}
+                className={`pill-button px-6 py-2.5 text-sm ${
+                  plan.groups.length
+                    ? "bg-accent text-on-accent hover:brightness-110"
+                    : "bg-white/8 text-ink-soft"
+                }`}
+              >
+                Generate brackets →
+              </Link>
+            </div>
+          );
+        })}
 
       <p className="text-ink-soft mt-4 text-sm">
         {entryFee
