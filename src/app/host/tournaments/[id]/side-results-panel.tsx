@@ -167,16 +167,12 @@ function HighGamePot({
   const sold = buyers.reduce((s, b) => s + b.quantity, 0);
   const fund = sold * Number(pot.buy_in);
   const games = Math.max(1, gamesPerSquad);
-  // Allocate sequentially so the games sum to exactly the fund. Rounding
-  // each game independently would over- or under-pay the pot.
-  const perGame: number[] = [];
-  let left = fund;
-  for (let i = 0; i < games; i++) {
-    const remaining = games - i;
-    const share = remaining === 1 ? left : Math.round(left / remaining / 5) * 5;
-    perGame.push(Math.max(0, share));
-    left -= share;
-  }
+  // Flat whole-dollar share per game. Anything left over is surfaced as a
+  // remainder rather than being silently absorbed into one game.
+  const unit = 1;
+  const share = Math.floor(fund / games);
+  const perGame: number[] = Array.from({ length: games }, () => share);
+  const remainder = fund - share * games;
   const inPot = new Map(buyers.map((b) => [b.entryId, b]));
 
   const rows = Array.from({ length: games }, (_, i) => i + 1).map((n) => {
@@ -200,7 +196,7 @@ function HighGamePot({
 
   return (
     <div>
-      <PotHeader pot={pot} fund={fund} sold={sold} note={`${formatMoney(perGame[0])} per game`} />
+      <PotHeader pot={pot} fund={fund} sold={sold} note={`${formatMoney(share)} per game${remainder ? ` · ${formatMoney(remainder)} left` : ""}`} />
       {buyers.length === 0 ? (
         <p className="text-ink-soft rounded-2xl bg-white/5 p-4 text-sm">
           Nobody in this pot yet.
