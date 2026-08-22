@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/payouts";
 import type { Entry } from "@/types";
+import VerifyBadge from "./verify-badge";
 
 interface SidePot {
   id: string;
@@ -139,14 +140,6 @@ export default function CheckInPanel({
     );
   }
 
-  if (!pots.length) {
-    return (
-      <p className="text-ink-soft rounded-2xl bg-white/5 p-5 text-sm">
-        Set up side pots above and they&apos;ll appear here for check-in.
-      </p>
-    );
-  }
-
   const grandTotal = entries.reduce((s, e) => s + owedFor(e.id), 0);
 
   return (
@@ -156,6 +149,8 @@ export default function CheckInPanel({
           <thead>
             <tr className="text-ink-soft text-xs uppercase tracking-wide">
               <th className="px-4 py-3 font-medium">Entry</th>
+              <th className="px-3 py-3 text-center font-medium">Avg</th>
+              <th className="px-3 py-3 text-center font-medium">Hdcp</th>
               {pots.map((p) => (
                 <th key={p.id} className="px-3 py-3 text-center font-medium">
                   {p.name}
@@ -166,6 +161,7 @@ export default function CheckInPanel({
                 </th>
               ))}
               <th className="text-accent px-4 py-3 text-right font-medium">Owed</th>
+              <th className="px-4 py-3 text-right font-medium">Average</th>
             </tr>
           </thead>
           <tbody>
@@ -173,6 +169,12 @@ export default function CheckInPanel({
               <tr key={entry.id} className="border-t border-white/5">
                 <td className="text-ink px-4 py-2 text-sm whitespace-nowrap">
                   {entry.entry_name}
+                </td>
+                <td className="font-score text-ink-soft px-3 py-2 text-center text-sm">
+                  {entry.locked_average ?? "—"}
+                </td>
+                <td className="font-score text-ink px-3 py-2 text-center text-sm">
+                  {entry.locked_handicap ?? "—"}
                 </td>
                 {pots.map((pot) => {
                   const s = sold[key(pot.id, entry.id)];
@@ -214,6 +216,12 @@ export default function CheckInPanel({
                 })}
                 <td className="font-score text-accent px-4 py-2 text-right">
                   {formatMoney(owedFor(entry.id))}
+                </td>
+                <td className="px-4 py-2 text-right">
+                  <VerifyBadge
+                    entryId={entry.id}
+                    status={entry.verification_status}
+                  />
                 </td>
               </tr>
             ))}

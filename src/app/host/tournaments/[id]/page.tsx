@@ -9,7 +9,6 @@ import SidePotsPanel from "./side-pots-panel";
 import CheckInPanel from "./check-in-panel";
 import ScoreEntryPanel from "./score-entry-panel";
 import StatusSwitch from "./status-switch";
-import VerifyBadge from "./verify-badge";
 
 export default async function HostTournamentPage({
   params,
@@ -94,31 +93,6 @@ export default async function HostTournamentPage({
           <StatusSwitch tournamentId={tournament.id} status={tournament.status} />
         </section>
 
-        <section className="glass-panel p-8 mb-6">
-          <h2 className="font-display text-xl text-ink mb-4">Entries</h2>
-          <div className="space-y-3">
-            {entries?.length ? (
-              entries.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="flex items-center justify-between rounded-2xl bg-white/5 px-5 py-4"
-                >
-                  <div>
-                    <p className="text-ink font-medium">{entry.entry_name}</p>
-                    <p className="text-ink-soft text-xs mt-0.5">
-                      avg {entry.locked_average ?? "—"} · hdcp {entry.locked_handicap ?? "—"}
-                    </p>
-                  </div>
-                  <VerifyBadge entryId={entry.id} status={entry.verification_status} />
-                </div>
-              ))
-            ) : (
-              <p className="text-ink-soft text-sm rounded-2xl bg-white/5 p-5">
-                No entries yet — add one below.
-              </p>
-            )}
-          </div>
-        </section>
 
         <section className="glass-panel p-8 mb-6">
           <h2 className="font-display text-xl text-ink mb-4">Add Entry</h2>
@@ -144,7 +118,7 @@ export default async function HostTournamentPage({
         </section>
 
         <section className="glass-panel p-8 mb-6">
-          <h2 className="font-display text-xl text-ink mb-4">Check-In</h2>
+          <h2 className="font-display text-xl text-ink mb-4">Entries &amp; Check-In</h2>
           <CheckInPanel
             tournamentId={tournament.id}
             entries={entries ?? []}
