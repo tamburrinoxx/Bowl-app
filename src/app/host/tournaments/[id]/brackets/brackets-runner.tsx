@@ -11,6 +11,8 @@ interface Pot {
   name: string;
   buy_in: number;
   bracket_size: number;
+  scoring: string;
+  game_numbers: number[];
 }
 
 interface Match {
@@ -29,7 +31,13 @@ interface Match {
   status: string;
 }
 
-export default function BracketsRunner({ tournamentId }: { tournamentId: string }) {
+export default function BracketsRunner({
+  tournamentId,
+  gamesPerSquad,
+}: {
+  tournamentId: string;
+  gamesPerSquad: number;
+}) {
   const supabase = createClient();
 
   const [pots, setPots] = useState<Pot[]>([]);
@@ -41,11 +49,16 @@ export default function BracketsRunner({ tournamentId }: { tournamentId: string 
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
   const [scores, setScores] = useState<Record<string, { a: string; b: string }>>({});
+  const [handicaps, setHandicaps] = useState<Record<string, number>>({});
+  const [gameScores, setGameScores] = useState
+    { entry_id: string; game_number: number; scratch_score: number }[]
+  >([]);
+  const [picks, setPicks] = useState<number[]>([]);
 
   const load = useCallback(async () => {
     const { data: potData } = await supabase
       .from("side_pots")
-      .select("id, name, buy_in, bracket_size")
+      .select("id, name, buy_in, bracket_size, scoring, game_numbers")
       .eq("tournament_id", tournamentId)
       .eq("pot_type", "brackets")
       .order("sort_order");
@@ -68,14 +81,27 @@ export default function BracketsRunner({ tournamentId }: { tournamentId: string 
 
     const { data: entryData } = await supabase
       .from("entries")
-      .select("id, entry_name")
+      .select("id, entry_name, locked_handicap")
       .eq("tournament_id", tournamentId);
 
     const map: Record<string, string> = {};
-    for (const e of (entryData as { id: string; entry_name: string }[]) ?? []) {
+    const hdcp: Record<string, number> = {};
+    for (const e of (entryData as
+      | { id: string; entry_name: string; locked_handicap: number | null }[]
+      | null) ?? []) {
       map[e.id] = e.entry_name;
+      hdcp[e.id] = e.locked_handicap ?? 0;
     }
     setNames(map);
+    setHandicaps(hdcp);
+
+    const { data: gs } = await supabase
+      .from("games")
+      .select("entry_id, game_number, scratch_score")
+      .in("entry_id", Object.keys(map));
+    setGameScores(
+      (gs as { entry_id: string; game_number: number; scratch_score: number }[]) ?? [],
+    );
 
     const { data: matchData } = await supabase
       .from("tournament_matches")
@@ -173,6 +199,79 @@ export default function BracketsRunner({ tournamentId }: { tournamentId: string 
     await load();
   }
 
+  function scoreFor(entryId: string, gameNumber: number, useHandicap: boolean) {
+    const g = gameScores.find(
+      (x) => x.entry_id === entryId && x.game_number === gameNumber,
+    );
+    if (!g) return null;
+    return g.scratch_score + (useHandicap ? (handicaps[entryId] ?? 0) : 0);
+  }
+
+  async function savePicks(pot: Pot, next: number[]) {
+    setPicks(next);
+    await supabase.from("side_pots").update({ game_numbers: next }).eq("id", pot.id);
+  }
+
+  /**
+   * Resolve the bracket from scores already on the tournament grid. Runs round
+   * by round because round 2's pairings don't exist until round 1 is decided
+   * and the database trigger has advanced the winners.
+   */
+  async function pullScores(pot: Pot, roundCount: number) {
+    const chosen = picks.length ? picks : pot.game_numbers;
+    if (chosen.length < roundCount) {
+      setIsError(true);
+      setMessage(`Pick a game for all ${roundCount} rounds first.`);
+      return;
+    }
+
+    setBusy(true);
+    setMessage(null);
+    setIsError(false);
+
+    const useHandicap = pot.scoring === "handicap";
+    let resolved = 0;
+    let missing = 0;
+
+    for (let r = 1; r <= roundCount; r++) {
+      const { data: fresh } = await supabase
+        .from("tournament_matches")
+        .select("*")
+        .eq("tournament_id", tournamentId)
+        .eq("side_pot_id", pot.id)
+        .eq("round_number", r);
+
+      const gameNumber = chosen[r - 1];
+
+      for (const m of (fresh as Match[]) ?? []) {
+        if (m.status === "complete" || !m.entry_a || !m.entry_b) continue;
+        const a = scoreFor(m.entry_a, gameNumber, useHandicap);
+        const b = scoreFor(m.entry_b, gameNumber, useHandicap);
+        if (a === null || b === null || a === b) {
+          missing++;
+          continue;
+        }
+        await supabase
+          .from("tournament_matches")
+          .update({
+            score_a: a,
+            score_b: b,
+            winner_entry_id: a > b ? m.entry_a : m.entry_b,
+            status: "complete",
+          })
+          .eq("id", m.id);
+        resolved++;
+      }
+    }
+
+    setBusy(false);
+    setMessage(
+      `${resolved} matches resolved.${missing ? ` ${missing} still need a score or a tiebreak.` : ""}`,
+    );
+    if (missing) setIsError(true);
+    await load();
+  }
+
   async function saveResult(m: Match) {
     const s = scores[m.id];
     if (!s || s.a === "" || s.b === "") return;
@@ -259,6 +358,19 @@ export default function BracketsRunner({ tournamentId }: { tournamentId: string 
           </button>
         )}
       </div>
+
+      <BracketControls
+        pot={pot}
+        gamesPerSquad={gamesPerSquad}
+        picks={picks.length ? picks : pot.game_numbers}
+        onPick={(next) => savePicks(pot, next)}
+        onPull={(rounds) => pullScores(pot, rounds)}
+        plan={buildGroups(potBuys, pot.bracket_size || 8)}
+        names={names}
+        buyIn={Number(pot.buy_in)}
+        hasBrackets={groups.length > 0}
+        busy={busy}
+      />
 
       {message && (
         <p className={`mb-4 text-sm ${isError ? "text-red-400" : "text-accent"}`}>{message}</p>
@@ -379,6 +491,99 @@ export default function BracketsRunner({ tournamentId }: { tournamentId: string 
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function BracketControls({
+  pot,
+  gamesPerSquad,
+  picks,
+  onPick,
+  onPull,
+  plan,
+  names,
+  buyIn,
+  hasBrackets,
+  busy,
+}: {
+  pot: Pot;
+  gamesPerSquad: number;
+  picks: number[];
+  onPick: (next: number[]) => void;
+  onPull: (rounds: number) => void;
+  plan: ReturnType<typeof buildGroups>;
+  names: Record<string, string>;
+  buyIn: number;
+  hasBrackets: boolean;
+  busy: boolean;
+}) {
+  const rounds = Math.round(Math.log2(pot.bracket_size || 8));
+  const chosen = Array.from({ length: rounds }, (_, i) => picks[i] ?? 0);
+  const complete = chosen.every((n) => n > 0);
+
+  return (
+    <div className="glass-panel mb-6 p-6">
+      <p className="text-ink-soft mb-3 text-xs font-medium uppercase tracking-wide">
+        Which game feeds each round
+      </p>
+      <div className="mb-4 flex flex-wrap items-end gap-3">
+        {chosen.map((val, i) => (
+          <label key={i} className="block">
+            <span className="text-ink-soft mb-1.5 block text-xs">
+              {i + 1 === rounds ? "Final" : `Round ${i + 1}`}
+            </span>
+            <select
+              value={val}
+              onChange={(e) => {
+                const next = [...chosen];
+                next[i] = Number(e.target.value);
+                onPick(next);
+              }}
+              className="glass-input px-4 py-2.5 text-ink"
+            >
+              <option value={0}>—</option>
+              {Array.from({ length: gamesPerSquad }, (_, g) => g + 1).map((g) => (
+                <option key={g} value={g}>
+                  Game {g}
+                </option>
+              ))}
+            </select>
+          </label>
+        ))}
+        <span className="text-ink-soft pb-3 text-xs uppercase">{pot.scoring}</span>
+        {hasBrackets && (
+          <button
+            type="button"
+            disabled={busy || !complete}
+            onClick={() => onPull(rounds)}
+            className="pill-button bg-accent text-on-accent px-6 py-2.5 text-sm hover:brightness-110 disabled:opacity-40"
+          >
+            {busy ? "Pulling…" : "Pull scores"}
+          </button>
+        )}
+      </div>
+
+      {plan.refunds.length > 0 && (
+        <div className="rounded-2xl bg-white/5 p-4">
+          <p className="text-ink-soft mb-2 text-xs font-medium uppercase tracking-wide">
+            Refunds owed
+          </p>
+          <div className="space-y-1">
+            {plan.refunds.map((r) => (
+              <div key={r.entryId} className="flex items-center justify-between text-sm">
+                <span className="text-ink">
+                  {names[r.entryId] ?? "—"}
+                  <span className="text-ink-soft ml-2 text-xs">
+                    bought {r.bought}, in {r.seated}
+                  </span>
+                </span>
+                <span className="font-score text-red-400">${r.owed * buyIn}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

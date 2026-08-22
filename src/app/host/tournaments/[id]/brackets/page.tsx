@@ -12,7 +12,7 @@ export default async function BracketsPage({
 
   const { data: tournament } = await supabase
     .from("tournaments")
-    .select("id, name")
+    .select("id, name, games_per_squad")
     .eq("id", id)
     .single();
 
@@ -34,7 +34,7 @@ export default async function BracketsPage({
           ← {tournament.name}
         </Link>
         <h1 className="font-display text-ink mb-8 text-4xl">Brackets</h1>
-        <BracketsRunner tournamentId={id} />
+        <BracketsRunner tournamentId={id} gamesPerSquad={tournament.games_per_squad} />
       </div>
     </main>
   );
