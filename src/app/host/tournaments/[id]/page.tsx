@@ -7,6 +7,7 @@ import AddEntryPanel from "./add-entry-panel";
 import PayoutsPanel from "./payouts-panel";
 import SidePotsPanel from "./side-pots-panel";
 import CheckInPanel from "./check-in-panel";
+import SideResultsPanel from "./side-results-panel";
 import ScoreEntryPanel from "./score-entry-panel";
 import StatusSwitch from "./status-switch";
 
@@ -124,6 +125,11 @@ export default async function HostTournamentPage({
             entries={entries ?? []}
             entryFee={tournament.entry_fee}
           />
+        </section>
+
+        <section className="glass-panel p-8 mb-6">
+          <h2 className="font-display text-xl text-ink mb-4">Side Action Results</h2>
+          <SideResultsPanel tournamentId={tournament.id} />
         </section>
 
         <section className="glass-panel p-8 mb-6">
