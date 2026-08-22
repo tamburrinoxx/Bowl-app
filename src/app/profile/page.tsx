@@ -342,6 +342,15 @@ export default function ProfilePage() {
             {profile.home_center && (
               <p className="text-ink-soft text-sm mt-1">{profile.home_center}</p>
             )}
+            <p className="text-ink-soft mt-3 text-xs uppercase tracking-wide">
+              Bowl ID
+            </p>
+            <p className="font-score text-accent text-2xl tracking-widest">
+              {profile.bowl_id}
+            </p>
+            <p className="text-ink-soft mt-1 text-xs">
+              Give this to a host to enter a tournament with your verified average.
+            </p>
           </div>
           <button onClick={handleSignOut} className="text-sm text-accent font-medium">
             Sign out

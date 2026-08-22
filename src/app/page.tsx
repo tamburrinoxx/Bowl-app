@@ -1,3 +1,4 @@
+import { Logo } from "@/components/logo";
 import Link from "next/link";
 
 export default function Home() {
@@ -5,9 +6,7 @@ export default function Home() {
     <main className="min-h-screen flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 uppercase">
-            Bowl
-          </p>
+          <Logo className="mb-6 justify-center text-4xl" />
           <h1 className="font-display text-4xl text-ink mb-2">
             Who are you here as?
           </h1>

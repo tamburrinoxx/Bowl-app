@@ -7,6 +7,7 @@ export type EntryType = "single" | "doubles" | "team";
 
 export interface Profile {
   id: string;
+  bowl_id: string;
   full_name: string;
   email: string | null;
   phone: string | null;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Bowl — Tournament Hosting & Handicaps",
+  title: "Pinfall — Tournament Hosting & Handicaps",
   description: "Pattern-aware handicaps, tournament scoring, and verified bowler profiles.",
 };
 

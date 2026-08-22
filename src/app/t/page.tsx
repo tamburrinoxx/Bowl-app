@@ -1,3 +1,4 @@
+import { Logo } from "@/components/logo";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Tournament } from "@/types";
@@ -14,9 +15,7 @@ export default async function PublicTournamentsPage() {
   return (
     <main className="min-h-screen px-6 py-12">
       <div className="mx-auto max-w-2xl">
-        <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 uppercase">
-          Bowl
-        </p>
+        <Logo className="mb-3 text-2xl" />
         <h1 className="font-display text-4xl text-ink mb-8">Tournaments</h1>
 
         {tournaments?.length ? (
