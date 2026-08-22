@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { buildGroups } from "@/lib/bracketPots";
+import { buildGroups, bracketPayout } from "@/lib/bracketPots";
 import { generateBracket, type SeededEntry } from "@/lib/brackets";
 import { formatMoney } from "@/lib/payouts";
 
@@ -268,78 +268,87 @@ export default function BracketsRunner({ tournamentId }: { tournamentId: string 
         {groups.map((g) => {
           const inGroup = mine.filter((m) => m.bracket_group === g);
           const rounds = [...new Set(inGroup.map((m) => m.round_number))].sort((a, b) => a - b);
-          const final = inGroup.find((m) => m.round_number === Math.max(...rounds));
-          const champ = final?.winner_entry_id;
+          const lastRound = Math.max(...rounds);
+          const champ = inGroup.find((m) => m.round_number === lastRound)?.winner_entry_id;
+          const pay = bracketPayout(Number(pot.buy_in), pot.bracket_size || 8);
 
           return (
             <div key={g} className="glass-panel p-6">
-              <div className="mb-4 flex items-baseline justify-between">
+              <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
                 <p className="font-display text-ink text-lg">Bracket {g}</p>
-                {champ && (
-                  <p className="font-score text-accent text-sm">
-                    {names[champ]} wins {formatMoney(Number(pot.buy_in) * (pot.bracket_size || 8))}
-                  </p>
-                )}
+                <p className="text-ink-soft font-score text-xs">
+                  Winner {formatMoney(pay.winner)} · Runner-up {formatMoney(pay.runnerUp)}
+                </p>
               </div>
 
-              <div className="space-y-4">
+              <div className="flex gap-4 overflow-x-auto pb-2">
                 {rounds.map((r) => (
-                  <div key={r}>
-                    <p className="text-ink-soft mb-2 text-xs uppercase tracking-wide">Round {r}</p>
-                    <div className="space-y-2">
+                  <div key={r} className="flex min-w-[200px] flex-1 flex-col">
+                    <p className="text-ink-soft mb-3 text-center text-[10px] uppercase tracking-widest">
+                      {r === lastRound ? "Final" : `Round ${r}`}
+                    </p>
+                    <div className="flex flex-1 flex-col justify-around gap-3">
                       {inGroup
                         .filter((m) => m.round_number === r)
                         .map((m) => {
                           const done = m.status === "complete";
                           const ready = m.entry_a && m.entry_b;
-                          const s = scores[m.id] ?? { a: "", b: "" };
+                          const sc = scores[m.id] ?? { a: "", b: "" };
                           return (
                             <div
                               key={m.id}
-                              className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/5 p-3"
+                              className="overflow-hidden rounded-xl bg-white/5 ring-1 ring-white/5"
                             >
-                              <span className="text-sm">
-                                <span className={done && m.winner_entry_id === m.entry_a ? "text-accent font-medium" : "text-ink"}>
-                                  {m.entry_a ? names[m.entry_a] : "TBD"}
-                                </span>
-                                <span className="text-ink-soft mx-2">vs</span>
-                                <span className={done && m.winner_entry_id === m.entry_b ? "text-accent font-medium" : "text-ink"}>
-                                  {m.entry_b ? names[m.entry_b] : "TBD"}
-                                </span>
-                              </span>
-                              {done ? (
-                                <span className="font-score text-accent text-sm">
-                                  {m.score_a} – {m.score_b}
-                                </span>
-                              ) : ready ? (
-                                <span className="flex items-center gap-2">
-                                  <input
-                                    type="number"
-                                    min={0}
-                                    max={300}
-                                    value={s.a}
-                                    onChange={(e) => setScores((p) => ({ ...p, [m.id]: { ...s, a: e.target.value } }))}
-                                    className="glass-input font-score w-16 px-2 py-1.5 text-center text-ink"
-                                  />
-                                  <input
-                                    type="number"
-                                    min={0}
-                                    max={300}
-                                    value={s.b}
-                                    onChange={(e) => setScores((p) => ({ ...p, [m.id]: { ...s, b: e.target.value } }))}
-                                    className="glass-input font-score w-16 px-2 py-1.5 text-center text-ink"
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={() => saveResult(m)}
-                                    disabled={busy || s.a === "" || s.b === ""}
-                                    className="pill-button bg-accent text-on-accent px-3 py-1.5 text-xs disabled:opacity-40"
+                              {(["a", "b"] as const).map((side) => {
+                                const entryId = side === "a" ? m.entry_a : m.entry_b;
+                                const score = side === "a" ? m.score_a : m.score_b;
+                                const won = done && m.winner_entry_id === entryId;
+                                return (
+                                  <div
+                                    key={side}
+                                    className={`flex items-center justify-between gap-2 px-3 py-2 text-xs ${
+                                      side === "a" ? "border-b border-white/10" : ""
+                                    } ${won ? "bg-accent/15" : ""}`}
                                   >
-                                    Save
-                                  </button>
-                                </span>
-                              ) : (
-                                <span className="text-ink-soft text-xs">waiting</span>
+                                    <span
+                                      className={`truncate ${won ? "text-accent font-semibold" : entryId ? "text-ink" : "text-ink-soft"}`}
+                                    >
+                                      {entryId ? names[entryId] : "—"}
+                                    </span>
+                                    {done ? (
+                                      <span className={`font-score shrink-0 ${won ? "text-accent" : "text-ink-soft"}`}>
+                                        {score}
+                                      </span>
+                                    ) : ready ? (
+                                      <input
+                                        type="number"
+                                        min={0}
+                                        max={300}
+                                        inputMode="numeric"
+                                        value={sc[side]}
+                                        onChange={(e) =>
+                                          setScores((p) => ({
+                                            ...p,
+                                            [m.id]: { ...sc, [side]: e.target.value },
+                                          }))
+                                        }
+                                        className="glass-input font-score w-12 shrink-0 px-1 py-1 text-center text-xs text-ink"
+                                      />
+                                    ) : (
+                                      <span className="text-ink-soft shrink-0">–</span>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                              {!done && ready && (
+                                <button
+                                  type="button"
+                                  onClick={() => saveResult(m)}
+                                  disabled={busy || sc.a === "" || sc.b === ""}
+                                  className="bg-accent text-on-accent w-full py-1.5 text-[10px] font-semibold uppercase tracking-wide disabled:opacity-30"
+                                >
+                                  Save
+                                </button>
                               )}
                             </div>
                           );
@@ -347,6 +356,24 @@ export default function BracketsRunner({ tournamentId }: { tournamentId: string 
                     </div>
                   </div>
                 ))}
+
+                <div className="flex min-w-[150px] flex-col justify-center">
+                  <p className="text-ink-soft mb-3 text-center text-[10px] uppercase tracking-widest">
+                    Winner
+                  </p>
+                  <div
+                    className={`rounded-xl px-3 py-3 text-center ${champ ? "bg-accent/15 ring-accent/40 ring-1" : "bg-white/5"}`}
+                  >
+                    <p className={`truncate text-sm ${champ ? "text-accent font-semibold" : "text-ink-soft"}`}>
+                      {champ ? names[champ] : "TBD"}
+                    </p>
+                    {champ && (
+                      <p className="font-score text-accent mt-1 text-xs">
+                        {formatMoney(pay.winner)}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           );

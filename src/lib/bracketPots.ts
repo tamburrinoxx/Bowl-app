@@ -63,3 +63,15 @@ export function buildGroups(buys: BracketBuy[], groupSize = 8): GroupPlan {
 
   return { groups: [], leftover: totalSlots, groupSize };
 }
+
+/**
+ * A bracket's own purse: every seat's buy-in, paid out to the last two.
+ * $5 x 8 = $40 -> $25 / $15.  $10 x 8 = $80 -> $50 / $30.
+ */
+export const BRACKET_WINNER_SHARE = 0.625;
+
+export function bracketPayout(buyIn: number, groupSize = 8) {
+  const fund = buyIn * groupSize;
+  const winner = Math.round((fund * BRACKET_WINNER_SHARE) / 5) * 5;
+  return { fund, winner, runnerUp: fund - winner };
+}
