@@ -50,7 +50,7 @@ export default function BracketsRunner({
   const [isError, setIsError] = useState(false);
   const [scores, setScores] = useState<Record<string, { a: string; b: string }>>({});
   const [handicaps, setHandicaps] = useState<Record<string, number>>({});
-  const [gameScores, setGameScores] = useState
+  const [gameScores, setGameScores] = useState<
     { entry_id: string; game_number: number; scratch_score: number }[]
   >([]);
   const [picks, setPicks] = useState<number[]>([]);

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Entry, StandingsRow, Tournament } from "@/types";
 import { Fragment } from "react";
 import Link from "next/link";
+import { NavBar } from "@/components/nav-bar";
 import { formatMoney } from "@/lib/payouts";
 import AddEntryPanel from "./add-entry-panel";
 import PayoutsPanel from "./payouts-panel";
@@ -58,6 +59,20 @@ export default async function HostTournamentPage({
   }
 
   return (
+    <>
+      <NavBar
+        title={tournament.name}
+        backHref="/host/tournaments"
+        links={[
+          { label: "Entries", href: "#entries" },
+          { label: "Side Action", href: "#side" },
+          { label: "Results", href: "#results" },
+          { label: "Payouts", href: "#payouts" },
+          { label: "Standings", href: "#standings" },
+          { label: "Brackets", href: `/host/tournaments/${tournament.id}/brackets` },
+          { label: "Public view", href: `/t/${tournament.id}` },
+        ]}
+      />
     <main className="min-h-screen px-6 py-12">
       <div className="mx-auto max-w-5xl">
         <Link
@@ -90,7 +105,7 @@ export default async function HostTournamentPage({
         </Link>
 
         <section className="glass-panel p-8 mb-6">
-          <h2 className="font-display text-xl text-ink mb-4">Status</h2>
+          <h2 id="status" className="font-display text-xl text-ink mb-4">Status</h2>
           <StatusSwitch tournamentId={tournament.id} status={tournament.status} />
         </section>
 
@@ -115,7 +130,7 @@ export default async function HostTournamentPage({
 
         <section className="glass-panel p-8 mb-6">
           <div className="mb-4 flex items-baseline justify-between">
-            <h2 className="font-display text-xl text-ink">Side Action</h2>
+            <h2 id="side" className="font-display text-xl text-ink">Side Action</h2>
             <Link
               href={`/host/tournaments/${tournament.id}/brackets`}
               className="text-accent text-sm hover:brightness-110"
@@ -127,7 +142,7 @@ export default async function HostTournamentPage({
         </section>
 
         <section className="glass-panel p-8 mb-6">
-          <h2 className="font-display text-xl text-ink mb-4">Entries &amp; Check-In</h2>
+          <h2 id="entries" className="font-display text-xl text-ink mb-4">Entries &amp; Check-In</h2>
           <CheckInPanel
             tournamentId={tournament.id}
             entries={entries ?? []}
@@ -136,7 +151,7 @@ export default async function HostTournamentPage({
         </section>
 
         <section className="glass-panel p-8 mb-6">
-          <h2 className="font-display text-xl text-ink mb-4">Side Action Results</h2>
+          <h2 id="results" className="font-display text-xl text-ink mb-4">Side Action Results</h2>
           <SideResultsPanel
             tournamentId={tournament.id}
             gamesPerSquad={tournament.games_per_squad}
@@ -144,7 +159,7 @@ export default async function HostTournamentPage({
         </section>
 
         <section className="glass-panel p-8 mb-6">
-          <h2 className="font-display text-xl text-ink mb-4">Payouts</h2>
+          <h2 id="payouts" className="font-display text-xl text-ink mb-4">Payouts</h2>
           <PayoutsPanel
             tournamentId={tournament.id}
             entryCount={entries?.length ?? 0}
@@ -155,7 +170,7 @@ export default async function HostTournamentPage({
         </section>
 
         <section className="glass-panel p-8">
-          <h2 className="font-display text-xl text-ink mb-4">Standings</h2>
+          <h2 id="standings" className="font-display text-xl text-ink mb-4">Standings</h2>
           <div className="overflow-x-auto rounded-2xl bg-white/5">
             <table className="w-full text-sm">
               <thead>
@@ -219,5 +234,6 @@ export default async function HostTournamentPage({
         </section>
       </div>
     </main>
+    </>
   );
 }
