@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatMoney } from "@/lib/payouts";
 import AddEntryPanel from "./add-entry-panel";
 import PayoutsPanel from "./payouts-panel";
+import SidePotsPanel from "./side-pots-panel";
 import ScoreEntryPanel from "./score-entry-panel";
 import StatusSwitch from "./status-switch";
 import VerifyBadge from "./verify-badge";
@@ -134,6 +135,11 @@ export default async function HostTournamentPage({
             entries={entries ?? []}
             gamesPerSquad={tournament.games_per_squad}
           />
+        </section>
+
+        <section className="glass-panel p-8 mb-6">
+          <h2 className="font-display text-xl text-ink mb-4">Side Action</h2>
+          <SidePotsPanel tournamentId={tournament.id} />
         </section>
 
         <section className="glass-panel p-8 mb-6">
