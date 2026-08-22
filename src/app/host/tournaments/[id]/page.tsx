@@ -114,7 +114,15 @@ export default async function HostTournamentPage({
         </section>
 
         <section className="glass-panel p-8 mb-6">
-          <h2 className="font-display text-xl text-ink mb-4">Side Action</h2>
+          <div className="mb-4 flex items-baseline justify-between">
+            <h2 className="font-display text-xl text-ink">Side Action</h2>
+            <Link
+              href={`/host/tournaments/${tournament.id}/brackets`}
+              className="text-accent text-sm hover:brightness-110"
+            >
+              Run brackets →
+            </Link>
+          </div>
           <SidePotsPanel tournamentId={tournament.id} />
         </section>
 
