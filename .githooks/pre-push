@@ -1,0 +1,12 @@
+#!/bin/sh
+echo "Running build before push..."
+if ! npm run build > /tmp/pinfall-build.log 2>&1; then
+  echo ""
+  echo "BUILD FAILED — push cancelled. Last 25 lines:"
+  echo ""
+  tail -25 /tmp/pinfall-build.log
+  echo ""
+  echo "Full log: /tmp/pinfall-build.log"
+  exit 1
+fi
+echo "Build OK — pushing."

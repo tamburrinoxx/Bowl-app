@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BracketsRunner from "./brackets-runner";
+import ShareLink from "./share-link";
 
 export default async function BracketsPage({
   params,
@@ -34,6 +35,7 @@ export default async function BracketsPage({
           ← {tournament.name}
         </Link>
         <h1 className="font-display text-ink mb-8 text-4xl">Brackets</h1>
+        <ShareLink tournamentId={id} />
         <BracketsRunner tournamentId={id} gamesPerSquad={tournament.games_per_squad} />
       </div>
     </main>
