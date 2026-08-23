@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import DeleteTournamentButton from "./delete-button";
+import { NavBar } from "@/components/nav-bar";
 import type { Tournament } from "@/types";
 
 export default async function HostTournamentsPage() {
@@ -22,6 +24,16 @@ export default async function HostTournamentsPage() {
     .returns<Tournament[]>();
 
   return (
+    <>
+      <NavBar
+        title="Host"
+        backHref="/host/tournaments"
+        links={[
+          { label: "New tournament", href: "/host/tournaments/wizard" },
+          { label: "Public tournaments", href: "/t" },
+          { label: "My profile", href: "/profile" },
+        ]}
+      />
     <main className="min-h-screen px-6 py-12">
       <div className="mx-auto max-w-2xl">
         <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 uppercase">
@@ -48,10 +60,10 @@ export default async function HostTournamentsPage() {
         {tournaments?.length ? (
           <div className="space-y-3">
             {tournaments.map((t) => (
+              <div key={t.id} className="glass-panel p-6">
               <Link
-                key={t.id}
                 href={`/host/tournaments/${t.id}`}
-                className="glass-panel block p-6 transition-colors hover:bg-white/8"
+                className="block transition-opacity hover:opacity-80"
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -63,17 +75,23 @@ export default async function HostTournamentsPage() {
                         : ""}
                     </p>
                   </div>
-                  <span
-                    className={`ml-4 shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold uppercase ${
-                      t.status === "in_progress"
-                        ? "bg-accent/15 text-accent"
-                        : "bg-white/8 text-ink-soft"
-                    }`}
-                  >
-                    {t.status.replace("_", " ")}
+                  <span className="ml-4 flex shrink-0 items-center gap-3">
+                    <span
+                      className={`rounded-full px-4 py-1.5 text-xs font-semibold uppercase ${
+                        t.status === "in_progress"
+                          ? "bg-accent/15 text-accent"
+                          : "bg-white/8 text-ink-soft"
+                      }`}
+                    >
+                      {t.status.replace("_", " ")}
+                    </span>
                   </span>
                 </div>
               </Link>
+              <div className="mt-3 flex justify-end border-t border-white/5 pt-3">
+                <DeleteTournamentButton tournamentId={t.id} name={t.name} />
+              </div>
+              </div>
             ))}
           </div>
         ) : (
@@ -91,5 +109,6 @@ export default async function HostTournamentsPage() {
         )}
       </div>
     </main>
+    </>
   );
 }
