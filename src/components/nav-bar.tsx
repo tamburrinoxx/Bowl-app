@@ -5,6 +5,11 @@ export interface NavLink {
   href: string;
 }
 
+export interface Crumb {
+  label: string;
+  href?: string;
+}
+
 /**
  * Sticky top bar. Links can be page anchors (#payouts) or routes; anchors
  * scroll, routes navigate, so one component covers both.
@@ -13,10 +18,12 @@ export function NavBar({
   title,
   links = [],
   backHref,
+  crumbs = [],
 }: {
   title?: string;
   links?: NavLink[];
   backHref?: string;
+  crumbs?: Crumb[];
 }) {
   return (
     <div className="sticky top-14 z-40 border-b border-white/10 bg-[#1f2329]/95 backdrop-blur">
@@ -30,8 +37,30 @@ export function NavBar({
           </Link>
         )}
 
-        {title && (
-          <span className="text-ink truncate text-sm font-medium">{title}</span>
+        {crumbs.length > 0 ? (
+          <nav className="flex min-w-0 items-center gap-1.5 text-sm">
+            {crumbs.map((c, i) => (
+              <span key={i} className="flex min-w-0 items-center gap-1.5">
+                {i > 0 && (
+                  <span className="text-ink-soft/40 shrink-0 text-xs">/</span>
+                )}
+                {c.href ? (
+                  <Link
+                    href={c.href}
+                    className="text-ink-soft hover:text-ink shrink-0 whitespace-nowrap"
+                  >
+                    {c.label}
+                  </Link>
+                ) : (
+                  <span className="text-ink truncate font-medium">{c.label}</span>
+                )}
+              </span>
+            ))}
+          </nav>
+        ) : (
+          title && (
+            <span className="text-ink truncate text-sm font-medium">{title}</span>
+          )
         )}
 
         {links.length > 0 && (

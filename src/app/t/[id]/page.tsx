@@ -50,7 +50,10 @@ export default async function PublicTournamentPage({
   return (
     <>
       <NavBar
-        title={tournament.name}
+        crumbs={[
+          { label: "Tournaments", href: "/t" },
+          { label: tournament.name },
+        ]}
         backHref="/t"
         links={[
           { label: "Your day", href: `/t/${id}/me` },

@@ -3,6 +3,7 @@ import type { Entry, StandingsRow, Tournament } from "@/types";
 import { Fragment } from "react";
 import Link from "next/link";
 import { NavBar } from "@/components/nav-bar";
+import { PhaseStrip } from "@/components/phase-strip";
 import { formatMoney } from "@/lib/payouts";
 import AddEntryPanel from "./add-entry-panel";
 import PayoutsPanel from "./payouts-panel";
@@ -61,7 +62,10 @@ export default async function HostTournamentPage({
   return (
     <>
       <NavBar
-        title={tournament.name}
+        crumbs={[
+          { label: "Tournaments", href: "/host/tournaments" },
+          { label: tournament.name },
+        ]}
         backHref="/host/tournaments"
         links={[
           { label: "Entries", href: "#entries" },
@@ -81,6 +85,8 @@ export default async function HostTournamentPage({
         >
           ← Your tournaments
         </Link>
+        <PhaseStrip status={tournament.status} />
+
         <div className="glass-panel p-8 mb-6 flex items-baseline justify-between">
           <div>
             <p className="font-score text-accent text-xs font-semibold tracking-wide mb-1 uppercase">

@@ -27,7 +27,11 @@ export default async function MyTournamentPage({
   return (
     <>
       <NavBar
-        title={tournament.name}
+        crumbs={[
+          { label: "Tournaments", href: "/t" },
+          { label: tournament.name, href: `/t/${id}` },
+          { label: "Your day" },
+        ]}
         backHref={`/t/${id}`}
         links={[
           { label: "Standings", href: `/t/${id}` },
