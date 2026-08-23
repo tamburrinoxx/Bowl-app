@@ -69,6 +69,15 @@ export default async function PublicTournamentPage({
           </span>
         </div>
 
+        <div className="mb-6 flex justify-end">
+          <Link
+            href={`/t/${id}/me`}
+            className="pill-button bg-accent text-on-accent px-5 py-2.5 text-sm hover:brightness-110"
+          >
+            Your day →
+          </Link>
+        </div>
+
         <BowlerPanel
           tournamentId={tournament.id}
           tournamentStatus={tournament.status}
