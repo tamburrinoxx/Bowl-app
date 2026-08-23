@@ -11,6 +11,9 @@ const SECTIONS = [
     { label: "Build a tournament", href: "/host/tournaments/wizard" },
     { label: "Manual setup", href: "/host/tournaments/new" },
   ]},
+  { group: "Everything", links: [
+    { label: "All pages", href: "/admin" },
+  ]},
   { group: "Bowler", links: [
     { label: "Public tournaments", href: "/t" },
     { label: "My profile", href: "/profile" },
@@ -23,6 +26,7 @@ const QUICK = [
   { label: "New", href: "/host/tournaments/wizard" },
   { label: "Public", href: "/t" },
   { label: "Profile", href: "/profile" },
+  { label: "All pages", href: "/admin" },
 ];
 
 export default function AppNav() {
