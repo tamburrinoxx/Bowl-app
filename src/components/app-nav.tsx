@@ -34,7 +34,7 @@ export default function AppNav() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-white/10 bg-[#1f2329]/90 backdrop-blur">
-        <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
+        <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-6">
           <Link href="/host/tournaments" className="shrink-0">
             <Logo className="text-lg" />
           </Link>

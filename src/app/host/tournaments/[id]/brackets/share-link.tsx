@@ -34,7 +34,7 @@ export default function ShareLink({ tournamentId }: { tournamentId: string }) {
         >
           {copied ? "Copied" : "Copy link"}
         </button>
-        
+        <a
           href={`/t/${tournamentId}/brackets`}
           target="_blank"
           rel="noopener noreferrer"

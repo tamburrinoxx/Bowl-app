@@ -19,7 +19,7 @@ export function NavBar({
   backHref?: string;
 }) {
   return (
-    <div className="border-b border-white/5 bg-white/[0.02]">
+    <div className="sticky top-14 z-40 border-b border-white/10 bg-[#1f2329]/95 backdrop-blur">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-6 py-2">
         {backHref && (
           <Link
