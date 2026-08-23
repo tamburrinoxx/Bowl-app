@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Logo } from "@/components/logo";
 
 export interface NavLink {
   label: string;
@@ -20,16 +19,19 @@ export function NavBar({
   backHref?: string;
 }) {
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#1f2329]/85 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-6 py-3">
-        <Link href={backHref ?? "/"} className="shrink-0">
-          <Logo className="text-lg" />
-        </Link>
+    <div className="border-b border-white/5 bg-white/[0.02]">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-5 gap-y-2 px-6 py-2">
+        {backHref && (
+          <Link
+            href={backHref}
+            className="text-ink-soft hover:text-ink shrink-0 text-xs"
+          >
+            ←
+          </Link>
+        )}
 
         {title && (
-          <span className="text-ink-soft hidden truncate text-sm sm:inline">
-            {title}
-          </span>
+          <span className="text-ink truncate text-sm font-medium">{title}</span>
         )}
 
         {links.length > 0 && (
@@ -46,6 +48,6 @@ export function NavBar({
           </nav>
         )}
       </div>
-    </header>
+    </div>
   );
 }
