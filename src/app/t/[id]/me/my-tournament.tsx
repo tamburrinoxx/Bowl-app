@@ -41,13 +41,13 @@ export default function MyTournament({
   const [handicap, setHandicap] = useState(0);
   const [payouts, setPayouts] = useState<{ position: number; amount: number }[]>([]);
   const [pots, setPots] = useState<PotBuy[]>([]);
-  const [allScores, setAllScores] = useState
+  const [allScores, setAllScores] = useState<
     { entry_id: string; game_number: number; scratch_score: number }[]
   >([]);
   const [potFieldSizes, setPotFieldSizes] = useState<Record<string, number>>({});
   const [potMembers, setPotMembers] = useState<Record<string, string[]>>({});
   const [handicapBy, setHandicapBy] = useState<Record<string, number>>({});
-  const [brackets, setBrackets] = useState
+  const [brackets, setBrackets] = useState<
     { group: number | null; potName: string; buyIn: number; alive: boolean; won: boolean }[]
   >([]);
 
