@@ -47,6 +47,9 @@ export default function TournamentWizard() {
   const [entries, setEntries] = useState("24");
   const [lanes, setLanes] = useState("12");
   const [hours, setHours] = useState("4");
+  const [entryFee, setEntryFee] = useState("");
+  const [handicapBase, setHandicapBase] = useState("220");
+  const [handicapPercent, setHandicapPercent] = useState("90");
   const [skillSpread, setSkillSpread] = useState<SkillSpread>("wide");
   const [finishStyle, setFinishStyle] = useState<FinishStyle>("dramatic");
   const [gamesOverride, setGamesOverride] = useState<number | null>(null);
@@ -130,8 +133,11 @@ export default function TournamentWizard() {
         event_type: eventType,
         entry_size: entrySize,
         center_name: centerName.trim() || null,
-        handicap_base: 220,
-        handicap_percent: 0.9,
+        entry_fee: entryFee.trim() === "" ? null : Number(entryFee),
+        prize_fund:
+          entryFee.trim() === "" ? null : Number(entryFee) * (Number(entries) || 0),
+        handicap_base: Number(handicapBase) || 220,
+        handicap_percent: (Number(handicapPercent) || 90) / 100,
         games_per_squad: plan.qualifyingGames || 3,
         starts_at: startsAt || null,
         status: "draft",
@@ -322,6 +328,57 @@ export default function TournamentWizard() {
                 These two drive everything. Lanes and time decide how many games
                 actually fit, which decides the format.
               </p>
+
+              <Field label="Entry fee">
+                <input
+                  type="number"
+                  min={0}
+                  inputMode="numeric"
+                  value={entryFee}
+                  onChange={(e) => setEntryFee(e.target.value)}
+                  placeholder="30"
+                  className="glass-input font-score w-32 px-4 py-2.5 text-ink"
+                />
+              </Field>
+              <p className="text-ink-soft text-xs">
+                {entryFee.trim() === ""
+                  ? "Used for the check-in Owed column and to seed the prize fund."
+                  : `${entries} entries at $${entryFee} seeds a $${(Number(entryFee) || 0) * (Number(entries) || 0)} prize fund. You can change it later.`}
+              </p>
+
+              <div className="flex flex-wrap items-end gap-4">
+                <Field label="Handicap base">
+                  <input
+                    type="number"
+                    min={0}
+                    max={300}
+                    value={handicapBase}
+                    onChange={(e) => setHandicapBase(e.target.value)}
+                    className="glass-input font-score w-24 px-4 py-2.5 text-ink"
+                  />
+                </Field>
+                <Field label="Handicap %">
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    value={handicapPercent}
+                    onChange={(e) => setHandicapPercent(e.target.value)}
+                    className="glass-input font-score w-24 px-4 py-2.5 text-ink"
+                  />
+                </Field>
+                <p className="text-ink-soft pb-3 text-xs">
+                  A {handicapBase} base at {handicapPercent}% gives a{" "}
+                  {Math.max(
+                    0,
+                    Math.floor(
+                      ((Number(handicapBase) || 220) - 150) *
+                        ((Number(handicapPercent) || 90) / 100),
+                    ),
+                  )}{" "}
+                  handicap to a 150 average.
+                </p>
+              </div>
             </>
           )}
 
