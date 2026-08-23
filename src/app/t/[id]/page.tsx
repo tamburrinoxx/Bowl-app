@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { StandingsRow, Tournament } from "@/types";
 import BowlerPanel from "./bowler-panel";
+import SideResultsPanel from "@/app/host/tournaments/[id]/side-results-panel";
+import { NavBar } from "@/components/nav-bar";
 import { formatMoney } from "@/lib/payouts";
 
 export default async function PublicTournamentPage({
@@ -46,6 +48,16 @@ export default async function PublicTournamentPage({
   }
 
   return (
+    <>
+      <NavBar
+        title={tournament.name}
+        backHref="/t"
+        links={[
+          { label: "Your day", href: `/t/${id}/me` },
+          { label: "Brackets", href: `/t/${id}/brackets` },
+          { label: "All tournaments", href: "/t" },
+        ]}
+      />
     <main className="min-h-screen px-6 py-12">
       <div className="mx-auto max-w-3xl">
         <Link href="/t" className="text-accent text-sm font-medium mb-6 inline-block">
@@ -161,7 +173,24 @@ export default async function PublicTournamentPage({
             </table>
           </div>
         </section>
+
+        <section className="glass-panel p-8 mt-6">
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="font-display text-xl text-ink">Side Action</h2>
+            <Link
+              href={`/t/${id}/brackets`}
+              className="text-accent text-sm hover:brightness-110"
+            >
+              View brackets →
+            </Link>
+          </div>
+          <SideResultsPanel
+            tournamentId={tournament.id}
+            gamesPerSquad={tournament.games_per_squad}
+          />
+        </section>
       </div>
     </main>
+    </>
   );
 }
