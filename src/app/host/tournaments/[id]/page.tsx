@@ -74,6 +74,7 @@ export default async function HostTournamentPage({
           { label: "Payouts", href: "#payouts" },
           { label: "Standings", href: "#standings" },
           { label: "Brackets", href: `/host/tournaments/${tournament.id}/brackets` },
+          { label: "Lane card", href: `/host/tournaments/${tournament.id}/qr` },
           { label: "Public view", href: `/t/${tournament.id}` },
         ]}
       />

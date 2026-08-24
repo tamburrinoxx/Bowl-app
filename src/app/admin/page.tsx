@@ -91,6 +91,7 @@ export default async function AdminPage() {
                     {[
                       { label: "Host page", href: `/host/tournaments/${t.id}` },
                       { label: "Run brackets", href: `/host/tournaments/${t.id}/brackets` },
+                      { label: "Lane card", href: `/host/tournaments/${t.id}/qr` },
                       { label: "Public standings", href: `/t/${t.id}` },
                       { label: "Public brackets", href: `/t/${t.id}/brackets` },
                       { label: "Your day", href: `/t/${t.id}/me` },
