@@ -25,6 +25,33 @@ const SPREADS: { value: SkillSpread; label: string; hint: string }[] = [
   { value: "wide", label: "Wide range", hint: "Beginners and sticks mixed → handicap" },
 ];
 
+const STEPS = [
+  {
+    title: "Name it",
+    lead: "Give it a name and a date. If you already know what you want, describe it in a sentence or pick a ready-made format and skip ahead.",
+  },
+  {
+    title: "Who's bowling",
+    lead: "Singles, pairs, or teams and roughly how many you expect. A close guess is fine; you can change it later.",
+  },
+  {
+    title: "Your house",
+    lead: "Lanes, time and how bowlers move between games. The estimate updates as you type.",
+  },
+  {
+    title: "The field",
+    lead: "Scratch means raw scores. Handicap adds pins so a mixed field stays competitive.",
+  },
+  {
+    title: "The finish",
+    lead: "How the winner gets decided. A stepladder gives you a moment worth watching; total pinfall is the least to run.",
+  },
+  {
+    title: "Check it over",
+    lead: "Here's the format and how long it should take on your lanes. Change anything before you create it.",
+  },
+];
+
 const FINISHES: { value: FinishStyle; label: string; hint: string }[] = [
   { value: "simple", label: "Highest total wins", hint: "Straight pinfall. Simplest to run." },
   { value: "dramatic", label: "Dramatic finish", hint: "Stepladder finals — great for spectators" },
@@ -50,6 +77,9 @@ export default function TournamentWizard() {
   const [entryFee, setEntryFee] = useState("");
   const [handicapBase, setHandicapBase] = useState("220");
   const [handicapPercent, setHandicapPercent] = useState("90");
+  const [laneStart, setLaneStart] = useState("1");
+  const [laneMove, setLaneMove] = useState("2");
+  const [laneMoveStyle, setLaneMoveStyle] = useState("shift");
   const [skillSpread, setSkillSpread] = useState<SkillSpread>("wide");
   const [finishStyle, setFinishStyle] = useState<FinishStyle>("dramatic");
   const [gamesOverride, setGamesOverride] = useState<number | null>(null);
@@ -136,6 +166,10 @@ export default function TournamentWizard() {
         entry_fee: entryFee.trim() === "" ? null : Number(entryFee),
         prize_fund:
           entryFee.trim() === "" ? null : Number(entryFee) * (Number(entries) || 0),
+        lane_count: Number(lanes) || null,
+        lane_start: Number(laneStart) || 1,
+        lane_move: laneMoveStyle === "none" ? 0 : Number(laneMove) || 0,
+        lane_move_style: laneMoveStyle,
         handicap_base: Number(handicapBase) || 220,
         handicap_percent: (Number(handicapPercent) || 90) / 100,
         games_per_squad: plan.qualifyingGames || 3,
@@ -189,17 +223,58 @@ export default function TournamentWizard() {
           ← Your tournaments
         </Link>
 
-        <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 uppercase">
-          Step {step + 1} of 6
+        <div className="mb-6 flex items-stretch gap-px">
+          {STEPS.map((st, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => i < step && setStep(i)}
+              disabled={i > step}
+              aria-label={`Step ${i + 1}`}
+              className={`relative h-11 flex-1 border text-left transition-colors ${
+                i === step
+                  ? "border-accent bg-accent/10"
+                  : i < step
+                    ? "border-white/15 bg-white/[0.04] hover:bg-white/8"
+                    : "border-white/10"
+              } ${i === 0 ? "rounded-l-lg" : ""} ${
+                i === STEPS.length - 1 ? "rounded-r-lg" : ""
+              }`}
+            >
+              <span
+                className={`font-score absolute left-2 top-1.5 text-[10px] tracking-widest ${
+                  i === step ? "text-accent" : "text-ink-soft/50"
+                }`}
+              >
+                {i + 1}
+              </span>
+              <span
+                className={`absolute right-0 top-0 flex h-4 w-4 items-center justify-center border-b border-l text-[9px] ${
+                  i < step
+                    ? "border-white/15 text-ink-soft"
+                    : "border-white/10 text-transparent"
+                }`}
+              >
+                {i < step ? "×" : ""}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <p className="font-score text-accent mb-2 text-[11px] font-semibold uppercase tracking-[0.2em]">
+          Step {step + 1} of {STEPS.length}
         </p>
-        <h1 className="font-display text-4xl text-ink mb-8">
-          {step === 5 ? "Your Format" : "Build a Tournament"}
+        <h1 className="font-display text-ink text-4xl leading-none">
+          {STEPS[step].title}
         </h1>
+        <p className="text-ink-soft mb-8 mt-2 max-w-lg text-sm">
+          {STEPS[step].lead}
+        </p>
 
         <div className="glass-panel space-y-6 p-8">
           {step === 0 && (
             <>
-              <Field label="Describe it in a sentence">
+              <Field label="Describe it in your own words">
                 <textarea
                   rows={2}
                   value={freeText}
@@ -258,14 +333,14 @@ export default function TournamentWizard() {
                   className="glass-input w-full px-4 py-2.5 text-ink"
                 />
               </Field>
-              <Field label="Center">
+              <Field label="Which house">
                 <input
                   value={centerName}
                   onChange={(e) => setCenterName(e.target.value)}
                   className="glass-input w-full px-4 py-2.5 text-ink"
                 />
               </Field>
-              <Field label="Date & time">
+              <Field label="When">
                 <input
                   type="datetime-local"
                   value={startsAt}
@@ -278,7 +353,7 @@ export default function TournamentWizard() {
 
           {step === 1 && (
             <>
-              <Field label="Who's bowling?">
+              <Field label="Entry type">
                 <div className="grid grid-cols-2 gap-3">
                   {ENTRY_SIZES.map((o) => (
                     <Choice
@@ -305,29 +380,83 @@ export default function TournamentWizard() {
 
           {step === 2 && (
             <>
-              <Field label="How many lanes do you have?">
-                <input
-                  type="number"
-                  min={1}
-                  value={lanes}
-                  onChange={(e) => setLanes(e.target.value)}
-                  className="glass-input font-score w-32 px-4 py-2.5 text-ink"
-                />
+              <div className="flex flex-wrap items-end gap-4">
+                <Field label="Lanes you have">
+                  <input
+                    type="number"
+                    min={1}
+                    value={lanes}
+                    onChange={(e) => setLanes(e.target.value)}
+                    className="glass-input font-score w-24 px-4 py-2.5 text-ink"
+                  />
+                </Field>
+                <Field label="Starting lane">
+                  <input
+                    type="number"
+                    min={1}
+                    value={laneStart}
+                    onChange={(e) => setLaneStart(e.target.value)}
+                    className="glass-input font-score w-24 px-4 py-2.5 text-ink"
+                  />
+                </Field>
+                <Field label="Hours you have">
+                  <input
+                    type="number"
+                    min={1}
+                    step={0.5}
+                    value={hours}
+                    onChange={(e) => setHours(e.target.value)}
+                    className="glass-input font-score w-24 px-4 py-2.5 text-ink"
+                  />
+                </Field>
+              </div>
+
+              <div className={`rounded-2xl p-4 ${plan.fits ? "bg-accent/10" : "bg-red-400/10"}`}>
+                <p className="text-ink text-sm">
+                  Runs about{" "}
+                  <span className="font-score text-accent">
+                    {formatDuration(plan.totalMinutes)}
+                  </span>{" "}
+                  on {lanes || 0} lanes
+                  {plan.squads > 1 ? ` across ${plan.squads} squads` : ""}.
+                </p>
+                <p className="text-ink-soft mt-1 text-xs">
+                  {plan.fits
+                    ? `Fits your ${hours}-hour window with room to spare.`
+                    : `That is over your ${hours}-hour window, so add lanes or drop a game.`}
+                </p>
+              </div>
+
+              <Field label="Lane movement">
+                <div className="space-y-3">
+                  {[
+                    { value: "none", label: "Stay on the same pair", hint: "Simplest. Fine for short blocks." },
+                    { value: "shift", label: "Everyone shifts the same way", hint: "Move up a set number of lanes each game." },
+                    { value: "split", label: "Odd left, even right", hint: "Odd pairs move down, even pairs move up. Keeps the field balanced." },
+                  ].map((o) => (
+                    <Choice
+                      key={o.value}
+                      selected={laneMoveStyle === o.value}
+                      label={o.label}
+                      hint={o.hint}
+                      onClick={() => setLaneMoveStyle(o.value)}
+                    />
+                  ))}
+                </div>
               </Field>
-              <Field label="How many hours?">
-                <input
-                  type="number"
-                  min={1}
-                  step={0.5}
-                  value={hours}
-                  onChange={(e) => setHours(e.target.value)}
-                  className="glass-input font-score w-32 px-4 py-2.5 text-ink"
-                />
-              </Field>
-              <p className="text-ink-soft text-xs">
-                These two drive everything. Lanes and time decide how many games
-                actually fit, which decides the format.
-              </p>
+
+              {laneMoveStyle !== "none" && (
+                <Field label="Lanes moved each game">
+                  <input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={laneMove}
+                    onChange={(e) => setLaneMove(e.target.value)}
+                    className="glass-input font-score w-24 px-4 py-2.5 text-ink"
+                  />
+                </Field>
+              )}
 
               <Field label="Entry fee">
                 <input
@@ -342,64 +471,71 @@ export default function TournamentWizard() {
               </Field>
               <p className="text-ink-soft text-xs">
                 {entryFee.trim() === ""
-                  ? "Used for the check-in Owed column and to seed the prize fund."
+                  ? "Sets what each bowler owes at the desk and seeds the prize fund."
                   : `${entries} entries at $${entryFee} seeds a $${(Number(entryFee) || 0) * (Number(entries) || 0)} prize fund. You can change it later.`}
               </p>
-
-              <div className="flex flex-wrap items-end gap-4">
-                <Field label="Handicap base">
-                  <input
-                    type="number"
-                    min={0}
-                    max={300}
-                    value={handicapBase}
-                    onChange={(e) => setHandicapBase(e.target.value)}
-                    className="glass-input font-score w-24 px-4 py-2.5 text-ink"
-                  />
-                </Field>
-                <Field label="Handicap %">
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={handicapPercent}
-                    onChange={(e) => setHandicapPercent(e.target.value)}
-                    className="glass-input font-score w-24 px-4 py-2.5 text-ink"
-                  />
-                </Field>
-                <p className="text-ink-soft pb-3 text-xs">
-                  A {handicapBase} base at {handicapPercent}% gives a{" "}
-                  {Math.max(
-                    0,
-                    Math.floor(
-                      ((Number(handicapBase) || 220) - 150) *
-                        ((Number(handicapPercent) || 90) / 100),
-                    ),
-                  )}{" "}
-                  handicap to a 150 average.
-                </p>
-              </div>
             </>
           )}
 
           {step === 3 && (
-            <Field label="How close are the averages?">
-              <div className="space-y-3">
-                {SPREADS.map((o) => (
+            <>
+              <Field label="Scoring">
+                <div className="space-y-3">
                   <Choice
-                    key={o.value}
-                    selected={skillSpread === o.value}
-                    label={o.label}
-                    hint={o.hint}
-                    onClick={() => setSkillSpread(o.value)}
+                    selected={skillSpread === "similar"}
+                    label="Scratch"
+                    hint="Raw scores, no handicap. For a field of regulars with close averages."
+                    onClick={() => setSkillSpread("similar")}
                   />
-                ))}
-              </div>
-            </Field>
+                  <Choice
+                    selected={skillSpread === "wide"}
+                    label="Handicap"
+                    hint="Adds pins based on average so a 140 bowler can beat a 210. For mixed fields, charity nights, open events."
+                    onClick={() => setSkillSpread("wide")}
+                  />
+                </div>
+              </Field>
+
+              {skillSpread === "wide" && (
+                <div className="flex flex-wrap items-end gap-4">
+                  <Field label="Handicap base">
+                    <input
+                      type="number"
+                      min={0}
+                      max={300}
+                      value={handicapBase}
+                      onChange={(e) => setHandicapBase(e.target.value)}
+                      className="glass-input font-score w-24 px-4 py-2.5 text-ink"
+                    />
+                  </Field>
+                  <Field label="Percent">
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      value={handicapPercent}
+                      onChange={(e) => setHandicapPercent(e.target.value)}
+                      className="glass-input font-score w-24 px-4 py-2.5 text-ink"
+                    />
+                  </Field>
+                  <p className="text-ink-soft pb-3 text-xs">
+                    A 150 average gets{" "}
+                    {Math.max(
+                      0,
+                      Math.floor(
+                        ((Number(handicapBase) || 220) - 150) *
+                          ((Number(handicapPercent) || 90) / 100),
+                      ),
+                    )}{" "}
+                    pins a game.
+                  </p>
+                </div>
+              )}
+            </>
           )}
 
           {step === 4 && (
-            <Field label="How should it end?">
+            <Field label="How it ends">
               <div className="space-y-3">
                 {FINISHES.map((o) => (
                   <Choice
