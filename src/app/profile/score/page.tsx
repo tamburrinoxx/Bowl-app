@@ -46,6 +46,11 @@ export default function ScoreEntryPage() {
   const [games, setGames] = useState<FrameData[][]>([emptyGame(), emptyGame(), emptyGame()]);
   const [activeGame, setActiveGame] = useState(0);
   const [pinLog, setPinLog] = useState<number[][]>([]);
+  // Which physical pins fell on each roll, kept per game and frame. The frame
+  // scores only carry counts, so this is the only record of what was left.
+  const [pinLogs, setPinLogs] = useState<number[][][][]>(() =>
+    Array.from({ length: 3 }, () => Array.from({ length: 10 }, () => [])),
+  );
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -74,6 +79,14 @@ export default function ScoreEntryPage() {
     setSelected(new Set());
     const newRolls = newPinLog.map((k) => k.length);
     updateFrame(activeGame, currentFrameIndex, newRolls);
+
+    const gameIdx = activeGame;
+    const frameIdx = currentFrameIndex;
+    setPinLogs((prev) => {
+      const next = prev.map((g) => g.map((f) => f.map((r) => [...r])));
+      next[gameIdx][frameIdx] = newPinLog.map((r) => [...r]);
+      return next;
+    });
   }
 
   function togglePin(pin: number) {
@@ -133,6 +146,7 @@ export default function ScoreEntryPage() {
       session_id: session.id,
       game_number: i + 1,
       frame_data: g,
+      pin_log: pinLogs[i],
       scratch_score: scoreGame(g),
     }));
 
