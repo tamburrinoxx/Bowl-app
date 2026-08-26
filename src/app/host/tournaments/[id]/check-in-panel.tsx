@@ -41,6 +41,7 @@ export default function CheckInPanel({
   const [pots, setPots] = useState<SidePot[]>([]);
   const [sold, setSold] = useState<Record<string, PotEntry>>({});
   const [busy, setBusy] = useState(false);
+  const [edits, setEdits] = useState<Record<string, { name: string; avg: string; hdcp: string }>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
 
@@ -128,6 +129,58 @@ export default function CheckInPanel({
     router.refresh();
   }
 
+  function draftFor(entry: Entry) {
+    return (
+      edits[entry.id] ?? {
+        name: entry.entry_name,
+        avg: entry.locked_average == null ? "" : String(entry.locked_average),
+        hdcp: entry.locked_handicap == null ? "" : String(entry.locked_handicap),
+      }
+    );
+  }
+
+  async function saveEntry(entry: Entry) {
+    const d = edits[entry.id];
+    if (!d) return;
+    const changed =
+      d.name !== entry.entry_name ||
+      d.avg !== (entry.locked_average == null ? "" : String(entry.locked_average)) ||
+      d.hdcp !== (entry.locked_handicap == null ? "" : String(entry.locked_handicap));
+    if (!changed) return;
+
+    setBusy(true);
+    const { error } = await supabase
+      .from("entries")
+      .update({
+        entry_name: d.name.trim() || entry.entry_name,
+        locked_average: d.avg === "" ? null : Number(d.avg),
+        locked_handicap: d.hdcp === "" ? null : Number(d.hdcp),
+      })
+      .eq("id", entry.id);
+    setBusy(false);
+    if (error) {
+      setIsError(true);
+      setMessage(error.message);
+      return;
+    }
+    setMessage("Entry updated.");
+    router.refresh();
+  }
+
+  async function removeEntry(entry: Entry) {
+    if (!confirm(`Remove ${entry.entry_name}? Their scores and side pot buys go with them.`)) return;
+    setBusy(true);
+    const { error } = await supabase.from("entries").delete().eq("id", entry.id);
+    setBusy(false);
+    if (error) {
+      setIsError(true);
+      setMessage(error.message);
+      return;
+    }
+    setMessage("Entry removed.");
+    router.refresh();
+  }
+
   function owedFor(entryId: string) {
     const side = pots.reduce((sum, p) => {
       const s = sold[key(p.id, entryId)];
@@ -166,19 +219,46 @@ export default function CheckInPanel({
               ))}
               <th className="text-accent px-4 py-3 text-right font-medium">Owed</th>
               <th className="px-4 py-3 text-right font-medium">Average</th>
+              <th className="px-2 py-3" />
             </tr>
           </thead>
           <tbody>
             {entries.map((entry) => (
               <tr key={entry.id} className="border-t border-white/5">
                 <td className="text-ink px-4 py-2 text-sm whitespace-nowrap">
-                  {entry.entry_name}
+                  <input
+                    value={draftFor(entry).name}
+                    onChange={(e) =>
+                      setEdits((d) => ({ ...d, [entry.id]: { ...draftFor(entry), name: e.target.value } }))
+                    }
+                    onBlur={() => saveEntry(entry)}
+                    className="glass-input w-36 px-3 py-1.5 text-sm text-ink"
+                  />
                 </td>
                 <td className="font-score text-ink-soft px-3 py-2 text-center text-sm">
-                  {entry.locked_average ?? "—"}
+                  <input
+                    type="number"
+                    min={0}
+                    max={300}
+                    value={draftFor(entry).avg}
+                    onChange={(e) =>
+                      setEdits((d) => ({ ...d, [entry.id]: { ...draftFor(entry), avg: e.target.value } }))
+                    }
+                    onBlur={() => saveEntry(entry)}
+                    className="glass-input font-score w-16 px-2 py-1.5 text-center text-sm text-ink"
+                  />
                 </td>
                 <td className="font-score text-ink px-3 py-2 text-center text-sm">
-                  {entry.locked_handicap ?? "—"}
+                  <input
+                    type="number"
+                    min={0}
+                    value={draftFor(entry).hdcp}
+                    onChange={(e) =>
+                      setEdits((d) => ({ ...d, [entry.id]: { ...draftFor(entry), hdcp: e.target.value } }))
+                    }
+                    onBlur={() => saveEntry(entry)}
+                    className="glass-input font-score w-16 px-2 py-1.5 text-center text-sm text-ink"
+                  />
                 </td>
                 {pots.map((pot) => {
                   const s = sold[key(pot.id, entry.id)];
@@ -226,6 +306,17 @@ export default function CheckInPanel({
                     entryId={entry.id}
                     status={entry.verification_status}
                   />
+                </td>
+                <td className="px-2 py-2 text-right">
+                  <button
+                    type="button"
+                    onClick={() => removeEntry(entry)}
+                    disabled={busy}
+                    aria-label={`Remove ${entry.entry_name}`}
+                    className="text-ink-soft hover:text-red-400 px-2 text-sm disabled:opacity-40"
+                  >
+                    ×
+                  </button>
                 </td>
               </tr>
             ))}
