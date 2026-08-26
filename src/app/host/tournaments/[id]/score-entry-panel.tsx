@@ -77,12 +77,6 @@ export default function ScoreEntryPanel({
       }
     }
 
-    if (!toInsert.length && !toUpdate.length) {
-      setSaving(false);
-      setMessage("Nothing changed.");
-      return;
-    }
-
     if (toInsert.length) {
       const { error } = await supabase.from("games").insert(toInsert);
       if (error) {
@@ -106,6 +100,18 @@ export default function ScoreEntryPanel({
       }
     }
 
+    // Saving is the host confirming the sheet, so everything filled in gets
+    // marked double-checked in the same action.
+    const filledIds: string[] = [];
+    for (const [key, raw] of Object.entries(drafts)) {
+      if (raw === "" || Number.isNaN(Number(raw))) continue;
+      const prior = existing[key];
+      if (prior && !prior.verified) filledIds.push(prior.id);
+    }
+    if (filledIds.length) {
+      await supabase.from("games").update({ verified: true }).in("id", filledIds);
+    }
+
     setSaving(false);
     const n = toInsert.length + toUpdate.length;
 
@@ -117,8 +123,23 @@ export default function ScoreEntryPanel({
     setJustSaved(touched);
     setTimeout(() => setJustSaved(new Set()), 1600);
 
-    setMessage(`Saved ${n} ${n === 1 ? "score" : "scores"}.`);
+    setMessage(
+      n
+        ? `Saved ${n} ${n === 1 ? "score" : "scores"} and marked the sheet checked.`
+        : "Sheet checked.",
+    );
     await load();
+
+    // Rows inserted in this pass had no id until now, so verify them too.
+    if (toInsert.length) {
+      const ids = entries.map((e) => e.id);
+      await supabase
+        .from("games")
+        .update({ verified: true })
+        .in("entry_id", ids)
+        .eq("verified", false);
+      await load();
+    }
     router.refresh();
   }
 
@@ -235,8 +256,8 @@ export default function ScoreEntryPanel({
           {saving ? "Saving…" : "Save scores"}
         </button>
         <p className="text-ink-soft text-xs">
-          Fill any cells and save. Tap the ✓ on a posted score once you have
-          double-checked it against the lane — verified scores go solid lime.
+          Fill the sheet and hit save — saved scores go solid lime, which means
+          checked. Tap a ✓ to un-check one if you need another look.
         </p>
       </div>
 
