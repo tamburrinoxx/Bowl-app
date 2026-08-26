@@ -27,6 +27,7 @@ export default function ScoreEntryPanel({
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
+  const [justSaved, setJustSaved] = useState<Set<string>>(new Set());
 
   const cols = Array.from({ length: gamesPerSquad }, (_, i) => i + 1);
 
@@ -105,6 +106,15 @@ export default function ScoreEntryPanel({
 
     setSaving(false);
     const n = toInsert.length + toUpdate.length;
+
+    // Flash the cells that just landed so it is obvious what was written.
+    const touched = new Set<string>();
+    for (const [key, raw] of Object.entries(drafts)) {
+      if (raw !== "" && !Number.isNaN(Number(raw))) touched.add(key);
+    }
+    setJustSaved(touched);
+    setTimeout(() => setJustSaved(new Set()), 1600);
+
     setMessage(`Saved ${n} ${n === 1 ? "score" : "scores"}.`);
     await load();
     router.refresh();
@@ -155,8 +165,14 @@ export default function ScoreEntryPanel({
                         inputMode="numeric"
                         value={drafts[key] ?? ""}
                         onChange={(e) => setDrafts((d) => ({ ...d, [key]: e.target.value }))}
-                        className={`glass-input font-score w-16 px-2 py-2 text-center text-ink ${
-                          existing[key] ? "ring-accent/40 ring-1" : ""
+                        className={`glass-input font-score w-16 px-2 py-2 text-center transition-colors ${
+                          justSaved.has(key)
+                            ? "bg-accent text-on-accent ring-accent ring-2"
+                            : existing[key]
+                              ? "bg-accent/15 text-accent ring-accent/40 ring-1"
+                              : drafts[key]
+                                ? "text-ink ring-1 ring-white/30"
+                                : "text-ink"
                         }`}
                       />
                     </td>
