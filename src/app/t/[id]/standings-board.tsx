@@ -82,7 +82,7 @@ export default function StandingsBoard({
               )}
 
               <div
-                className={`flex items-center gap-3 rounded-2xl px-3 py-3 ${
+                className={`relative overflow-hidden rounded-2xl px-3 py-3 ${
                   isMe
                     ? "bg-accent/15 ring-accent/50 ring-1"
                     : i < cashLine
@@ -90,34 +90,62 @@ export default function StandingsBoard({
                       : "bg-white/[0.03]"
                 }`}
               >
+                {/* Pace bar: how close this total sits to the leader, so the
+                    row's width carries meaning instead of sitting empty. */}
                 <span
-                  className={`font-score w-7 shrink-0 text-center text-lg leading-none ${
-                    i === 0 ? "text-accent" : isMe ? "text-accent" : "text-ink-soft"
-                  }`}
-                >
-                  {i + 1}
-                </span>
+                  className={`absolute inset-y-0 left-0 ${isMe ? "bg-accent/10" : "bg-white/[0.03]"}`}
+                  style={{
+                    width: `${leader ? Math.max(6, Math.round((row.handicap_total / leader) * 100)) : 0}%`,
+                  }}
+                />
 
-                <span className="min-w-0 flex-1">
-                  <span className={`block truncate text-sm ${isMe ? "text-accent font-semibold" : "text-ink"}`}>
-                    {row.entry_name}
-                    {isMe && <span className="text-ink-soft ml-2 text-[12px] uppercase">you</span>}
+                <span className="relative flex items-center gap-3">
+                  <span
+                    className={`font-score w-8 shrink-0 text-center text-xl leading-none ${
+                      i === 0 ? "text-accent" : isMe ? "text-accent" : "text-ink-soft"
+                    }`}
+                  >
+                    {i + 1}
                   </span>
-                  <span className="text-ink-soft text-[13px]">
-                    {row.games_played}/{gamesPerSquad} games
-                    {backFromAbove > 0 && ` · ${backFromAbove} back`}
-                  </span>
-                </span>
 
-                <span className="shrink-0 text-right">
-                  <span className={`font-score block text-lg leading-none ${isMe ? "text-accent" : "text-ink"}`}>
-                    {row.handicap_total}
-                  </span>
-                  {pay > 0 && (
-                    <span className="font-score text-accent block text-[13px]">
-                      {formatMoney(pay)}
+                  <span className="min-w-0 flex-1">
+                    <span className={`block truncate ${isMe ? "text-accent font-semibold" : "text-ink"}`}>
+                      {row.entry_name}
+                      {isMe && <span className="text-ink-soft ml-2 text-[12px] uppercase">you</span>}
                     </span>
-                  )}
+                    <span className="text-ink-soft text-[13px]">
+                      {row.games_played}/{gamesPerSquad} games
+                      {backFromAbove > 0 && ` · ${backFromAbove} back`}
+                    </span>
+                  </span>
+
+                  <span className="hidden shrink-0 text-right sm:block">
+                    <span className="text-ink-soft block text-[12px] uppercase tracking-wide">Avg</span>
+                    <span className="font-score text-ink block leading-none">
+                      {row.games_played ? Math.round(row.scratch_total / row.games_played) : "—"}
+                    </span>
+                  </span>
+
+                  <span className="hidden w-24 shrink-0 text-right sm:block">
+                    <span className="text-ink-soft block text-[12px] uppercase tracking-wide">Scratch</span>
+                    <span className="font-score text-ink-soft block leading-none">
+                      {row.scratch_total}
+                      {row.handicap_total > row.scratch_total && (
+                        <span className="text-accent"> +{row.handicap_total - row.scratch_total}</span>
+                      )}
+                    </span>
+                  </span>
+
+                  <span className="w-20 shrink-0 text-right">
+                    <span className={`font-score block text-2xl leading-none ${isMe ? "text-accent" : "text-ink"}`}>
+                      {row.handicap_total}
+                    </span>
+                    {pay > 0 && (
+                      <span className="font-score text-accent block text-[13px]">
+                        {formatMoney(pay)}
+                      </span>
+                    )}
+                  </span>
                 </span>
               </div>
             </div>
