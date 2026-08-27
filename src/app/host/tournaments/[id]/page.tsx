@@ -11,6 +11,7 @@ import PayoutsPanel from "./payouts-panel";
 import SidePotsPanel from "./side-pots-panel";
 import CheckInPanel from "./check-in-panel";
 import SideResultsPanel from "./side-results-panel";
+import PotRecap from "./pot-recap";
 import ScoreEntryPanel from "./score-entry-panel";
 import StatusSwitch from "./status-switch";
 
@@ -172,6 +173,13 @@ export default async function HostTournamentPage({
 
         <section className="glass-panel p-8 mb-6">
           <h2 id="results" className="font-display text-xl text-ink mb-4">Side Action Results</h2>
+          <div className="mb-8 rounded-2xl bg-white/[0.03] p-5">
+            <p className="font-display text-ink mb-3 text-lg">Payout recap</p>
+            <PotRecap
+              tournamentId={tournament.id}
+              gamesPerSquad={tournament.games_per_squad}
+            />
+          </div>
           <SideResultsPanel
             tournamentId={tournament.id}
             gamesPerSquad={tournament.games_per_squad}
