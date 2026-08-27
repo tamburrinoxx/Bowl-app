@@ -50,9 +50,26 @@ body {
   font-weight: 700;
   /* Oswald is condensed, so a touch of tracking keeps small text readable. */
   letter-spacing: 0.01em;
+  /* Lane boards. A bowler spends the night looking down 39 narrow strips, so
+     the background borrows that instead of a generic gradient. Kept far below
+     text contrast so it reads as texture, not pattern. */
   background-image:
-    radial-gradient(circle at 15% 10%, rgba(182, 255, 46, 0.08), transparent 40%),
-    radial-gradient(circle at 85% 90%, rgba(182, 255, 46, 0.05), transparent 40%);
+    radial-gradient(circle at 15% 8%, rgba(182, 255, 46, 0.10), transparent 42%),
+    radial-gradient(circle at 85% 92%, rgba(182, 255, 46, 0.06), transparent 42%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.028) 0px,
+      rgba(255, 255, 255, 0.028) 1px,
+      transparent 1px,
+      transparent 34px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(182, 255, 46, 0.05) 0px,
+      rgba(182, 255, 46, 0.05) 1px,
+      transparent 1px,
+      transparent 238px
+    );
   background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
 }
@@ -102,4 +119,25 @@ body {
 
 .pill-button:active {
   transform: scale(0.97);
+}
+
+/* Foul line: a single lime rule under the sticky chrome, the way the approach
+   ends and the lane begins. */
+.lane-edge {
+  position: relative;
+}
+
+.lane-edge::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(182, 255, 46, 0.35) 20%,
+    rgba(182, 255, 46, 0.35) 80%,
+    transparent
+  );
 }
