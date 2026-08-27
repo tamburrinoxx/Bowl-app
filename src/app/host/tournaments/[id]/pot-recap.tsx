@@ -123,7 +123,7 @@ export default function PotRecap({
     return (
       <p className="text-ink-soft rounded-2xl bg-white/5 p-5 text-sm">
         {openPots.length
-          ? `Nothing decided yet. ${openPots.join(", ")} still need scores.`
+          ? "Nothing decided yet. Those pots still need scores."
           : "No side pots on this tournament."}
       </p>
     );
@@ -143,61 +143,14 @@ export default function PotRecap({
           <div key={r.entryId} className="rounded-2xl bg-white/5 px-4 py-3">
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-ink font-medium">{r.name}</span>
-              <span className="font-score text-accent text-lg">{formatMoney(r.amount)}</span>
+              <span className="font-score text-accent text-lg">
+                {formatMoney(r.amount)}
+              </span>
             </div>
-            <p className="text-ink-soft mt-1 text-xs">{r.lines.join(" · ")}</p>
+            <p className="text-ink-soft mt-1 text-xs">{r.lines.join(" and ")}</p>
           </div>
         ))}
       </div>
-
-      {openPots.length > 0 && (
-        <p className="text-ink-soft mt-4 text-xs">
-          Still open: {openPots.join(",
-cat >> "src/app/host/tournaments/[id]/pot-recap.tsx" << 'EOF_P3'
-
-  if (loading) {
-    return <p className="text-ink-soft text-sm">Working out the pots...</p>;
-  }
-
-  const rows = rollUp(wins);
-  const owed = rows.reduce((s, r) => s + r.amount, 0);
-
-  if (!rows.length) {
-    return (
-      <p className="text-ink-soft rounded-2xl bg-white/5 p-5 text-sm">
-        {openPots.length
-          ? `Nothing decided yet. ${openPots.join(", ")} still need scores.`
-          : "No side pots on this tournament."}
-      </p>
-    );
-  }
-
-  return (
-    <div>
-      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
-        <p className="text-ink-soft text-xs font-medium uppercase tracking-wide">
-          {rows.length} to pay
-        </p>
-        <p className="font-score text-accent text-lg">{formatMoney(owed)} total</p>
-      </div>
-
-      <div className="space-y-2">
-        {rows.map((r) => (
-          <div key={r.entryId} className="rounded-2xl bg-white/5 px-4 py-3">
-            <div className="flex items-baseline justify-between gap-3">
-              <span className="text-ink font-medium">{r.name}</span>
-              <span className="font-score text-accent text-lg">{formatMoney(r.amount)}</span>
-            </div>
-            <p className="text-ink-soft mt-1 text-xs">{r.lines.join(" · ")}</p>
-          </div>
-        ))}
-      </div>
-
-      {openPots.length > 0 && (
-        <p className="text-ink-soft mt-4 text-xs">
-          Still open: {openPots.join(", ")}. Those need every buyer scored first.
-        </p>
-      )}
     </div>
   );
 }
