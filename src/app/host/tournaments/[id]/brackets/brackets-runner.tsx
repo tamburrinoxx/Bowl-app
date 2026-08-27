@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { buildGroups, bracketPayout } from "@/lib/bracketPots";
 import { generateBracket, type SeededEntry } from "@/lib/brackets";
 import { formatMoney } from "@/lib/payouts";
+import { BracketTree } from "@/components/bracket-tree";
 
 interface Pot {
   id: string;
@@ -409,116 +410,53 @@ export default function BracketsRunner({
                 </p>
               </div>
 
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {rounds.map((r) => (
-                  <div key={r} className="flex min-w-[200px] flex-1 flex-col">
-                    <p className="text-ink-soft mb-3 text-center text-[10px] uppercase tracking-widest">
-                      {r === lastRound ? "Final" : `Round ${r}`}
-                    </p>
-                    <div className="flex flex-1 flex-col justify-around gap-3">
-                      {inGroup
-                        .filter((m) => m.round_number === r)
-                        .map((m) => {
-                          const done = m.status === "complete";
-                          const ready = m.entry_a && m.entry_b;
-                          const sc = scores[m.id] ?? { a: "", b: "" };
-                          return (
-                            <div
-                              key={m.id}
-                              className="overflow-hidden rounded-xl bg-white/5 ring-1 ring-white/5"
-                            >
-                              {(["a", "b"] as const).map((side) => {
-                                const entryId = side === "a" ? m.entry_a : m.entry_b;
-                                const score = side === "a" ? m.score_a : m.score_b;
-                                const won = done && m.winner_entry_id === entryId;
-                                return (
-                                  <div
-                                    key={side}
-                                    className={`flex items-center justify-between gap-2 px-3 py-2 text-xs ${
-                                      side === "a" ? "border-b border-white/10" : ""
-                                    } ${won ? "bg-accent/15" : ""}`}
-                                  >
-                                    <span
-                                      className={`truncate ${won ? "text-accent font-semibold" : entryId ? "text-ink" : "text-ink-soft"}`}
-                                    >
-                                      {entryId ? names[entryId] : "—"}
-                                    </span>
-                                    {done ? (
-                                      <span className={`font-score shrink-0 ${won ? "text-accent" : "text-ink-soft"}`}>
-                                        {score}
-                                      </span>
-                                    ) : ready ? (
-                                      <input
-                                        type="number"
-                                        min={0}
-                                        max={300}
-                                        inputMode="numeric"
-                                        value={sc[side]}
-                                        onChange={(e) =>
-                                          setScores((p) => ({
-                                            ...p,
-                                            [m.id]: { ...sc, [side]: e.target.value },
-                                          }))
-                                        }
-                                        className="glass-input font-score w-12 shrink-0 px-1 py-1 text-center text-xs text-ink"
-                                      />
-                                    ) : (
-                                      <span className="text-ink-soft shrink-0">–</span>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                              {!done && ready && (
-                                <button
-                                  type="button"
-                                  onClick={() => saveResult(m)}
-                                  disabled={busy || sc.a === "" || sc.b === ""}
-                                  className="bg-accent text-on-accent w-full py-1.5 text-[10px] font-semibold uppercase tracking-wide disabled:opacity-30"
-                                >
-                                  Save
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })}
-                    </div>
-                  </div>
-                ))}
-
-                <div className="flex min-w-[170px] flex-col justify-center gap-2">
-                  <p className="text-ink-soft text-center text-[10px] uppercase tracking-widest">
-                    Payout
-                  </p>
-
-                  <div
-                    className={`flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 ${champ ? "bg-accent/15 ring-accent/40 ring-1" : "bg-white/5"}`}
-                  >
-                    <span className="min-w-0">
-                      <span className="text-ink-soft block text-[9px] uppercase tracking-widest">1st</span>
-                      <span className={`block truncate text-sm ${champ ? "text-accent font-semibold" : "text-ink-soft"}`}>
-                        {champ ? names[champ] : "TBD"}
+              <BracketTree
+                matches={inGroup}
+                names={names}
+                winnerPay={pay.winner}
+                runnerUpPay={pay.runnerUp}
+                renderScore={(m, side) => {
+                  const done = m.status === "complete";
+                  const ready = m.entry_a && m.entry_b;
+                  const sc = scores[m.id] ?? { a: "", b: "" };
+                  const val = side === "a" ? m.score_a : m.score_b;
+                  if (done) {
+                    return (
+                      <span
+                        className={`font-score text-xs ${m.winner_entry_id === (side === "a" ? m.entry_a : m.entry_b) ? "text-accent" : "text-ink-soft"}`}
+                      >
+                        {val}
                       </span>
+                    );
+                  }
+                  if (!ready) return <span className="text-ink-soft text-xs">–</span>;
+                  return (
+                    <span className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        min={0}
+                        max={300}
+                        inputMode="numeric"
+                        value={sc[side]}
+                        onChange={(e) =>
+                          setScores((p) => ({ ...p, [m.id]: { ...sc, [side]: e.target.value } }))
+                        }
+                        className="glass-input font-score w-11 px-1 py-0.5 text-center text-[11px] text-ink"
+                      />
+                      {side === "b" && (
+                        <button
+                          type="button"
+                          onClick={() => saveResult(m as unknown as Match)}
+                          disabled={busy || sc.a === "" || sc.b === ""}
+                          className="bg-accent text-on-accent rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase disabled:opacity-30"
+                        >
+                          ok
+                        </button>
+                      )}
                     </span>
-                    <span className="font-score text-accent shrink-0 text-sm">
-                      {formatMoney(pay.winner)}
-                    </span>
-                  </div>
-
-                  <div
-                    className={`flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 ${runnerUp ? "bg-white/[0.07]" : "bg-white/5"}`}
-                  >
-                    <span className="min-w-0">
-                      <span className="text-ink-soft block text-[9px] uppercase tracking-widest">2nd</span>
-                      <span className={`block truncate text-sm ${runnerUp ? "text-ink" : "text-ink-soft"}`}>
-                        {runnerUp ? names[runnerUp] : "TBD"}
-                      </span>
-                    </span>
-                    <span className="font-score text-ink-soft shrink-0 text-sm">
-                      {formatMoney(pay.runnerUp)}
-                    </span>
-                  </div>
-                </div>
-              </div>
+                  );
+                }}
+              />
             </div>
           );
         })}
