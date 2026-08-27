@@ -238,7 +238,7 @@ export default function CareerView() {
                     <span className={`font-score block text-lg ${r.position === 1 ? "text-accent" : "text-ink"}`}>
                       {ordinal(r.position)}
                     </span>
-                    <span className="text-ink-soft text-[10px]">of {r.fieldSize}</span>
+                    <span className="text-ink-soft text-[12px]">of {r.fieldSize}</span>
                   </span>
                   <span className="font-score text-accent w-16 text-sm">
                     {r.winnings ? formatMoney(r.winnings) : "—"}

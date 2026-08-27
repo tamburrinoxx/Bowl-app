@@ -74,7 +74,7 @@ export default function StandingsBoard({
               {showCut && (
                 <div className="my-3 flex items-center gap-3">
                   <div className="bg-accent/50 h-px flex-1" />
-                  <span className="font-score text-accent text-[10px] font-semibold uppercase tracking-[0.2em]">
+                  <span className="font-score text-accent text-[12px] font-semibold uppercase tracking-[0.2em]">
                     Cash line · top {cashLine}
                   </span>
                   <div className="bg-accent/50 h-px flex-1" />
@@ -101,9 +101,9 @@ export default function StandingsBoard({
                 <span className="min-w-0 flex-1">
                   <span className={`block truncate text-sm ${isMe ? "text-accent font-semibold" : "text-ink"}`}>
                     {row.entry_name}
-                    {isMe && <span className="text-ink-soft ml-2 text-[10px] uppercase">you</span>}
+                    {isMe && <span className="text-ink-soft ml-2 text-[12px] uppercase">you</span>}
                   </span>
-                  <span className="text-ink-soft text-[11px]">
+                  <span className="text-ink-soft text-[13px]">
                     {row.games_played}/{gamesPerSquad} games
                     {backFromAbove > 0 && ` · ${backFromAbove} back`}
                   </span>
@@ -114,7 +114,7 @@ export default function StandingsBoard({
                     {row.handicap_total}
                   </span>
                   {pay > 0 && (
-                    <span className="font-score text-accent block text-[11px]">
+                    <span className="font-score text-accent block text-[13px]">
                       {formatMoney(pay)}
                     </span>
                   )}
@@ -125,7 +125,7 @@ export default function StandingsBoard({
         })}
       </div>
 
-      <p className="text-ink-soft mt-4 text-center text-[11px]">
+      <p className="text-ink-soft mt-4 text-center text-[13px]">
         Leader {leader}
         {cashLine > 0 && ` · ${cashMark} to cash`}
       </p>
@@ -158,14 +158,14 @@ function YouBar({
     <div className="bg-accent/10 ring-accent/30 mb-5 rounded-2xl p-5 ring-1">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-ink-soft text-[10px] font-semibold uppercase tracking-[0.2em]">You</p>
+          <p className="text-ink-soft text-[12px] font-semibold uppercase tracking-[0.2em]">You</p>
           <p className="font-score text-accent text-4xl leading-none">
             {index + 1}
             <span className="text-ink-soft ml-1 text-base">of {rows.length}</span>
           </p>
         </div>
         <div className="text-right">
-          <p className="text-ink-soft text-[10px] font-semibold uppercase tracking-[0.2em]">Total</p>
+          <p className="text-ink-soft text-[12px] font-semibold uppercase tracking-[0.2em]">Total</p>
           <p className="font-score text-ink text-3xl leading-none">{row.handicap_total}</p>
         </div>
       </div>

@@ -35,7 +35,7 @@ export function PhaseStrip({ status }: { status: string; tournamentId?: string }
             }`}
           >
             <span
-              className={`absolute right-0 top-0 flex h-5 w-5 items-center justify-center border-b border-l text-[10px] ${
+              className={`absolute right-0 top-0 flex h-5 w-5 items-center justify-center border-b border-l text-[12px] ${
                 now
                   ? "border-accent/50 text-accent"
                   : done
@@ -47,7 +47,7 @@ export function PhaseStrip({ status }: { status: string; tournamentId?: string }
             </span>
 
             <span
-              className={`font-score block text-[10px] uppercase tracking-widest ${
+              className={`font-score block text-[12px] uppercase tracking-widest ${
                 now ? "text-accent" : "text-ink-soft/60"
               }`}
             >
@@ -60,7 +60,7 @@ export function PhaseStrip({ status }: { status: string; tournamentId?: string }
             >
               {p.label}
             </span>
-            <span className="text-ink-soft block text-[11px] leading-tight">
+            <span className="text-ink-soft block text-[13px] leading-tight">
               {now ? p.hint : ""}
             </span>
           </div>

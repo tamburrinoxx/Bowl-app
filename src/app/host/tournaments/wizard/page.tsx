@@ -242,14 +242,14 @@ export default function TournamentWizard() {
               }`}
             >
               <span
-                className={`font-score absolute left-2 top-1.5 text-[10px] tracking-widest ${
+                className={`font-score absolute left-2 top-1.5 text-[12px] tracking-widest ${
                   i === step ? "text-accent" : "text-ink-soft/50"
                 }`}
               >
                 {i + 1}
               </span>
               <span
-                className={`absolute right-0 top-0 flex h-4 w-4 items-center justify-center border-b border-l text-[9px] ${
+                className={`absolute right-0 top-0 flex h-4 w-4 items-center justify-center border-b border-l text-[13px] ${
                   i < step
                     ? "border-white/15 text-ink-soft"
                     : "border-white/10 text-transparent"
@@ -261,7 +261,7 @@ export default function TournamentWizard() {
           ))}
         </div>
 
-        <p className="font-score text-accent mb-2 text-[11px] font-semibold uppercase tracking-[0.2em]">
+        <p className="font-score text-accent mb-2 text-[13px] font-semibold uppercase tracking-[0.2em]">
           Step {step + 1} of {STEPS.length}
         </p>
         <h1 className="font-display text-ink text-4xl leading-none">

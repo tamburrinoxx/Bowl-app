@@ -441,14 +441,14 @@ export default function BracketsRunner({
                         onChange={(e) =>
                           setScores((p) => ({ ...p, [m.id]: { ...sc, [side]: e.target.value } }))
                         }
-                        className="glass-input font-score w-11 px-1 py-0.5 text-center text-[11px] text-ink"
+                        className="glass-input font-score w-11 px-1 py-0.5 text-center text-[13px] text-ink"
                       />
                       {side === "b" && (
                         <button
                           type="button"
                           onClick={() => saveResult(m as unknown as Match)}
                           disabled={busy || sc.a === "" || sc.b === ""}
-                          className="bg-accent text-on-accent rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase disabled:opacity-30"
+                          className="bg-accent text-on-accent rounded px-1.5 py-0.5 text-[13px] font-semibold uppercase disabled:opacity-30"
                         >
                           ok
                         </button>
@@ -650,7 +650,7 @@ function PayoutRecap({
                 {names[r.id] ?? "—"}
               </span>
               {r.alive > 0 && (
-                <span className="text-ink-soft text-[11px]">
+                <span className="text-ink-soft text-[13px]">
                   still alive in {r.alive} bracket{r.alive === 1 ? "" : "s"}
                 </span>
               )}
@@ -660,7 +660,7 @@ function PayoutRecap({
                 {r.won > 0 ? formatMoney(r.won) : "—"}
               </span>
               {r.potential > 0 && (
-                <span className="text-ink-soft block text-[11px]">
+                <span className="text-ink-soft block text-[13px]">
                   up to {formatMoney(r.won + r.potential)}
                 </span>
               )}

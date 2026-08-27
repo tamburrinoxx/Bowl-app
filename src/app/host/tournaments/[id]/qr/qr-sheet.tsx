@@ -61,7 +61,7 @@ export default function QrSheet({
             <span className="font-display text-2xl tracking-tight">PINFALL</span>
           </div>
 
-          <p className="font-score mb-1 text-[11px] font-semibold uppercase tracking-[0.25em] text-[#1F2329]/50">
+          <p className="font-score mb-1 text-[13px] font-semibold uppercase tracking-[0.25em] text-[#1F2329]/50">
             Live standings
           </p>
           <h1 className="font-display mb-1 text-4xl leading-none">{name}</h1>

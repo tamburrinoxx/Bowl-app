@@ -205,7 +205,7 @@ export default function ScoreEntryPanel({
                           onClick={() => toggleVerified(key)}
                           disabled={busy}
                           aria-label={existing[key].verified ? "Mark unchecked" : "Mark double-checked"}
-                          className={`absolute -right-1 -top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full text-[9px] leading-none transition-colors ${
+                          className={`absolute -right-1 -top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full text-[13px] leading-none transition-colors ${
                             existing[key].verified
                               ? "bg-accent text-on-accent"
                               : "bg-white/20 text-ink-soft hover:bg-white/30"

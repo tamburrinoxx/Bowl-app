@@ -223,7 +223,7 @@ export default function ScoreEntryPage() {
                     isActive ? "bg-accent/10" : ""
                   }`}
                 >
-                  <p className="text-[10px] text-ink-soft text-center pt-1">{i + 1}</p>
+                  <p className="text-[12px] text-ink-soft text-center pt-1">{i + 1}</p>
                   <div className="flex justify-center gap-0.5 h-5 items-center">
                     {marks.length ? (
                       marks.map((m, j) => (

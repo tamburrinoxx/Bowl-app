@@ -211,7 +211,7 @@ export default function CheckInPanel({
               {pots.map((p) => (
                 <th key={p.id} className="px-3 py-3 text-center font-medium">
                   {p.name}
-                  <span className="text-ink-soft block text-[10px] normal-case">
+                  <span className="text-ink-soft block text-[12px] normal-case">
                     {formatMoney(Number(p.buy_in))}
                     {p.allow_multiple ? " ea" : ""}
                   </span>

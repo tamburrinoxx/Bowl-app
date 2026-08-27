@@ -58,7 +58,7 @@ export function BracketTree({
 
           return (
             <div key={r} className="flex min-w-[150px] flex-1 flex-col">
-              <p className="text-ink-soft mb-2 text-center text-[10px] uppercase tracking-[0.2em]">
+              <p className="text-ink-soft mb-2 text-center text-[12px] uppercase tracking-[0.2em]">
                 {isFinal ? "Final" : `Round ${r}`}
               </p>
               <div className="flex flex-1 flex-col">
@@ -81,12 +81,12 @@ export function BracketTree({
         })}
 
         <div className="flex min-w-[150px] flex-col">
-          <p className="text-ink-soft mb-2 text-center text-[10px] uppercase tracking-[0.2em]">
+          <p className="text-ink-soft mb-2 text-center text-[12px] uppercase tracking-[0.2em]">
             Champion
           </p>
           <div className="flex flex-1 flex-col justify-center gap-2">
             <div className={`rounded-xl px-3 py-2.5 ${champ ? "bg-accent/15 ring-accent/40 ring-1" : "bg-white/5"}`}>
-              <span className="text-ink-soft block text-[9px] uppercase tracking-widest">1st</span>
+              <span className="text-ink-soft block text-[13px] uppercase tracking-widest">1st</span>
               <span className="flex items-center justify-between gap-2">
                 <span className={`truncate text-sm ${champ ? "text-accent font-semibold" : "text-ink-soft"}`}>
                   {champ ? names[champ] : "TBD"}
@@ -101,7 +101,7 @@ export function BracketTree({
 
             {runnerUpPay != null && (
               <div className={`rounded-xl px-3 py-2.5 ${runnerUp ? "bg-white/[0.07]" : "bg-white/5"}`}>
-                <span className="text-ink-soft block text-[9px] uppercase tracking-widest">2nd</span>
+                <span className="text-ink-soft block text-[13px] uppercase tracking-widest">2nd</span>
                 <span className="flex items-center justify-between gap-2">
                   <span className={`truncate text-sm ${runnerUp ? "text-ink" : "text-ink-soft"}`}>
                     {runnerUp ? names[runnerUp] : "TBD"}
@@ -141,7 +141,7 @@ function Slot({
     <span className={`flex items-center justify-between gap-2 border-b pb-1 text-xs ${won ? "border-accent" : "border-white/20"}`}>
       <span className="flex min-w-0 items-baseline gap-1.5">
         {seed != null && (
-          <span className="font-score text-ink-soft/60 shrink-0 text-[10px]">{seed}</span>
+          <span className="font-score text-ink-soft/60 shrink-0 text-[12px]">{seed}</span>
         )}
         <span className={`truncate ${won ? "text-accent font-semibold" : lost ? "text-ink-soft/50" : "text-ink"}`}>
           {entryId ? (names[entryId] ?? "—") : "TBD"}
