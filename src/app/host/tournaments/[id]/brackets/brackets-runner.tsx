@@ -376,6 +376,14 @@ export default function BracketsRunner({
         <p className={`mb-4 text-sm ${isError ? "text-red-400" : "text-accent"}`}>{message}</p>
       )}
 
+      <PayoutRecap
+        matches={mine}
+        groups={groups}
+        names={names}
+        buyIn={Number(pot.buy_in)}
+        bracketSize={pot.bracket_size || 8}
+      />
+
       <div className="space-y-6">
         {groups.map((g) => {
           const inGroup = mine.filter((m) => m.bracket_group === g);
@@ -608,6 +616,120 @@ function BracketControls({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Money recap across every bracket in the pot.
+ *
+ * A bowler in six brackets can't tally their own position from six trees, so
+ * this rolls it up: what they've locked in, and what's still live.
+ */
+function PayoutRecap({
+  matches,
+  groups,
+  names,
+  buyIn,
+  bracketSize,
+}: {
+  matches: Match[];
+  groups: (number | null)[];
+  names: Record<string, string>;
+  buyIn: number;
+  bracketSize: number;
+}) {
+  const pay = bracketPayout(buyIn, bracketSize);
+  const tally = new Map<string, { won: number; alive: number; potential: number }>();
+
+  const bump = (
+    id: string,
+    patch: Partial<{ won: number; alive: number; potential: number }>,
+  ) => {
+    const cur = tally.get(id) ?? { won: 0, alive: 0, potential: 0 };
+    tally.set(id, {
+      won: cur.won + (patch.won ?? 0),
+      alive: cur.alive + (patch.alive ?? 0),
+      potential: cur.potential + (patch.potential ?? 0),
+    });
+  };
+
+  for (const g of groups) {
+    const inGroup = matches.filter((m) => m.bracket_group === g);
+    if (!inGroup.length) continue;
+    const lastRound = Math.max(...inGroup.map((m) => m.round_number));
+    const final = inGroup.find((m) => m.round_number === lastRound);
+
+    if (final?.status === "complete" && final.winner_entry_id) {
+      const loser = final.entry_a === final.winner_entry_id ? final.entry_b : final.entry_a;
+      bump(final.winner_entry_id, { won: pay.winner });
+      if (loser) bump(loser, { won: pay.runnerUp });
+      continue;
+    }
+
+    const everyone = new Set<string>();
+    for (const m of inGroup) {
+      if (m.entry_a) everyone.add(m.entry_a);
+      if (m.entry_b) everyone.add(m.entry_b);
+    }
+    for (const id of everyone) {
+      const lost = inGroup.some(
+        (m) =>
+          m.status === "complete" &&
+          (m.entry_a === id || m.entry_b === id) &&
+          m.winner_entry_id !== id,
+      );
+      if (!lost) bump(id, { alive: 1, potential: pay.winner });
+    }
+  }
+
+  const rows = [...tally.entries()]
+    .map(([id, v]) => ({ id, ...v }))
+    .filter((r) => r.won > 0 || r.alive > 0)
+    .sort((a, b) => b.won - a.won || b.potential - a.potential);
+
+  if (!rows.length) return null;
+
+  const paidOut = rows.reduce((s, r) => s + r.won, 0);
+
+  return (
+    <div className="glass-panel mb-6 p-6">
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
+        <p className="font-display text-ink text-lg">Who&apos;s winning</p>
+        <p className="font-score text-accent text-xs">{formatMoney(paidOut)} decided</p>
+      </div>
+
+      <div className="space-y-1.5">
+        {rows.map((r) => (
+          <div
+            key={r.id}
+            className={`flex items-center justify-between gap-3 rounded-2xl px-4 py-2.5 ${
+              r.won > 0 ? "bg-accent/10" : "bg-white/[0.04]"
+            }`}
+          >
+            <span className="min-w-0">
+              <span className={`block truncate text-sm ${r.won > 0 ? "text-accent font-medium" : "text-ink"}`}>
+                {names[r.id] ?? "—"}
+              </span>
+              {r.alive > 0 && (
+                <span className="text-ink-soft text-[11px]">
+                  still alive in {r.alive} bracket{r.alive === 1 ? "" : "s"}
+                </span>
+              )}
+            </span>
+            <span className="shrink-0 text-right">
+              <span className={`font-score block text-base leading-none ${r.won > 0 ? "text-accent" : "text-ink-soft"}`}>
+                {r.won > 0 ? formatMoney(r.won) : "—"}
+              </span>
+              {r.potential > 0 && (
+                <span className="text-ink-soft block text-[11px]">
+                  up to {formatMoney(r.won + r.potential)}
+                </span>
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
