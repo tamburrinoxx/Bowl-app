@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { Logo } from "@/components/logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -89,14 +90,66 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-sm glass-panel p-8">
-        <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 text-center uppercase">
-          Host Access
-        </p>
-        <h1 className="font-display text-3xl text-ink mb-8 text-center">
-          {mode === "signup" ? "Create Account" : "Welcome Back"}
-        </h1>
+    <main className="min-h-screen px-6 py-12">
+      <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-2">
+        <div className="max-w-lg">
+          <Logo className="mb-8 text-3xl" />
+
+          <h1 className="font-display text-ink mb-4 text-5xl leading-[0.95]">
+            Tournament night
+            <br />
+            without the clipboard.
+          </h1>
+          <p className="text-ink-soft mb-10 text-base">
+            Build the format, take the entries, run the brackets, and let every
+            bowler follow along from their own phone.
+          </p>
+
+          <div className="space-y-px">
+            {[
+              {
+                n: "1",
+                title: "Live standings, no app to install",
+                body: "Scan the code taped to the pair. Scores, side action and brackets update as they go in.",
+              },
+              {
+                n: "2",
+                title: "Every pot worked out for you",
+                body: "Brackets, high game, series, eliminator. Who won what, totalled per bowler at the end of the night.",
+              },
+              {
+                n: "3",
+                title: "Your average follows you",
+                body: "Every tournament you bowl, every leave you throw at. One profile, one Bowl ID.",
+              },
+            ].map((f, i, arr) => (
+              <div
+                key={f.n}
+                className={`relative border border-white/10 px-5 py-4 ${
+                  i === 0 ? "rounded-t-lg" : ""
+                } ${i === arr.length - 1 ? "rounded-b-lg" : ""}`}
+              >
+                <span className="text-ink-soft/50 absolute right-0 top-0 flex h-5 w-5 items-center justify-center border-b border-l border-white/10 text-[11px]">
+                  {f.n}
+                </span>
+                <p className="text-accent mb-1 text-sm font-semibold">{f.title}</p>
+                <p className="text-ink-soft text-sm">{f.body}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-ink-soft mt-8 text-xs">
+            Built at a bowling centre, for people who actually run these.
+          </p>
+        </div>
+
+        <div className="w-full max-w-sm glass-panel p-8 lg:justify-self-end">
+          <p className="font-score text-accent mb-2 text-[13px] font-semibold uppercase tracking-[0.2em]">
+            {mode === "signup" ? "Get started" : "Welcome back"}
+          </p>
+          <h2 className="font-display text-ink mb-6 text-3xl leading-none">
+            {mode === "signup" ? "Create your account" : "Sign in"}
+          </h2>
 
         <form
           onSubmit={mode === "signup" ? handleSignUp : handleSignIn}
@@ -179,6 +232,7 @@ export default function LoginPage() {
             ? "Already have an account? Sign in"
             : "Need an account? Sign up"}
         </button>
+        </div>
       </div>
     </main>
   );
