@@ -381,7 +381,15 @@ export default function BracketsRunner({
           const inGroup = mine.filter((m) => m.bracket_group === g);
           const rounds = [...new Set(inGroup.map((m) => m.round_number))].sort((a, b) => a - b);
           const lastRound = Math.max(...rounds);
-          const champ = inGroup.find((m) => m.round_number === lastRound)?.winner_entry_id;
+          const finalMatch = inGroup.find((m) => m.round_number === lastRound);
+          const champ = finalMatch?.winner_entry_id;
+          // Runner-up is whoever lost the final — the other side of that match.
+          const runnerUp =
+            finalMatch && champ
+              ? finalMatch.entry_a === champ
+                ? finalMatch.entry_b
+                : finalMatch.entry_a
+              : null;
           const pay = bracketPayout(Number(pot.buy_in), pot.bracket_size || 8);
 
           return (
@@ -469,21 +477,37 @@ export default function BracketsRunner({
                   </div>
                 ))}
 
-                <div className="flex min-w-[150px] flex-col justify-center">
-                  <p className="text-ink-soft mb-3 text-center text-[10px] uppercase tracking-widest">
-                    Winner
+                <div className="flex min-w-[170px] flex-col justify-center gap-2">
+                  <p className="text-ink-soft text-center text-[10px] uppercase tracking-widest">
+                    Payout
                   </p>
+
                   <div
-                    className={`rounded-xl px-3 py-3 text-center ${champ ? "bg-accent/15 ring-accent/40 ring-1" : "bg-white/5"}`}
+                    className={`flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 ${champ ? "bg-accent/15 ring-accent/40 ring-1" : "bg-white/5"}`}
                   >
-                    <p className={`truncate text-sm ${champ ? "text-accent font-semibold" : "text-ink-soft"}`}>
-                      {champ ? names[champ] : "TBD"}
-                    </p>
-                    {champ && (
-                      <p className="font-score text-accent mt-1 text-xs">
-                        {formatMoney(pay.winner)}
-                      </p>
-                    )}
+                    <span className="min-w-0">
+                      <span className="text-ink-soft block text-[9px] uppercase tracking-widest">1st</span>
+                      <span className={`block truncate text-sm ${champ ? "text-accent font-semibold" : "text-ink-soft"}`}>
+                        {champ ? names[champ] : "TBD"}
+                      </span>
+                    </span>
+                    <span className="font-score text-accent shrink-0 text-sm">
+                      {formatMoney(pay.winner)}
+                    </span>
+                  </div>
+
+                  <div
+                    className={`flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 ${runnerUp ? "bg-white/[0.07]" : "bg-white/5"}`}
+                  >
+                    <span className="min-w-0">
+                      <span className="text-ink-soft block text-[9px] uppercase tracking-widest">2nd</span>
+                      <span className={`block truncate text-sm ${runnerUp ? "text-ink" : "text-ink-soft"}`}>
+                        {runnerUp ? names[runnerUp] : "TBD"}
+                      </span>
+                    </span>
+                    <span className="font-score text-ink-soft shrink-0 text-sm">
+                      {formatMoney(pay.runnerUp)}
+                    </span>
                   </div>
                 </div>
               </div>
