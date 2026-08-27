@@ -41,7 +41,7 @@ export default function CheckInPanel({
   const [pots, setPots] = useState<SidePot[]>([]);
   const [sold, setSold] = useState<Record<string, PotEntry>>({});
   const [busy, setBusy] = useState(false);
-  const [edits, setEdits] = useState<Record<string, { name: string; avg: string; hdcp: string }>>({});
+  const [edits, setEdits] = useState<Record<string, { name: string; avg: string; hdcp: string; lane: string }>>({});
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
 
@@ -135,6 +135,7 @@ export default function CheckInPanel({
         name: entry.entry_name,
         avg: entry.locked_average == null ? "" : String(entry.locked_average),
         hdcp: entry.locked_handicap == null ? "" : String(entry.locked_handicap),
+        lane: entry.lane == null ? "" : String(entry.lane),
       }
     );
   }
@@ -145,7 +146,8 @@ export default function CheckInPanel({
     const changed =
       d.name !== entry.entry_name ||
       d.avg !== (entry.locked_average == null ? "" : String(entry.locked_average)) ||
-      d.hdcp !== (entry.locked_handicap == null ? "" : String(entry.locked_handicap));
+      d.hdcp !== (entry.locked_handicap == null ? "" : String(entry.locked_handicap)) ||
+      d.lane !== (entry.lane == null ? "" : String(entry.lane));
     if (!changed) return;
 
     setBusy(true);
@@ -155,6 +157,7 @@ export default function CheckInPanel({
         entry_name: d.name.trim() || entry.entry_name,
         locked_average: d.avg === "" ? null : Number(d.avg),
         locked_handicap: d.hdcp === "" ? null : Number(d.hdcp),
+        lane: d.lane === "" ? null : Number(d.lane),
       })
       .eq("id", entry.id);
     setBusy(false);
@@ -205,6 +208,7 @@ export default function CheckInPanel({
         <table className="w-full text-left">
           <thead>
             <tr className="text-ink-soft text-xs uppercase tracking-wide">
+              <th className="px-3 py-3 text-center font-medium">Lane</th>
               <th className="px-4 py-3 font-medium">Entry</th>
               <th className="px-3 py-3 text-center font-medium">Avg</th>
               <th className="px-3 py-3 text-center font-medium">Hdcp</th>
@@ -225,6 +229,18 @@ export default function CheckInPanel({
           <tbody>
             {entries.map((entry) => (
               <tr key={entry.id} className="border-t border-white/5">
+                <td className="px-3 py-2 text-center">
+                  <input
+                    type="number"
+                    min={1}
+                    value={draftFor(entry).lane}
+                    onChange={(e) =>
+                      setEdits((d) => ({ ...d, [entry.id]: { ...draftFor(entry), lane: e.target.value } }))
+                    }
+                    onBlur={() => saveEntry(entry)}
+                    className="glass-input font-score w-14 px-2 py-1.5 text-center text-sm text-ink"
+                  />
+                </td>
                 <td className="text-ink px-4 py-2 text-sm whitespace-nowrap">
                   <input
                     value={draftFor(entry).name}

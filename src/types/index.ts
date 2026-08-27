@@ -64,6 +64,7 @@ export interface Squad {
 }
 
 export interface Entry {
+  lane: number | null;
   id: string;
   tournament_id: string;
   squad_id: string | null;

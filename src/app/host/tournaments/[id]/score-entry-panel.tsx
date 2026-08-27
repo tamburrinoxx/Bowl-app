@@ -29,6 +29,7 @@ export default function ScoreEntryPanel({
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
   const [justSaved, setJustSaved] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<"lane" | "name" | "added">("lane");
   const [busy, setBusy] = useState(false);
 
   const cols = Array.from({ length: gamesPerSquad }, (_, i) => i + 1);
@@ -168,6 +169,19 @@ export default function ScoreEntryPanel({
     );
   }
 
+  // A host reads the sheet in whatever order they walk the house, so the order
+  // is theirs to choose rather than fixed to how entries were typed.
+  const ordered = [...entries].sort((a, b) => {
+    if (sortBy === "name") return a.entry_name.localeCompare(b.entry_name);
+    if (sortBy === "lane") {
+      const al = a.lane ?? Number.MAX_SAFE_INTEGER;
+      const bl = b.lane ?? Number.MAX_SAFE_INTEGER;
+      if (al !== bl) return al - bl;
+      return a.entry_name.localeCompare(b.entry_name);
+    }
+    return 0;
+  });
+
   function rowTotal(entryId: string) {
     return cols.reduce((sum, n) => {
       const v = drafts[`${entryId}:${n}`];
@@ -177,10 +191,33 @@ export default function ScoreEntryPanel({
 
   return (
     <div>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="text-ink-soft text-xs uppercase tracking-wide">Order by</span>
+        {([
+          { key: "lane", label: "Lane" },
+          { key: "name", label: "A-Z" },
+          { key: "added", label: "As added" },
+        ] as const).map((o) => (
+          <button
+            key={o.key}
+            type="button"
+            onClick={() => setSortBy(o.key)}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+              sortBy === o.key
+                ? "bg-accent text-on-accent"
+                : "bg-white/8 text-ink-soft hover:bg-white/12"
+            }`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+
       <div className="overflow-x-auto rounded-2xl bg-white/5">
         <table className="w-full text-left">
           <thead>
             <tr className="text-ink-soft text-xs uppercase tracking-wide">
+              <th className="px-3 py-3 text-center font-medium">Lane</th>
               <th className="px-4 py-3 font-medium">Entry</th>
               {cols.map((n) => (
                 <th key={n} className="px-2 py-3 text-center font-medium">G{n}</th>
@@ -189,8 +226,11 @@ export default function ScoreEntryPanel({
             </tr>
           </thead>
           <tbody>
-            {entries.map((entry) => (
+            {ordered.map((entry) => (
               <tr key={entry.id} className="border-t border-white/5">
+                <td className="font-score text-ink-soft px-3 py-2 text-center text-sm">
+                  {entry.lane ?? "—"}
+                </td>
                 <td className="text-ink px-4 py-2 text-sm whitespace-nowrap">
                   {entry.entry_name}
                 </td>
