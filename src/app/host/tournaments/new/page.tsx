@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { splitEntryFee } from "@/lib/money";
 
 const EVENT_TYPES = [
   { value: "singles", label: "Singles" },
@@ -16,6 +17,8 @@ export default function NewTournamentPage() {
   const supabase = createClient();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [patternFile, setPatternFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -30,6 +33,8 @@ export default function NewTournamentPage() {
     starts_at: "",
     pattern_name: "",
     pattern_distance_ft: "",
+    lineage_per_game: "4",
+    director_percent: "15",
   });
 
   function update<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
@@ -49,6 +54,26 @@ export default function NewTournamentPage() {
       setSaving(false);
       router.push("/login");
       return;
+    }
+
+    // The sheet is optional — a host often books lanes before the pattern is
+    // decided, so this can be filled in later from the tournament page.
+    let patternUrl: string | null = null;
+    if (patternFile) {
+      setUploading(true);
+      const ext = patternFile.name.split(".").pop() ?? "pdf";
+      const path = `${user.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("oil-patterns")
+        .upload(path, patternFile);
+      setUploading(false);
+      if (upErr) {
+        setError(`Pattern upload failed: ${upErr.message}`);
+        setSaving(false);
+        return;
+      }
+      const { data: pub } = supabase.storage.from("oil-patterns").getPublicUrl(path);
+      patternUrl = pub.publicUrl;
     }
 
     let oilPatternId: string | null = null;
@@ -82,6 +107,10 @@ export default function NewTournamentPage() {
         oil_pattern_id: oilPatternId,
         center_name: form.center_name || null,
         entry_fee: form.entry_fee ? Number(form.entry_fee) : null,
+        oil_pattern_url: patternUrl,
+        oil_pattern_name: form.pattern_name.trim() || null,
+        lineage_per_game: Number(form.lineage_per_game) || 0,
+        director_percent: Number(form.director_percent) || 0,
         prize_fund: form.prize_fund ? Number(form.prize_fund) : null,
         handicap_base: Number(form.handicap_base),
         handicap_percent: Number(form.handicap_percent) / 100,
@@ -229,7 +258,21 @@ export default function NewTournamentPage() {
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <Field label="Oil pattern sheet">
+            <input
+              type="file"
+              accept="application/pdf,image/*"
+              onChange={(e) => setPatternFile(e.target.files?.[0] ?? null)}
+              className="text-ink-soft file:bg-accent file:text-on-accent w-full text-sm file:mr-3 file:rounded-full file:border-0 file:px-4 file:py-2 file:text-sm file:font-semibold"
+            />
+          </Field>
+          <p className="text-ink-soft text-xs">
+            {patternFile
+              ? `${patternFile.name} ready to upload.`
+              : "PDF or photo. Skip it if the pattern isn't decided — you can add it from the tournament page later."}
+          </p>
+
+          <div className="grid grid-cols-3 gap-4">
             <Field label="Entry fee ($)">
               <input
                 type="number"
@@ -238,15 +281,61 @@ export default function NewTournamentPage() {
                 className={inputClass}
               />
             </Field>
-            <Field label="Prize fund ($)">
+            <Field label="Lineage / game ($)">
               <input
                 type="number"
-                value={form.prize_fund}
-                onChange={(e) => update("prize_fund", e.target.value)}
+                step="0.5"
+                value={form.lineage_per_game}
+                onChange={(e) => update("lineage_per_game", e.target.value)}
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Director cut (%)">
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={form.director_percent}
+                onChange={(e) => update("director_percent", e.target.value)}
                 className={inputClass}
               />
             </Field>
           </div>
+
+          {Number(form.entry_fee) > 0 && (() => {
+            const split = splitEntryFee(
+              Number(form.entry_fee),
+              Number(form.games_per_squad) || 0,
+              Number(form.lineage_per_game) || 0,
+              Number(form.director_percent) || 0,
+            );
+            return (
+              <div className="rounded-2xl bg-white/5 p-4">
+                <p className="text-ink-soft mb-3 text-xs font-medium uppercase tracking-wide">
+                  Where each ${split.entryFee} goes
+                </p>
+                <div className="space-y-1.5 text-sm">
+                  <Split label={`Lineage · ${form.games_per_squad} games to the house`} value={split.lineage} />
+                  <Split label={`Director · ${form.director_percent}% of what's left`} value={split.director} />
+                  <Split label="Prize fund" value={split.prizePerEntry} accent />
+                </div>
+                <p className="text-ink-soft mt-3 text-xs">
+                  Set the prize fund below to{" "}
+                  <span className="font-score text-accent">${split.prizePerEntry} × entries</span>
+                  , or type your own.
+                </p>
+              </div>
+            );
+          })()}
+
+          <Field label="Prize fund ($)">
+            <input
+              type="number"
+              value={form.prize_fund}
+              onChange={(e) => update("prize_fund", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
 
           {error && (
             <p className="text-danger text-sm bg-danger/10 border border-danger/20 rounded-2xl p-3">
@@ -280,3 +369,20 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 const inputClass =
   "glass-input w-full px-4 py-3 text-ink placeholder:text-ink-soft/60 text-base";
+
+function Split({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number;
+  accent?: boolean;
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-3">
+      <span className="text-ink-soft">{label}</span>
+      <span className={`font-score ${accent ? "text-accent" : "text-ink"}`}>${value}</span>
+    </div>
+  );
+}
