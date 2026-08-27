@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import BracketsRunner from "./brackets-runner";
@@ -11,11 +12,23 @@ export default async function BracketsPage({
   const { id } = await params;
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
   const { data: tournament } = await supabase
     .from("tournaments")
-    .select("id, name, games_per_squad")
+    .select("id, name, games_per_squad, host_id")
     .eq("id", id)
     .single();
+
+  // Host pages carry rosters, money owed and payouts, so only the host who
+  // owns this tournament may see them.
+  if (!tournament || tournament.host_id !== user.id) {
+    redirect("/host/tournaments");
+  }
 
   if (!tournament) {
     return (

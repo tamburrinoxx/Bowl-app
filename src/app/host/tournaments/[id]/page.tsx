@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Entry, StandingsRow, Tournament } from "@/types";
 import { Fragment } from "react";
@@ -21,11 +22,23 @@ export default async function HostTournamentPage({
   const { id } = await params;
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
   const { data: tournament } = await supabase
     .from("tournaments")
     .select("*")
     .eq("id", id)
     .single<Tournament>();
+
+  // Host pages carry rosters, money owed and payouts, so only the host who
+  // owns this tournament may see them.
+  if (!tournament || tournament.host_id !== user.id) {
+    redirect("/host/tournaments");
+  }
 
   const { data: entries } = await supabase
     .from("entries")
