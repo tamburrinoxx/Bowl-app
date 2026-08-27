@@ -1,0 +1,189 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { formatMoney } from "@/lib/payouts";
+
+export interface BoardRow {
+  entry_id: string;
+  entry_name: string;
+  games_played: number;
+  scratch_total: number;
+  handicap_total: number;
+}
+
+export default function StandingsBoard({
+  rows,
+  payouts,
+  gamesPerSquad,
+}: {
+  rows: BoardRow[];
+  payouts: { position: number; amount: number }[];
+  gamesPerSquad: number;
+}) {
+  const supabase = createClient();
+  const [myEntryId, setMyEntryId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function findMe() {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user || !rows.length) return;
+      const { data: links } = await supabase
+        .from("entry_bowlers")
+        .select("entry_id")
+        .eq("bowler_id", auth.user.id)
+        .in("entry_id", rows.map((r) => r.entry_id));
+      if (!cancelled) setMyEntryId(links?.[0]?.entry_id ?? null);
+    }
+    findMe();
+    return () => {
+      cancelled = true;
+    };
+  }, [supabase, rows]);
+
+  if (!rows.length) {
+    return (
+      <p className="text-ink-soft rounded-2xl bg-white/5 px-4 py-8 text-center text-sm">
+        No entries yet. Check back once bowlers are signed up.
+      </p>
+    );
+  }
+
+  const payFor = new Map(payouts.map((p) => [p.position, Number(p.amount)]));
+  const cashLine = payouts.length;
+  const leader = rows[0]?.handicap_total ?? 0;
+  const cashMark = cashLine > 0 ? rows[cashLine - 1]?.handicap_total ?? 0 : 0;
+  const myIndex = myEntryId ? rows.findIndex((r) => r.entry_id === myEntryId) : -1;
+
+  return (
+    <div>
+      {myIndex >= 0 && (
+        <YouBar row={rows[myIndex]} index={myIndex} rows={rows} cashLine={cashLine} payFor={payFor} />
+      )}
+
+      <div className="space-y-1.5">
+        {rows.map((row, i) => {
+          const isMe = row.entry_id === myEntryId;
+          const pay = payFor.get(i + 1) ?? 0;
+          const backFromAbove = i === 0 ? 0 : rows[i - 1].handicap_total - row.handicap_total;
+          const showCut = cashLine > 0 && i === cashLine;
+
+          return (
+            <div key={row.entry_id}>
+              {showCut && (
+                <div className="my-3 flex items-center gap-3">
+                  <div className="bg-accent/50 h-px flex-1" />
+                  <span className="font-score text-accent text-[10px] font-semibold uppercase tracking-[0.2em]">
+                    Cash line · top {cashLine}
+                  </span>
+                  <div className="bg-accent/50 h-px flex-1" />
+                </div>
+              )}
+
+              <div
+                className={`flex items-center gap-3 rounded-2xl px-3 py-3 ${
+                  isMe
+                    ? "bg-accent/15 ring-accent/50 ring-1"
+                    : i < cashLine
+                      ? "bg-white/[0.06]"
+                      : "bg-white/[0.03]"
+                }`}
+              >
+                <span
+                  className={`font-score w-7 shrink-0 text-center text-lg leading-none ${
+                    i === 0 ? "text-accent" : isMe ? "text-accent" : "text-ink-soft"
+                  }`}
+                >
+                  {i + 1}
+                </span>
+
+                <span className="min-w-0 flex-1">
+                  <span className={`block truncate text-sm ${isMe ? "text-accent font-semibold" : "text-ink"}`}>
+                    {row.entry_name}
+                    {isMe && <span className="text-ink-soft ml-2 text-[10px] uppercase">you</span>}
+                  </span>
+                  <span className="text-ink-soft text-[11px]">
+                    {row.games_played}/{gamesPerSquad} games
+                    {backFromAbove > 0 && ` · ${backFromAbove} back`}
+                  </span>
+                </span>
+
+                <span className="shrink-0 text-right">
+                  <span className={`font-score block text-lg leading-none ${isMe ? "text-accent" : "text-ink"}`}>
+                    {row.handicap_total}
+                  </span>
+                  {pay > 0 && (
+                    <span className="font-score text-accent block text-[11px]">
+                      {formatMoney(pay)}
+                    </span>
+                  )}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="text-ink-soft mt-4 text-center text-[11px]">
+        Leader {leader}
+        {cashLine > 0 && ` · ${cashMark} to cash`}
+      </p>
+    </div>
+  );
+}
+
+function YouBar({
+  row,
+  index,
+  rows,
+  cashLine,
+  payFor,
+}: {
+  row: BoardRow;
+  index: number;
+  rows: BoardRow[];
+  cashLine: number;
+  payFor: Map<number, number>;
+}) {
+  const inMoney = cashLine > 0 && index < cashLine;
+  const pay = payFor.get(index + 1) ?? 0;
+  const toCash =
+    cashLine > 0 && !inMoney
+      ? (rows[cashLine - 1]?.handicap_total ?? 0) - row.handicap_total
+      : 0;
+  const toNext = index === 0 ? 0 : rows[index - 1].handicap_total - row.handicap_total;
+
+  return (
+    <div className="bg-accent/10 ring-accent/30 mb-5 rounded-2xl p-5 ring-1">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="text-ink-soft text-[10px] font-semibold uppercase tracking-[0.2em]">You</p>
+          <p className="font-score text-accent text-4xl leading-none">
+            {index + 1}
+            <span className="text-ink-soft ml-1 text-base">of {rows.length}</span>
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-ink-soft text-[10px] font-semibold uppercase tracking-[0.2em]">Total</p>
+          <p className="font-score text-ink text-3xl leading-none">{row.handicap_total}</p>
+        </div>
+      </div>
+
+      <p className="text-ink mt-3 text-sm">
+        {inMoney ? (
+          <>
+            In the money for <span className="font-score text-accent">{formatMoney(pay)}</span>
+            {toNext > 0 && <span className="text-ink-soft"> · {toNext} pins off the spot above</span>}
+          </>
+        ) : toCash > 0 ? (
+          <>
+            <span className="font-score text-accent">{toCash}</span> pins out of the money
+          </>
+        ) : (
+          <span className="text-ink-soft">Standings update as scores go in.</span>
+        )}
+      </p>
+    </div>
+  );
+}

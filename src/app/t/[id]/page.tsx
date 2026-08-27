@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { StandingsRow, Tournament } from "@/types";
 import BowlerPanel from "./bowler-panel";
+import StandingsBoard from "./standings-board";
 import SideResultsPanel from "@/app/host/tournaments/[id]/side-results-panel";
 import { NavBar } from "@/components/nav-bar";
 import { formatMoney } from "@/lib/payouts";
@@ -103,78 +104,11 @@ export default async function PublicTournamentPage({
 
         <section className="glass-panel p-8">
           <h2 className="font-display text-xl text-ink mb-4">Standings</h2>
-          <div className="overflow-x-auto rounded-2xl bg-white/5">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-ink-soft uppercase text-xs">
-                  <th className="px-4 py-3">Pos</th>
-                  <th className="px-4 py-3">Entry</th>
-                  <th className="px-4 py-3 text-right">Games</th>
-                  <th className="px-4 py-3 text-right">Scratch</th>
-                  <th className="px-4 py-3 text-right">Hdcp</th>
-                  <th className="px-4 py-3 text-right text-accent">Total</th>
-                  <th className="px-4 py-3 text-right">Winnings</th>
-                </tr>
-              </thead>
-              <tbody>
-                {standings?.map((row, i) => (
-                  <Fragment key={row.entry_id}>
-                  {paidSpots > 0 && i === paidSpots && (
-                    <tr>
-                      <td colSpan={7} className="px-4 py-1">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-accent/60 h-px flex-1" />
-                          <span className="text-accent text-xs font-semibold uppercase">
-                            Cash line — top {paidSpots} paid
-                          </span>
-                          <div className="bg-accent/60 h-px flex-1" />
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                  <tr className="border-t border-white/10">
-                    <td className="px-4 py-3 text-ink">{i + 1}</td>
-                    <td className="px-4 py-3 text-ink font-medium">
-                      {row.entry_name}
-                      {row.verification_status === "flagged" && (
-                        <span className="ml-2 text-warning text-xs font-semibold uppercase">
-                          Flagged
-                        </span>
-                      )}
-                      {row.verification_status === "pending" && (
-                        <span className="ml-2 text-ink-soft text-xs font-semibold uppercase">
-                          Unverified
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right font-score text-ink">
-                      {row.games_played}
-                    </td>
-                    <td className="px-4 py-3 text-right font-score text-ink">
-                      {row.scratch_total}
-                    </td>
-                    <td className="px-4 py-3 text-right font-score text-ink">
-                      {row.locked_handicap ?? 0}
-                    </td>
-                    <td className="px-4 py-3 text-right font-score text-accent font-bold">
-                      {row.handicap_total}
-                    </td>
-                    <td className="px-4 py-3 text-right font-score text-ink">
-                      {payoutFor.has(i + 1) ? formatMoney(payoutFor.get(i + 1) ?? 0) : "—"}
-                    </td>
-                  </tr>
-                  </Fragment>
-                ))}
-                {!standings?.length && (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-8 text-center text-ink-soft">
-                      No entries yet. Check back once bowlers are signed up.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          <StandingsBoard
+            rows={standings ?? []}
+            payouts={payouts ?? []}
+            gamesPerSquad={tournament.games_per_squad}
+          />
         </section>
 
         <section className="glass-panel p-8 mt-6">
