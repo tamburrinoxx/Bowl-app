@@ -298,7 +298,7 @@ export default function ScoreEntryPage() {
                   }
                   className="pill-button flex-1 bg-white/10 text-ink py-3 hover:bg-white/15"
                 >
-                  {selected.size === standingPins.length
+                  {pinLog.length === 0
                     ? "Next ball"
                     : selected.size === 0
                     ? "Spare"
