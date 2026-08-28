@@ -14,7 +14,7 @@ export default async function PublicTournamentsPage({ searchParams }: { searchPa
     .order("starts_at", { ascending: true, nullsFirst: false })
     .returns<Tournament[]>();
 
-  const rows = (tournaments ?? []) as (Tournament & { state?: string | null })[];
+  const rows = (tournaments ?? []) as (Tournament & { city?: string | null; state?: string | null })[];
   const states = Array.from(new Set(rows.map((t) => t.state).filter((s): s is string => Boolean(s)))).sort();
   const shown = stateFilter ? rows.filter((t) => t.state === stateFilter) : rows;
 
@@ -44,6 +44,7 @@ export default async function PublicTournamentsPage({ searchParams }: { searchPa
                   <p className="font-display text-xl text-ink mb-1">{t.name}</p>
                   <p className="text-ink-soft text-sm">
                     {t.center_name ?? "Center TBD"}
+                {(t.city || t.state) ? ` · ${[t.city, t.state].filter(Boolean).join(", ")}` : ""}
                     {t.starts_at
                       ? ` · ${new Date(t.starts_at).toLocaleDateString()}`
                       : ""}
