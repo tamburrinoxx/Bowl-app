@@ -17,7 +17,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function ensureHostProfile(userId: string, name: string, userEmail: string) {
+  async function ensureProfile(userId: string, name: string, userEmail: string) {
     const { data: existing } = await supabase
       .from("profiles")
       .select("id")
@@ -29,9 +29,19 @@ export default function LoginPage() {
         id: userId,
         full_name: name || userEmail,
         email: userEmail,
-        role: "host",
+        role: "bowler",
       });
     }
+  }
+
+  async function landingFor(userId?: string) {
+    if (!userId) return "/profile";
+    const { data } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+    return data?.role === "host" ? "/host/tournaments" : "/profile";
   }
 
   async function handleSignUp(e: React.FormEvent) {
@@ -52,9 +62,9 @@ export default function LoginPage() {
     }
 
     if (data.session && data.user) {
-      await ensureHostProfile(data.user.id, fullName, email);
+      await ensureProfile(data.user.id, fullName, email);
       setBusy(false);
-      router.push("/host/tournaments");
+      router.push(await landingFor(data.user?.id));
       return;
     }
 
@@ -82,11 +92,11 @@ export default function LoginPage() {
     }
 
     if (data.user) {
-      await ensureHostProfile(data.user.id, fullName, email);
+      await ensureProfile(data.user.id, fullName, email);
     }
 
     setBusy(false);
-    router.push("/host/tournaments");
+    router.push(await landingFor(data.user?.id));
   }
 
   return (
