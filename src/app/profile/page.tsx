@@ -332,6 +332,14 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen px-6 py-12">
+      <div className="mx-auto max-w-2xl flex justify-end mb-4">
+        <button
+          onClick={async () => { await supabase.auth.signOut(); window.location.href = "/login"; }}
+          className="text-ink-soft hover:text-ink text-xs uppercase tracking-wide border border-white/15 rounded-full px-4 py-2"
+        >
+          Sign out
+        </button>
+      </div>
       <div className="mx-auto max-w-2xl">
         <div className="glass-panel p-8 mb-6 flex items-baseline justify-between">
           <div>
