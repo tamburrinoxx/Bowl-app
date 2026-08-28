@@ -69,6 +69,8 @@ export default function TournamentWizard() {
 
   const [name, setName] = useState("");
   const [centerName, setCenterName] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [entrySize, setEntrySize] = useState(1);
   const [entries, setEntries] = useState("24");
@@ -163,6 +165,8 @@ export default function TournamentWizard() {
         event_type: eventType,
         entry_size: entrySize,
         center_name: centerName.trim() || null,
+          city: city.trim() || null,
+          state: state.trim().toUpperCase() || null,
         entry_fee: entryFee.trim() === "" ? null : Number(entryFee),
         prize_fund:
           entryFee.trim() === "" ? null : Number(entryFee) * (Number(entries) || 0),
@@ -340,6 +344,12 @@ export default function TournamentWizard() {
                   className="glass-input w-full px-4 py-2.5 text-ink"
                 />
               </Field>
+            <Field label="City">
+              <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Sandusky" className="glass-input w-full px-4 py-2.5 text-ink" />
+            </Field>
+            <Field label="State">
+              <input value={state} onChange={(e) => setState(e.target.value)} placeholder="OH" maxLength={2} className="glass-input w-full px-4 py-2.5 text-ink" />
+            </Field>
               <Field label="When">
                 <input
                   type="datetime-local"
