@@ -211,8 +211,8 @@ export default function ScoreEntryPage() {
         </div>
 
         {/* Scoresheet grid */}
-        <div className="glass-panel p-4 mb-4 overflow-x-auto">
-          <div className="flex min-w-max">
+        <div className="glass-panel p-4 mb-4">
+          <div className="grid grid-cols-5">
             {currentGame.map((frame, i) => {
               const marks = frameMarks(frame, i + 1);
               const isActive = i === currentFrameIndex;
@@ -271,7 +271,7 @@ export default function ScoreEntryPage() {
                             !isAvailable
                               ? "bg-white/5 text-ink-soft/20"
                               : isSelected
-                              ? "bg-white/15 text-ink border-2 border-ink-soft"
+                              ? "bg-accent text-on-accent border-2 border-accent"
                               : "bg-white/10 text-ink hover:bg-white/15"
                           }`}
                         >
@@ -298,7 +298,11 @@ export default function ScoreEntryPage() {
                   }
                   className="pill-button flex-1 bg-white/10 text-ink py-3 hover:bg-white/15"
                 >
-                  Next
+                  {selected.size === standingPins.length
+                    ? "Next ball"
+                    : selected.size === 0
+                    ? "Spare"
+                    : "Open"}
                 </button>
               </div>
             </>
