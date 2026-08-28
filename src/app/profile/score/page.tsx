@@ -61,6 +61,21 @@ export default function ScoreEntryPage() {
   const gameFinished = currentFrameIndex === -1;
   const frameNumber = currentFrameIndex + 1;
 
+  const [hand, setHand] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("handedness")
+        .eq("id", user.id)
+        .maybeSingle();
+      setHand(data?.handedness ?? "");
+    })();
+  }, []);
+
   useEffect(() => {
     setPinLog([]);
     setSelected(new Set());
@@ -287,7 +302,7 @@ export default function ScoreEntryPage() {
 
         {pinLog.length === 0 && (
           <div className="flex gap-2 mb-3">
-            {["Miss L", "Light", "Pocket", "Heavy", "Miss R"].map((h) => {
+            {(hand.includes("left") ? ["Miss L", "Light", "Pocket", "Heavy", "Miss R"] : ["Miss L", "Heavy", "Pocket", "Light", "Miss R"]).map((h) => {
               const hk = activeGame + "-" + currentFrameIndex;
               const on = hitLogs[hk] === h;
               return (
