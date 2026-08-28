@@ -52,6 +52,7 @@ export default function ScoreEntryPage() {
     Array.from({ length: 3 }, () => Array.from({ length: 10 }, () => [])),
   );
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [hitLogs, setHitLogs] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -147,6 +148,7 @@ export default function ScoreEntryPage() {
       game_number: i + 1,
       frame_data: g,
       pin_log: pinLogs[i],
+      hit_log: Object.fromEntries(Object.entries(hitLogs).filter(([k]) => k.startsWith(i + "-")).map(([k, v]) => [k.split("-")[1], v])),
       scratch_score: scoreGame(g),
     }));
 
@@ -283,6 +285,23 @@ export default function ScoreEntryPage() {
                 ))}
               </div>
 
+        {pinLog.length === 0 && (
+          <div className="flex gap-2 mb-3">
+            {["Miss L", "Light", "Pocket", "Heavy", "Miss R"].map((h) => {
+              const hk = activeGame + "-" + currentFrameIndex;
+              const on = hitLogs[hk] === h;
+              return (
+                <button
+                  key={h}
+                  onClick={() => setHitLogs((prev) => ({ ...prev, [hk]: prev[hk] === h ? "" : h }))}
+                  className={"pill-button flex-1 py-2 text-xs " + (on ? "bg-accent text-on-accent" : "bg-white/10 text-ink-soft")}
+                >
+                  {h}
+                </button>
+              );
+            })}
+          </div>
+        )}
               <div className="flex gap-3">
                 {canStrike && (
                   <button
