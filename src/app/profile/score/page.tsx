@@ -356,6 +356,26 @@ export default function ScoreEntryPage() {
             <p className="text-xs text-ink-soft uppercase tracking-wide">Opens</p>
             <p className="font-score text-lg text-ink">{stats.opens}</p>
           </div>
+          <div className="flex-1 ml-4">
+            <p className="text-xs text-ink-soft uppercase tracking-wide">Read</p>
+            <p className="text-sm text-ink mt-1">
+              {(() => {
+                const tags = Object.entries(hitLogs)
+                  .filter(([k, v]) => k.startsWith(activeGame + "-") && v)
+                  .map(([, v]) => v);
+                const recent = tags.slice(-4);
+                if (recent.length < 2) return "Tag a few shots";
+                const n = (t: string) => recent.filter((x) => x === t).length;
+                const righty = !hand.includes("left");
+                if (n("Heavy") >= 2) return righty ? "Playing heavy — move left" : "Playing heavy — move right";
+                if (n("Light") >= 2) return righty ? "Coming in light — move right" : "Coming in light — move left";
+                if (n("Miss R") >= 2) return "Missing right — check your target";
+                if (n("Miss L") >= 2) return "Missing left — check your target";
+                if (n("Pocket") >= 2) return "Pocket is dialed in";
+                return "Mixed reaction — stay put";
+              })()}
+            </p>
+          </div>
         </div>
 
         {error && (
