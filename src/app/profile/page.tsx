@@ -25,6 +25,7 @@ export default function ProfilePage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [homeCenter, setHomeCenter] = useState("");
+  const [handedness, setHandedness] = useState("");
   const [usbcId, setUsbcId] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -93,6 +94,7 @@ export default function ProfilePage() {
         full_name: fullName || userEmail,
         email: userEmail,
         home_center: homeCenter || null,
+      handedness: handedness || null,
         usbc_id: usbcId || null,
         role: "bowler",
       });
@@ -244,6 +246,22 @@ export default function ProfilePage() {
                     className={inputClass}
                   />
                 </div>
+              <div>
+                <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
+                  Hand
+                </label>
+                <select
+                  value={handedness}
+                  onChange={(e) => setHandedness(e.target.value)}
+                  className={inputClass}
+                >
+                  <option value="">Select</option>
+                  <option value="right">Right handed</option>
+                  <option value="left">Left handed</option>
+                  <option value="two-right">Two handed (right)</option>
+                  <option value="two-left">Two handed (left)</option>
+                </select>
+              </div>
                 <div>
                   <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
                     USBC ID (optional)
