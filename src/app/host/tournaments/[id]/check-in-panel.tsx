@@ -8,6 +8,7 @@ import { formatMoney } from "@/lib/payouts";
 import { buildGroups } from "@/lib/bracketPots";
 import type { Entry } from "@/types";
 import VerifyBadge from "./verify-badge";
+import LaneBar from "./lane-bar";
 
 interface SidePot {
   id: string;
@@ -204,6 +205,7 @@ export default function CheckInPanel({
 
   return (
     <div>
+      <LaneBar entries={entries} />
       <div className="overflow-x-auto rounded-2xl bg-white/5">
         <table className="w-full text-left">
           <thead>
