@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Tournament } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export default async function PublicTournamentsPage({ searchParams }: { searchParams: Promise<{ state?: string }> }) {
   const sp = await searchParams;
   const stateFilter = sp.state ?? "";
