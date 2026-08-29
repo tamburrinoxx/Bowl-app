@@ -19,6 +19,8 @@ interface SidePot {
   allow_multiple: boolean;
 }
 
+type SortKey = "lane" | "name" | "avg" | "hdcp" | "owed" | "verif" | `pot:${string}`;
+
 interface PotEntry {
   id: string;
   side_pot_id: string;
@@ -44,10 +46,10 @@ export default function CheckInPanel({
   const [busy, setBusy] = useState(false);
   const [edits, setEdits] = useState<Record<string, { name: string; avg: string; hdcp: string; lane: string }>>({});
   const [message, setMessage] = useState<string | null>(null);
-  const [sortKey, setSortKey] = useState<"lane" | "name" | "avg" | "hdcp">("lane");
+  const [sortKey, setSortKey] = useState<SortKey>("lane");
   const [sortDir, setSortDir] = useState<1 | -1>(1);
 
-  function toggleSort(k: "lane" | "name" | "avg" | "hdcp") {
+  function toggleSort(k: SortKey) {
     if (k === sortKey) { setSortDir((d) => (d === 1 ? -1 : 1)); return; }
     setSortKey(k);
     setSortDir(k === "avg" ? -1 : 1);
@@ -214,6 +216,15 @@ export default function CheckInPanel({
   const BIG = Number.MAX_SAFE_INTEGER;
   const sortedEntries = [...entries].sort((a, b) => {
     if (sortKey === "name") return sortDir * a.entry_name.localeCompare(b.entry_name);
+    if (sortKey === "verif")
+      return sortDir * a.verification_status.localeCompare(b.verification_status);
+    if (sortKey === "owed") return sortDir * (owedFor(a.id) - owedFor(b.id));
+    if (sortKey.startsWith("pot:")) {
+      const pid = sortKey.slice(4);
+      const qa = sold[key(pid, a.id)]?.quantity ?? 0;
+      const qb = sold[key(pid, b.id)]?.quantity ?? 0;
+      return sortDir * (qa - qb);
+    }
     const av = sortKey === "lane" ? a.lane : sortKey === "avg" ? a.locked_average : a.locked_handicap;
     const bv = sortKey === "lane" ? b.lane : sortKey === "avg" ? b.locked_average : b.locked_handicap;
     if (av == null && bv == null) return 0;
@@ -235,15 +246,19 @@ export default function CheckInPanel({
               <SortTh label="Hdcp" k="hdcp" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} center />
               {pots.map((p) => (
                 <th key={p.id} className="px-3 py-3 text-center font-medium">
-                  {p.name}
+                  <button onClick={() => toggleSort(`pot:${p.id}`)}
+                    className={sortKey === `pot:${p.id}` ? "text-accent" : ""}>
+                    {p.name}</button>
                   <span className="text-ink-soft block text-[12px] normal-case">
                     {formatMoney(Number(p.buy_in))}
                     {p.allow_multiple ? " ea" : ""}
                   </span>
                 </th>
               ))}
-              <th className="text-accent px-4 py-3 text-right font-medium">Owed</th>
-              <th className="px-4 py-3 text-right font-medium">Average</th>
+              <th className="text-accent px-4 py-3 text-right font-medium">
+                <button onClick={() => toggleSort("owed")}>Owed</button></th>
+              <th className="px-4 py-3 text-right font-medium">
+                <button onClick={() => toggleSort("verif")}>Average</button></th>
               <th className="px-2 py-3" />
             </tr>
           </thead>
@@ -420,10 +435,10 @@ export default function CheckInPanel({
 
 function SortTh({ label, k, sortKey, sortDir, onClick, center }: {
   label: string;
-  k: "lane" | "name" | "avg" | "hdcp";
+  k: SortKey;
   sortKey: string;
   sortDir: 1 | -1;
-  onClick: (k: "lane" | "name" | "avg" | "hdcp") => void;
+  onClick: (k: SortKey) => void;
   center?: boolean;
 }) {
   const active = sortKey === k;
