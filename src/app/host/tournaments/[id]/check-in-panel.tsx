@@ -358,13 +358,12 @@ export default function CheckInPanel({
                     <td key={pot.id} className="px-3 py-2 text-center">
                       {pot.allow_multiple ? (
                         <input
-                        disabled={isLocked}
                           type="number"
                           min={0}
                           max={20}
                           inputMode="numeric"
                           value={qty || ""}
-                          disabled={busy}
+                          disabled={busy || isLocked}
                           onChange={(e) =>
                             setQuantity(pot, entry.id, Number(e.target.value) || 0)
                           }
@@ -376,9 +375,8 @@ export default function CheckInPanel({
                       ) : (
                         <button
                           type="button"
-                          disabled={busy}
+                          disabled={busy || isLocked}
                           onClick={() => setQuantity(pot, entry.id, qty > 0 ? 0 : 1)}
-                          disabled={isLocked}
                           className={`h-8 w-8 rounded-full text-sm font-semibold transition-colors ${
                             qty > 0
                               ? "bg-accent text-on-accent"
