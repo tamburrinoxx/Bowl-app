@@ -169,30 +169,6 @@ export default async function HostTournamentPage({
           />
         </CollapseSection>
 
-        <CollapseSection title="Side Action Results" id="results">
-          <div className="mb-8 rounded-2xl bg-white/[0.03] p-5">
-            <p className="font-display text-ink mb-3 text-lg">Payout recap</p>
-            <PotRecap
-              tournamentId={tournament.id}
-              gamesPerSquad={tournament.games_per_squad}
-            />
-          </div>
-          <SideResultsPanel
-            tournamentId={tournament.id}
-            gamesPerSquad={tournament.games_per_squad}
-          />
-        </CollapseSection>
-
-        <CollapseSection title="Payouts" id="payouts">
-          <PayoutsPanel
-            tournamentId={tournament.id}
-            entryCount={entries?.length ?? 0}
-            entryFee={tournament.entry_fee}
-            prizeFund={tournament.prize_fund}
-            cashersRatio={tournament.cashers_ratio ?? 5}
-          />
-        </CollapseSection>
-
         <CollapseSection title="Standings" id="standings">
           <div className="overflow-x-auto rounded-2xl bg-white/5">
             <table className="w-full text-sm">
@@ -255,6 +231,30 @@ export default async function HostTournamentPage({
             </table>
           </div>
         </CollapseSection>
+        <CollapseSection title="Side Action Results" id="results">
+          <div className="mb-8 rounded-2xl bg-white/[0.03] p-5">
+            <p className="font-display text-ink mb-3 text-lg">Payout recap</p>
+            <PotRecap
+              tournamentId={tournament.id}
+              gamesPerSquad={tournament.games_per_squad}
+            />
+          </div>
+          <SideResultsPanel
+            tournamentId={tournament.id}
+            gamesPerSquad={tournament.games_per_squad}
+          />
+        </CollapseSection>
+
+        <CollapseSection title="Payouts" id="payouts">
+          <PayoutsPanel
+            tournamentId={tournament.id}
+            entryCount={entries?.length ?? 0}
+            entryFee={tournament.entry_fee}
+            prizeFund={tournament.prize_fund}
+            cashersRatio={tournament.cashers_ratio ?? 5}
+          />
+        </CollapseSection>
+
       </div>
     </main>
     </>
