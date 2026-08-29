@@ -44,6 +44,14 @@ export default function CheckInPanel({
   const [busy, setBusy] = useState(false);
   const [edits, setEdits] = useState<Record<string, { name: string; avg: string; hdcp: string; lane: string }>>({});
   const [message, setMessage] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<"lane" | "name" | "avg" | "hdcp">("lane");
+  const [sortDir, setSortDir] = useState<1 | -1>(1);
+
+  function toggleSort(k: "lane" | "name" | "avg" | "hdcp") {
+    if (k === sortKey) { setSortDir((d) => (d === 1 ? -1 : 1)); return; }
+    setSortKey(k);
+    setSortDir(k === "avg" ? -1 : 1);
+  }
   const [isError, setIsError] = useState(false);
 
   const key = (potId: string, entryId: string) => `${potId}:${entryId}`;
@@ -203,6 +211,17 @@ export default function CheckInPanel({
 
   const grandTotal = entries.reduce((s, e) => s + owedFor(e.id), 0);
 
+  const BIG = Number.MAX_SAFE_INTEGER;
+  const sortedEntries = [...entries].sort((a, b) => {
+    if (sortKey === "name") return sortDir * a.entry_name.localeCompare(b.entry_name);
+    const av = sortKey === "lane" ? a.lane : sortKey === "avg" ? a.locked_average : a.locked_handicap;
+    const bv = sortKey === "lane" ? b.lane : sortKey === "avg" ? b.locked_average : b.locked_handicap;
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    return sortDir * (av - bv);
+  });
+
   return (
     <div>
       <LaneBar entries={entries} />
@@ -210,10 +229,10 @@ export default function CheckInPanel({
         <table className="w-full text-left">
           <thead>
             <tr className="text-ink-soft text-xs uppercase tracking-wide">
-              <th className="px-3 py-3 text-center font-medium">Lane</th>
-              <th className="px-4 py-3 font-medium">Entry</th>
-              <th className="px-3 py-3 text-center font-medium">Avg</th>
-              <th className="px-3 py-3 text-center font-medium">Hdcp</th>
+              <SortTh label="Lane" k="lane" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} center />
+              <SortTh label="Entry" k="name" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} />
+              <SortTh label="Avg" k="avg" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} center />
+              <SortTh label="Hdcp" k="hdcp" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} center />
               {pots.map((p) => (
                 <th key={p.id} className="px-3 py-3 text-center font-medium">
                   {p.name}
@@ -229,7 +248,7 @@ export default function CheckInPanel({
             </tr>
           </thead>
           <tbody>
-            {entries.map((entry) => (
+            {sortedEntries.map((entry) => (
               <tr key={entry.id} className="border-t border-white/5">
                 <td className="px-3 py-2 text-center">
                   <input
@@ -396,5 +415,27 @@ export default function CheckInPanel({
         </p>
       )}
     </div>
+  );
+}
+
+function SortTh({ label, k, sortKey, sortDir, onClick, center }: {
+  label: string;
+  k: "lane" | "name" | "avg" | "hdcp";
+  sortKey: string;
+  sortDir: 1 | -1;
+  onClick: (k: "lane" | "name" | "avg" | "hdcp") => void;
+  center?: boolean;
+}) {
+  const active = sortKey === k;
+  return (
+    <th className={`${center ? "px-3 text-center" : "px-4"} py-3 font-medium`}>
+      <button
+        onClick={() => onClick(k)}
+        className={`uppercase tracking-wide ${active ? "text-accent" : "hover:text-white"}`}
+      >
+        {label}
+        {active ? (sortDir === 1 ? " \u2191" : " \u2193") : ""}
+      </button>
+    </th>
   );
 }
