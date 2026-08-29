@@ -168,6 +168,7 @@ export default async function HostTournamentPage({
             tournamentId={tournament.id}
             entries={entries ?? []}
             entryFee={tournament.entry_fee}
+            locked={tournament.check_in_locked ?? false}
           />
         </section>
 

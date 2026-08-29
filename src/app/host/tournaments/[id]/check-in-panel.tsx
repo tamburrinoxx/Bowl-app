@@ -33,10 +33,12 @@ export default function CheckInPanel({
   tournamentId,
   entries,
   entryFee,
+  locked,
 }: {
   tournamentId: string;
   entries: Entry[];
   entryFee: number | null;
+  locked: boolean;
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -46,6 +48,19 @@ export default function CheckInPanel({
   const [busy, setBusy] = useState(false);
   const [edits, setEdits] = useState<Record<string, { name: string; avg: string; hdcp: string; lane: string }>>({});
   const [message, setMessage] = useState<string | null>(null);
+  const [isLocked, setIsLocked] = useState(locked);
+
+  async function toggleLock() {
+    const next = !isLocked;
+    setBusy(true);
+    const { error } = await supabase
+      .from("tournaments").update({ check_in_locked: next }).eq("id", tournamentId);
+    setBusy(false);
+    if (error) { setIsError(true); setMessage(error.message); return; }
+    setIsLocked(next);
+    setMessage(next ? "Check-in locked." : "Check-in unlocked.");
+    router.refresh();
+  }
   const [sortKey, setSortKey] = useState<SortKey>("lane");
   const [sortDir, setSortDir] = useState<1 | -1>(1);
 
@@ -213,7 +228,6 @@ export default function CheckInPanel({
 
   const grandTotal = entries.reduce((s, e) => s + owedFor(e.id), 0);
 
-  const BIG = Number.MAX_SAFE_INTEGER;
   const sortedEntries = [...entries].sort((a, b) => {
     if (sortKey === "name") return sortDir * a.entry_name.localeCompare(b.entry_name);
     if (sortKey === "verif")
@@ -235,7 +249,28 @@ export default function CheckInPanel({
 
   return (
     <div>
-      <LaneBar entries={entries} />
+      <div className="mb-3 flex items-center gap-3">
+        <button
+          onClick={toggleLock}
+          disabled={busy}
+          className={`rounded px-3 py-2 text-sm font-bold ${
+            isLocked
+              ? "bg-[#B6FF2E] text-black"
+              : "border border-white/20 text-white/70 hover:text-white"
+          }`}
+        >
+          {isLocked ? "\ud83d\udd12 Locked \u2014 Unlock to edit" : "\ud83d\udd13 Lock check-in"}
+        </button>
+      </div>
+      <div className="mb-3 flex items-center gap-3">
+        <button onClick={toggleLock} disabled={busy}
+          className={`rounded px-3 py-2 text-sm font-bold ${isLocked
+            ? "bg-[#B6FF2E] text-black"
+            : "border border-white/20 text-white/70"}`}>
+          {isLocked ? "Locked \u2014 tap to unlock" : "Lock check-in"}
+        </button>
+      </div>
+      {!isLocked && <LaneBar entries={entries} />}
       <div className="overflow-x-auto rounded-2xl bg-white/5">
         <table className="w-full text-left">
           <thead>
@@ -267,6 +302,7 @@ export default function CheckInPanel({
               <tr key={entry.id} className="border-t border-white/5">
                 <td className="px-3 py-2 text-center">
                   <input
+                  disabled={isLocked}
                     type="number"
                     min={1}
                     value={draftFor(entry).lane}
@@ -279,6 +315,7 @@ export default function CheckInPanel({
                 </td>
                 <td className="text-ink px-4 py-2 text-sm whitespace-nowrap">
                   <input
+                  disabled={isLocked}
                     value={draftFor(entry).name}
                     onChange={(e) =>
                       setEdits((d) => ({ ...d, [entry.id]: { ...draftFor(entry), name: e.target.value } }))
@@ -289,6 +326,7 @@ export default function CheckInPanel({
                 </td>
                 <td className="font-score text-ink-soft px-3 py-2 text-center text-sm">
                   <input
+                  disabled={isLocked}
                     type="number"
                     min={0}
                     max={300}
@@ -302,6 +340,7 @@ export default function CheckInPanel({
                 </td>
                 <td className="font-score text-ink px-3 py-2 text-center text-sm">
                   <input
+                  disabled={isLocked}
                     type="number"
                     min={0}
                     value={draftFor(entry).hdcp}
@@ -319,6 +358,7 @@ export default function CheckInPanel({
                     <td key={pot.id} className="px-3 py-2 text-center">
                       {pot.allow_multiple ? (
                         <input
+                        disabled={isLocked}
                           type="number"
                           min={0}
                           max={20}
@@ -338,6 +378,7 @@ export default function CheckInPanel({
                           type="button"
                           disabled={busy}
                           onClick={() => setQuantity(pot, entry.id, qty > 0 ? 0 : 1)}
+                          disabled={isLocked}
                           className={`h-8 w-8 rounded-full text-sm font-semibold transition-colors ${
                             qty > 0
                               ? "bg-accent text-on-accent"
@@ -363,7 +404,7 @@ export default function CheckInPanel({
                   <button
                     type="button"
                     onClick={() => removeEntry(entry)}
-                    disabled={busy}
+                    disabled={busy || isLocked}
                     aria-label={`Remove ${entry.entry_name}`}
                     className="text-ink-soft hover:text-red-400 px-2 text-sm disabled:opacity-40"
                   >
