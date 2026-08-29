@@ -9,6 +9,7 @@ import { formatMoney } from "@/lib/payouts";
 import AddEntryPanel from "./add-entry-panel";
 import PayoutsPanel from "./payouts-panel";
 import SidePotsPanel from "./side-pots-panel";
+import CollapseSection from "./collapse-section";
 import CheckInPanel from "./check-in-panel";
 import SideResultsPanel from "./side-results-panel";
 import PotRecap from "./pot-recap";
@@ -125,29 +126,26 @@ export default async function HostTournamentPage({
           <span className="text-accent text-sm font-medium shrink-0 ml-4">Open →</span>
         </Link>
 
-        <section className="glass-panel p-8 mb-6">
-          <h2 id="status" className="font-display text-xl text-ink mb-4">Status</h2>
+        <CollapseSection title="Status" id="status">
           <StatusSwitch tournamentId={tournament.id} status={tournament.status} />
-        </section>
+        </CollapseSection>
 
 
-        <section className="glass-panel p-8 mb-6">
-          <h2 className="font-display text-xl text-ink mb-4">Add Entry</h2>
+        <CollapseSection title="Add Entry">
           <AddEntryPanel
             tournamentId={tournament.id}
             eventType={tournament.event_type}
             handicapBase={tournament.handicap_base}
             handicapPercent={tournament.handicap_percent}
           />
-        </section>
+        </CollapseSection>
 
-        <section className="glass-panel p-8 mb-6">
-          <h2 className="font-display text-xl text-ink mb-4">Enter Scores</h2>
+        <CollapseSection title="Enter Scores">
           <ScoreEntryPanel
             entries={entries ?? []}
             gamesPerSquad={tournament.games_per_squad}
           />
-        </section>
+        </CollapseSection>
 
         <section className="glass-panel p-8 mb-6">
           <div className="mb-4 flex items-baseline justify-between">
@@ -162,18 +160,16 @@ export default async function HostTournamentPage({
           <SidePotsPanel tournamentId={tournament.id} />
         </section>
 
-        <section className="glass-panel p-8 mb-6">
-          <h2 id="entries" className="font-display text-xl text-ink mb-4">Entries &amp; Check-In</h2>
+        <CollapseSection title="Entries &amp; Check-In" id="entries">
           <CheckInPanel
             tournamentId={tournament.id}
             entries={entries ?? []}
             entryFee={tournament.entry_fee}
             locked={tournament.check_in_locked ?? false}
           />
-        </section>
+        </CollapseSection>
 
-        <section className="glass-panel p-8 mb-6">
-          <h2 id="results" className="font-display text-xl text-ink mb-4">Side Action Results</h2>
+        <CollapseSection title="Side Action Results" id="results">
           <div className="mb-8 rounded-2xl bg-white/[0.03] p-5">
             <p className="font-display text-ink mb-3 text-lg">Payout recap</p>
             <PotRecap
@@ -185,10 +181,9 @@ export default async function HostTournamentPage({
             tournamentId={tournament.id}
             gamesPerSquad={tournament.games_per_squad}
           />
-        </section>
+        </CollapseSection>
 
-        <section className="glass-panel p-8 mb-6">
-          <h2 id="payouts" className="font-display text-xl text-ink mb-4">Payouts</h2>
+        <CollapseSection title="Payouts" id="payouts">
           <PayoutsPanel
             tournamentId={tournament.id}
             entryCount={entries?.length ?? 0}
@@ -196,10 +191,9 @@ export default async function HostTournamentPage({
             prizeFund={tournament.prize_fund}
             cashersRatio={tournament.cashers_ratio ?? 5}
           />
-        </section>
+        </CollapseSection>
 
-        <section className="glass-panel p-8">
-          <h2 id="standings" className="font-display text-xl text-ink mb-4">Standings</h2>
+        <CollapseSection title="Standings" id="standings">
           <div className="overflow-x-auto rounded-2xl bg-white/5">
             <table className="w-full text-sm">
               <thead>
@@ -260,7 +254,7 @@ export default async function HostTournamentPage({
               </tbody>
             </table>
           </div>
-        </section>
+        </CollapseSection>
       </div>
     </main>
     </>
