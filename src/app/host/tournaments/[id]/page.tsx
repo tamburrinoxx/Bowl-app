@@ -9,6 +9,7 @@ import { formatMoney } from "@/lib/payouts";
 import AddEntryPanel from "./add-entry-panel";
 import PayoutsPanel from "./payouts-panel";
 import SidePotsPanel from "./side-pots-panel";
+import TickerSwitch from "./ticker-switch";
 import CollapseSection from "./collapse-section";
 import CheckInPanel from "./check-in-panel";
 import SideResultsPanel from "./side-results-panel";
@@ -128,6 +129,7 @@ export default async function HostTournamentPage({
 
         <CollapseSection title="Status" id="status">
           <StatusSwitch tournamentId={tournament.id} status={tournament.status} />
+          <TickerSwitch tournamentId={tournament.id} showTicker={tournament.show_ticker ?? true} />
         </CollapseSection>
 
 

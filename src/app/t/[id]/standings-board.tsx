@@ -17,10 +17,12 @@ export default function StandingsBoard({
   rows,
   payouts,
   gamesPerSquad,
+  showTicker,
 }: {
   rows: BoardRow[];
   payouts: { position: number; amount: number }[];
   gamesPerSquad: number;
+  showTicker: boolean;
 }) {
   const supabase = createClient();
   const [myEntryId, setMyEntryId] = useState<string | null>(null);
@@ -59,7 +61,7 @@ export default function StandingsBoard({
 
   return (
     <div className="pb-12">
-      <ScoreTicker rows={rows} />
+      {showTicker && <ScoreTicker rows={rows} />}
       {myIndex >= 0 && (
         <YouBar row={rows[myIndex]} index={myIndex} rows={rows} cashLine={cashLine} payFor={payFor} />
       )}

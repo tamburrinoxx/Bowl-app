@@ -108,6 +108,7 @@ export default async function PublicTournamentPage({
             rows={standings ?? []}
             payouts={payouts ?? []}
             gamesPerSquad={tournament.games_per_squad}
+            showTicker={tournament.show_ticker ?? true}
           />
         </section>
 

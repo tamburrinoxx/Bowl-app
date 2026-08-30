@@ -54,6 +54,7 @@ export interface Tournament {
   status: TournamentStatus;
   starts_at: string | null;
   check_in_locked: boolean | null;
+  show_ticker: boolean | null;
 }
 
 export interface Squad {
