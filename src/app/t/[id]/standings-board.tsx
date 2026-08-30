@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/payouts";
+import ScoreTicker from "./score-ticker";
 
 export interface BoardRow {
   entry_id: string;
@@ -57,7 +58,8 @@ export default function StandingsBoard({
   const myIndex = myEntryId ? rows.findIndex((r) => r.entry_id === myEntryId) : -1;
 
   return (
-    <div>
+    <div className="pb-12">
+      <ScoreTicker rows={rows} />
       {myIndex >= 0 && (
         <YouBar row={rows[myIndex]} index={myIndex} rows={rows} cashLine={cashLine} payFor={payFor} />
       )}
