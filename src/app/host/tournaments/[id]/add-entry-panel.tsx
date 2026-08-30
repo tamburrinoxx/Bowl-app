@@ -16,11 +16,13 @@ export default function AddEntryPanel({
   eventType,
   handicapBase,
   handicapPercent,
+  entrySize,
 }: {
   tournamentId: string;
   eventType: EventType;
   handicapBase: number;
   handicapPercent: number;
+  entrySize: number;
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -48,7 +50,8 @@ export default function AddEntryPanel({
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const base = handicapBase ?? 220;
+  const size = Math.max(1, entrySize ?? 1);
+  const base = (handicapBase ?? 220) * size;
   const percent = handicapPercent ?? 0.9;
   const avgNum = average.trim() === "" ? null : Number(average);
   const computed =
@@ -246,7 +249,7 @@ export default function AddEntryPanel({
       <p className="text-ink-soft w-full text-xs">
         {computed === null
           ? `Handicap auto-calculates from average — ${base} base at ${Math.round(percent * 100)}%.`
-          : `Auto handicap: ${computed} (${base} base, ${Math.round(percent * 100)}%). Type a value to override.`}
+          : `Auto handicap: ${computed} (${base} base${size > 1 ? ` for ${size} bowlers` : ""}, ${Math.round(percent * 100)}%). Type a value to override.`}
         {message ? ` · ${message}` : ""}
       </p>
       {lookupNote && <p className="text-accent w-full text-xs">{lookupNote}</p>}
