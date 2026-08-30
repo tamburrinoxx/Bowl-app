@@ -22,14 +22,14 @@ export default function ScoreTicker({
       <style jsx>{`
         .ticker-track {
           width: max-content;
-          animation: ticker ${Math.max(20, rows.length * 4)}s linear infinite;
+          animation: ticker ${Math.max(45, rows.length * 9)}s linear infinite;
         }
         .ticker-track:hover {
           animation-play-state: paused;
         }
         @keyframes ticker {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
+          from { transform: translateX(-50%); }
+          to { transform: translateX(0); }
         }
       `}</style>
     </div>
