@@ -76,7 +76,7 @@ export default function StandingsBoard({
           return (
             <div key={row.entry_id}>
               {showCut && (
-                <div className="my-3 flex items-center gap-3">
+                <div className="my-2 flex items-center gap-3">
                   <div className="bg-accent/50 h-px flex-1" />
                   <span className="font-score text-accent text-[12px] font-semibold uppercase tracking-[0.2em]">
                     Cash line · top {cashLine}
@@ -86,7 +86,7 @@ export default function StandingsBoard({
               )}
 
               <div
-                className={`relative overflow-hidden rounded-2xl px-3 py-3 ${
+                className={`relative overflow-hidden rounded-xl px-3 py-1.5 ${
                   isMe
                     ? "bg-accent/15 ring-accent/50 ring-1"
                     : i < cashLine
@@ -103,9 +103,9 @@ export default function StandingsBoard({
                   }}
                 />
 
-                <span className="relative flex items-center gap-3">
+                <span className="relative flex items-center gap-2">
                   <span
-                    className={`font-score w-8 shrink-0 text-center text-xl leading-none ${
+                    className={`font-score w-7 shrink-0 text-center text-lg leading-none ${
                       i === 0 ? "text-accent" : isMe ? "text-accent" : "text-ink-soft"
                     }`}
                   >
@@ -117,7 +117,7 @@ export default function StandingsBoard({
                       {row.entry_name}
                       {isMe && <span className="text-ink-soft ml-2 text-[12px] uppercase">you</span>}
                     </span>
-                    <span className="text-ink-soft text-[13px]">
+                    <span className="text-ink-soft text-[11px]">
                       {row.games_played}/{gamesPerSquad} games
                       {backFromAbove > 0 && ` · ${backFromAbove} back`}
                     </span>
@@ -141,7 +141,7 @@ export default function StandingsBoard({
                   </span>
 
                   <span className="w-20 shrink-0 text-right">
-                    <span className={`font-score block text-2xl leading-none ${isMe ? "text-accent" : "text-ink"}`}>
+                    <span className={`font-score block text-xl leading-none ${isMe ? "text-accent" : "text-ink"}`}>
                       {row.handicap_total}
                     </span>
                     {pay > 0 && (
