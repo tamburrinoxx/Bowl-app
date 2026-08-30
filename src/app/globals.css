@@ -141,3 +141,8 @@ body {
     transparent
   );
 }
+
+@keyframes pf-ticker {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
