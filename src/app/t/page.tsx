@@ -21,12 +21,12 @@ export default async function PublicTournamentsPage({ searchParams }: { searchPa
   const shown = stateFilter ? rows.filter((t) => t.state === stateFilter) : rows;
 
   return (
-    <main className="min-h-screen px-6 py-12">
+    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-2xl">
         <Logo className="mb-3 text-2xl" />
-        <h1 className="font-display text-4xl text-ink mb-4">Tournaments</h1>
+        <h1 className="font-display text-2xl sm:text-4xl text-ink mb-3 sm:mb-4">Tournaments</h1>
 
-        <form method="get" className="mb-8 flex items-center gap-2">
+        <form method="get" className="mb-5 sm:mb-8 flex items-center gap-2">
           <select name="state" defaultValue={stateFilter} className="glass-panel px-3 py-2 text-sm text-ink bg-transparent">
             <option value="">All states</option>
             {states.map((s) => (<option key={s} value={s}>{s}</option>))}
@@ -35,15 +35,15 @@ export default async function PublicTournamentsPage({ searchParams }: { searchPa
         </form>
 
         {shown.length ? (
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {shown.map((t) => (
               <Link
                 key={t.id}
                 href={`/t/${t.id}`}
-                className="glass-panel p-6 flex items-center justify-between hover:bg-white/8 transition-colors block"
+                className="glass-panel p-4 sm:p-6 flex items-center justify-between hover:bg-white/8 transition-colors block"
               >
                 <div>
-                  <p className="font-display text-xl text-ink mb-1">{t.name}</p>
+                  <p className="font-display text-lg sm:text-xl text-ink mb-0.5">{t.name}</p>
                   <p className="text-ink-soft text-sm">
                     {t.center_name ?? "Center TBD"}
                 {(t.city || t.state) ? ` · ${[t.city, t.state].filter(Boolean).join(", ")}` : ""}
@@ -53,7 +53,7 @@ export default async function PublicTournamentsPage({ searchParams }: { searchPa
                   </p>
                 </div>
                 <span
-                  className={`text-xs font-semibold uppercase rounded-full px-4 py-1.5 shrink-0 ml-4 ${
+                  className={`text-xs font-semibold uppercase rounded-full px-3 py-1 shrink-0 ml-3 ${
                     t.status === "in_progress"
                       ? "bg-accent/15 text-accent"
                       : "bg-white/8 text-ink-soft"
