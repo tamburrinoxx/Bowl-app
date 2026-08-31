@@ -9,6 +9,7 @@ import { formatMoney } from "@/lib/payouts";
 import AddEntryPanel from "./add-entry-panel";
 import PayoutsPanel from "./payouts-panel";
 import SidePotsPanel from "./side-pots-panel";
+import RyderPanel from "./ryder-panel";
 import TickerSwitch from "./ticker-switch";
 import CollapseSection from "./collapse-section";
 import CheckInPanel from "./check-in-panel";
@@ -132,6 +133,10 @@ export default async function HostTournamentPage({
           <TickerSwitch tournamentId={tournament.id} showTicker={tournament.show_ticker ?? true} />
         </CollapseSection>
 
+
+        <CollapseSection title="Ryder Cup">
+          <RyderPanel tournamentId={tournament.id} />
+        </CollapseSection>
 
         <CollapseSection title="Add Entry">
           <AddEntryPanel
