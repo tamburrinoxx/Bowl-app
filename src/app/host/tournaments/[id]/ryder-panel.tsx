@@ -20,6 +20,7 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [labelDrafts, setLabelDrafts] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [nameA, setNameA] = useState("Team Red");
@@ -67,11 +68,15 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
     const rows = (m as Match[]) ?? [];
     setMatches(rows);
     const d: Record<string, string> = {};
+    const l: Record<string, string> = {};
     for (const r of rows) {
       d[r.id + ":a"] = r.score_a == null ? "" : String(r.score_a);
       d[r.id + ":b"] = r.score_b == null ? "" : String(r.score_b);
+      l[r.id + ":a"] = r.side_a_label;
+      l[r.id + ":b"] = r.side_b_label;
     }
     setDrafts(d);
+    setLabelDrafts(l);
   }, [supabase, tournamentId]);
 
   useEffect(() => { load(); }, [load]);
@@ -88,6 +93,13 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   const teamA = teams.find((t) => t.side === "A");
   const teamB = teams.find((t) => t.side === "B");
 
+  async function renameTeam(id: string, name: string) {
+    const clean = name.trim();
+    if (!clean) return;
+    await supabase.from("ryder_teams").update({ name: clean }).eq("id", id);
+    load();
+  }
+
   async function saveScores() {
     setBusy(true);
     for (const m of matches) {
@@ -95,9 +107,13 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
       const b = drafts[m.id + ":b"];
       const na = a === "" ? null : Number(a);
       const nb = b === "" ? null : Number(b);
-      if (na === m.score_a && nb === m.score_b) continue;
+      const la = (labelDrafts[m.id + ":a"] ?? m.side_a_label).trim() || m.side_a_label;
+      const lb = (labelDrafts[m.id + ":b"] ?? m.side_b_label).trim() || m.side_b_label;
+      if (na === m.score_a && nb === m.score_b && la === m.side_a_label && lb === m.side_b_label) continue;
       const { error } = await supabase
-        .from("ryder_matches").update({ score_a: na, score_b: nb }).eq("id", m.id);
+        .from("ryder_matches")
+        .update({ score_a: na, score_b: nb, side_a_label: la, side_b_label: lb })
+        .eq("id", m.id);
       if (error) { setBusy(false); setMsg(error.message); return; }
     }
     setBusy(false);
@@ -128,12 +144,20 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
     <div>
       <div className="mb-4 flex items-center justify-around rounded-xl bg-black/20 p-4">
         <div className="text-center">
-          <p className="text-ink-soft text-xs uppercase">{teamA?.name ?? "Team A"}</p>
+          <input
+            defaultValue={teamA?.name ?? "Team A"}
+            onBlur={(e) => teamA && renameTeam(teamA.id, e.target.value)}
+            className="text-ink-soft w-28 bg-transparent text-center text-xs uppercase"
+          />
           <p className="font-score text-accent text-4xl">{totalA}</p>
         </div>
         <span className="text-ink-soft">vs</span>
         <div className="text-center">
-          <p className="text-ink-soft text-xs uppercase">{teamB?.name ?? "Team B"}</p>
+          <input
+            defaultValue={teamB?.name ?? "Team B"}
+            onBlur={(e) => teamB && renameTeam(teamB.id, e.target.value)}
+            className="text-ink-soft w-28 bg-transparent text-center text-xs uppercase"
+          />
           <p className="font-score text-accent text-4xl">{totalB}</p>
         </div>
       </div>
@@ -166,9 +190,17 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
             <div key={m.id} className="rounded-xl bg-white/5 px-3 py-2">
               <p className="text-ink-soft mb-1 text-[11px] uppercase">
                 {m.session_label} - {m.format}
+                {(() => {
+                  const ptsRow = pointsFor(m);
+                  return m.score_a == null || m.score_b == null ? null : (
+                    <span className="text-accent ml-2">
+                      {ptsRow[0]} - {ptsRow[1]}
+                    </span>
+                  );
+                })()}
               </p>
               <div className="flex items-center gap-2">
-                <span className="text-ink flex-1 truncate text-sm">{m.side_a_label}</span>
+                <input value={labelDrafts[m.id + ":a"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":a"]: e.target.value }))} className="glass-input min-w-0 flex-1 px-2 py-1 text-sm text-ink" />
                 <input
                   inputMode="numeric"
                   value={drafts[m.id + ":a"] ?? ""}
@@ -181,7 +213,7 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
                   onChange={(e) => setDrafts((d) => ({ ...d, [m.id + ":b"]: e.target.value }))}
                   className="glass-input w-14 px-2 py-1 text-center text-ink"
                 />
-                <span className="text-ink flex-1 truncate text-right text-sm">{m.side_b_label}</span>
+                <input value={labelDrafts[m.id + ":b"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":b"]: e.target.value }))} className="glass-input min-w-0 flex-1 px-2 py-1 text-right text-sm text-ink" />
               </div>
             </div>
           ))}
