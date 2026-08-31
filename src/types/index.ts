@@ -55,6 +55,7 @@ export interface Tournament {
   starts_at: string | null;
   check_in_locked: boolean | null;
   show_ticker: boolean | null;
+  is_ryder: boolean | null;
 }
 
 export interface Squad {

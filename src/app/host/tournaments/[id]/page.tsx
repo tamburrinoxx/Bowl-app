@@ -134,9 +134,11 @@ export default async function HostTournamentPage({
         </CollapseSection>
 
 
-        <CollapseSection title="Ryder Cup">
-          <RyderPanel tournamentId={tournament.id} />
-        </CollapseSection>
+        {tournament.is_ryder && (
+          <CollapseSection title="Ryder Cup">
+            <RyderPanel tournamentId={tournament.id} />
+          </CollapseSection>
+        )}
 
         <CollapseSection title="Add Entry">
           <AddEntryPanel

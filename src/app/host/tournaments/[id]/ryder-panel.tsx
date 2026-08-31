@@ -22,6 +22,41 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [nameA, setNameA] = useState("Team Red");
+  const [nameB, setNameB] = useState("Team Blue");
+  const [mSession, setMSession] = useState("Session 1");
+  const [mFormat, setMFormat] = useState("5-man Baker");
+  const [mA, setMA] = useState("");
+  const [mB, setMB] = useState("");
+
+  async function createTeams() {
+    setBusy(true);
+    const { error } = await supabase.from("ryder_teams").insert([
+      { tournament_id: tournamentId, name: nameA.trim() || "Team A", side: "A" },
+      { tournament_id: tournamentId, name: nameB.trim() || "Team B", side: "B" },
+    ]);
+    setBusy(false);
+    if (error) { setMsg(error.message); return; }
+    setMsg(null);
+    load();
+  }
+
+  async function addMatch() {
+    if (!mA.trim() || !mB.trim()) { setMsg("Both sides need a name."); return; }
+    setBusy(true);
+    const { error } = await supabase.from("ryder_matches").insert({
+      tournament_id: tournamentId,
+      session_label: mSession.trim() || "Session 1",
+      format: mFormat,
+      sort_order: matches.length + 1,
+      side_a_label: mA.trim(),
+      side_b_label: mB.trim(),
+    });
+    setBusy(false);
+    if (error) { setMsg(error.message); return; }
+    setMA(""); setMB(""); setMsg(null);
+    load();
+  }
 
   const load = useCallback(async () => {
     const [{ data: t }, { data: m }] = await Promise.all([
@@ -70,6 +105,25 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
     load();
   }
 
+  if (teams.length === 0) {
+    return (
+      <div className="space-y-2">
+        <p className="text-ink-soft text-sm">Name the two sides to start.</p>
+        <div className="flex flex-wrap gap-2">
+          <input value={nameA} onChange={(e) => setNameA(e.target.value)}
+            className="glass-input px-3 py-2 text-ink" />
+          <input value={nameB} onChange={(e) => setNameB(e.target.value)}
+            className="glass-input px-3 py-2 text-ink" />
+          <button onClick={createTeams} disabled={busy}
+            className="rounded bg-[#B6FF2E] px-4 py-2 font-bold text-black disabled:opacity-40">
+            Build Ryder Cup
+          </button>
+        </div>
+        {msg && <p className="mt-1 text-sm text-red-400">{msg}</p>}
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-around rounded-xl bg-black/20 p-4">
@@ -82,6 +136,26 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
           <p className="text-ink-soft text-xs uppercase">{teamB?.name ?? "Team B"}</p>
           <p className="font-score text-accent text-4xl">{totalB}</p>
         </div>
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-end gap-2 rounded-xl bg-black/20 p-3">
+        <input value={mSession} onChange={(e) => setMSession(e.target.value)}
+          placeholder="Session" className="glass-input w-28 px-2 py-1.5 text-sm text-ink" />
+        <select value={mFormat} onChange={(e) => setMFormat(e.target.value)}
+          className="glass-input bg-transparent px-2 py-1.5 text-sm text-ink">
+          <option>5-man Baker</option>
+          <option>2-man Baker</option>
+          <option>Scotch Doubles</option>
+          <option>Singles</option>
+        </select>
+        <input value={mA} onChange={(e) => setMA(e.target.value)}
+          placeholder="Side A" className="glass-input w-32 px-2 py-1.5 text-sm text-ink" />
+        <input value={mB} onChange={(e) => setMB(e.target.value)}
+          placeholder="Side B" className="glass-input w-32 px-2 py-1.5 text-sm text-ink" />
+        <button onClick={addMatch} disabled={busy}
+          className="rounded bg-[#B6FF2E] px-3 py-1.5 text-sm font-bold text-black disabled:opacity-40">
+          Add match
+        </button>
       </div>
 
       {matches.length === 0 ? (
