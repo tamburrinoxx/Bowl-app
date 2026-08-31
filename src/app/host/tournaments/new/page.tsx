@@ -24,6 +24,7 @@ export default function NewTournamentPage() {
     name: "",
     format: "handicap" as "handicap" | "scratch",
     event_type: "singles" as (typeof EVENT_TYPES)[number]["value"],
+    is_ryder: false,
     center_name: "",
     entry_fee: "",
     prize_fund: "",
@@ -104,6 +105,7 @@ export default function NewTournamentPage() {
         name: form.name,
         format: form.format,
         event_type: form.event_type,
+        is_ryder: form.is_ryder,
         oil_pattern_id: oilPatternId,
         center_name: form.center_name || null,
         entry_fee: form.entry_fee ? Number(form.entry_fee) : null,
@@ -176,6 +178,17 @@ export default function NewTournamentPage() {
                   </option>
                 ))}
               </select>
+            </Field>
+
+            <Field label="Ryder Cup format">
+              <label className="flex items-center gap-2 text-sm text-ink">
+                <input
+                  type="checkbox"
+                  checked={form.is_ryder}
+                  onChange={(e) => update("is_ryder", e.target.checked)}
+                />
+                Two teams, match play, points
+              </label>
             </Field>
           </div>
 
