@@ -8,6 +8,7 @@ import type { Entry } from "@/types";
 interface ExistingGame {
   id: string;
   entry_id: string;
+  bowler_id: string | null;
   game_number: number;
   scratch_score: number;
   verified: boolean;
@@ -59,13 +60,13 @@ export default function ScoreEntryPanel({
     if (!entries.length) return;
     const { data } = await supabase
       .from("games")
-      .select("id, entry_id, game_number, scratch_score, verified")
+      .select("id, entry_id, bowler_id, game_number, scratch_score, verified")
       .in("entry_id", entries.map((e) => e.id));
 
     const byKey: Record<string, ExistingGame> = {};
     const seeded: Record<string, string> = {};
     for (const g of (data as ExistingGame[]) ?? []) {
-      const key = `${g.entry_id}:${g.game_number}`;
+      const key = `${g.entry_id}:${g.bowler_id ?? "solo"}:${g.game_number}`;
       byKey[key] = g;
       seeded[key] = String(g.scratch_score);
     }
@@ -83,7 +84,7 @@ export default function ScoreEntryPanel({
     setMessage(null);
     setIsError(false);
 
-    const toInsert: { entry_id: string; game_number: number; scratch_score: number }[] = [];
+    const toInsert: { entry_id: string; bowler_id: string | null; game_number: number; scratch_score: number }[] = [];
     const toUpdate: { id: string; scratch_score: number }[] = [];
 
     for (const [key, raw] of Object.entries(drafts)) {
@@ -95,8 +96,13 @@ export default function ScoreEntryPanel({
           toUpdate.push({ id: prior.id, scratch_score: value });
         }
       } else {
-        const [entryId, gameNumber] = key.split(":");
-        toInsert.push({ entry_id: entryId, game_number: Number(gameNumber), scratch_score: value });
+        const [entryId, bowlerKey, gameNumber] = key.split(":");
+        toInsert.push({
+          entry_id: entryId,
+          bowler_id: bowlerKey === "solo" ? null : bowlerKey,
+          game_number: Number(gameNumber),
+          scratch_score: value,
+        });
       }
     }
 
@@ -204,9 +210,9 @@ export default function ScoreEntryPanel({
     return 0;
   });
 
-  function rowTotal(entryId: string) {
+  function rowTotal(entryId: string, bowlerKey: string) {
     return cols.reduce((sum, n) => {
-      const v = drafts[`${entryId}:${n}`];
+      const v = drafts[`${entryId}:${bowlerKey}:${n}`];
       return sum + (v && !Number.isNaN(Number(v)) ? Number(v) : 0);
     }, 0);
   }
@@ -248,16 +254,21 @@ export default function ScoreEntryPanel({
             </tr>
           </thead>
           <tbody>
-            {ordered.map((entry) => (
-              <tr key={entry.id} className="border-t border-white/5">
+            {ordered.flatMap((entry) => {
+              const roster = rosters[entry.id] ?? [];
+              return roster.length > 1
+                ? roster.map((b) => ({ entry, bowlerKey: b.bowler_id, label: b.name }))
+                : [{ entry, bowlerKey: "solo", label: entry.entry_name }];
+            }).map(({ entry, bowlerKey, label }) => (
+              <tr key={`${entry.id}:${bowlerKey}`} className="border-t border-white/5">
                 <td className="font-score text-ink-soft px-3 py-2 text-center text-sm">
                   {entry.lane ?? "—"}
                 </td>
                 <td className="text-ink px-4 py-2 text-sm whitespace-nowrap">
-                  {entry.entry_name}
+                  {label}
                 </td>
                 {cols.map((n) => {
-                  const key = `${entry.id}:${n}`;
+                  const key = `${entry.id}:${bowlerKey}:${n}`;
                   return (
                     <td key={n} className="px-2 py-2 text-center">
                       <span className="relative inline-block">
@@ -300,7 +311,7 @@ export default function ScoreEntryPanel({
                   );
                 })}
                 <td className="font-score text-accent px-4 py-2 text-right">
-                  {rowTotal(entry.id) || "—"}
+                  {rowTotal(entry.id, bowlerKey) || "—"}
                 </td>
               </tr>
             ))}
