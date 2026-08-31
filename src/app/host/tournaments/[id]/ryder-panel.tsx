@@ -100,6 +100,16 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
     load();
   }
 
+  async function deleteMatch(id: string, label: string) {
+    if (!confirm(`Delete ${label}?`)) return;
+    setBusy(true);
+    const { error } = await supabase.from("ryder_matches").delete().eq("id", id);
+    setBusy(false);
+    if (error) { setMsg(error.message); return; }
+    setMsg(null);
+    load();
+  }
+
   async function saveScores() {
     setBusy(true);
     for (const m of matches) {
@@ -188,7 +198,7 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
         <div className="space-y-2">
           {matches.map((m) => (
             <div key={m.id} className="rounded-xl bg-white/5 px-3 py-2">
-              <p className="text-ink-soft mb-1 text-[11px] uppercase">
+              <p className="text-ink-soft mb-1 flex items-center text-[11px] uppercase">
                 {m.session_label} - {m.format}
                 {(() => {
                   const ptsRow = pointsFor(m);
@@ -198,6 +208,14 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
                     </span>
                   );
                 })()}
+                <button
+                  onClick={() => deleteMatch(m.id, `${m.side_a_label} vs ${m.side_b_label}`)}
+                  disabled={busy}
+                  className="text-ink-soft ml-auto px-2 hover:text-red-400"
+                  aria-label="Delete match"
+                >
+                  x
+                </button>
               </p>
               <div className="flex items-center gap-2">
                 <input value={labelDrafts[m.id + ":a"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":a"]: e.target.value }))} className="glass-input min-w-0 flex-1 px-2 py-1 text-sm text-ink" />
