@@ -31,6 +31,27 @@ export default function ScoreEntryPanel({
   const [justSaved, setJustSaved] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<"lane" | "name" | "added">("lane");
   const [busy, setBusy] = useState(false);
+  const [rosters, setRosters] = useState<Record<string, { bowler_id: string; name: string }[]>>({});
+
+  const loadRosters = useCallback(async () => {
+    if (!entries.length) return;
+    const { data } = await supabase
+      .from("entry_bowlers")
+      .select("entry_id, bowler_id, position, profiles(full_name)")
+      .in("entry_id", entries.map((e) => e.id))
+      .order("position");
+    const map: Record<string, { bowler_id: string; name: string }[]> = {};
+    for (const r of (data as unknown as {
+      entry_id: string; bowler_id: string;
+      profiles: { full_name: string } | null;
+    }[]) ?? []) {
+      (map[r.entry_id] ||= []).push({
+        bowler_id: r.bowler_id,
+        name: r.profiles?.full_name ?? "Bowler",
+      });
+    }
+    setRosters(map);
+  }, [entries, supabase]);
 
   const cols = Array.from({ length: gamesPerSquad }, (_, i) => i + 1);
 
@@ -54,7 +75,8 @@ export default function ScoreEntryPanel({
 
   useEffect(() => {
     load();
-  }, [load]);
+    loadRosters();
+  }, [load, loadRosters]);
 
   async function saveAll() {
     setSaving(true);
