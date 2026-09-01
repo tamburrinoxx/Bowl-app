@@ -118,12 +118,6 @@ export default function StandingsBoard({
               >
                 {/* Pace bar: how close this total sits to the leader, so the
                     row's width carries meaning instead of sitting empty. */}
-                <span
-                  className={`absolute inset-y-0 left-0 ${isMe ? "bg-accent/10" : "bg-white/[0.03]"}`}
-                  style={{
-                    width: `${leader ? Math.max(6, Math.round((row.handicap_total / leader) * 100)) : 0}%`,
-                  }}
-                />
 
                 <span className="relative flex items-center gap-1.5">
                   <span
