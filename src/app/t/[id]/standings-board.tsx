@@ -139,16 +139,27 @@ export default function StandingsBoard({
                       {isMe && <span className="text-ink-soft ml-2 text-[12px] uppercase">you</span>}
                     </span>
                     <span className="text-ink-soft text-[11px]">
-                      {Array.from({ length: gamesPerSquad }, (_, gi) => {
+                      <span className="sm:hidden">{Array.from({ length: gamesPerSquad }, (_, gi) => {
                         const v = gameMap[row.entry_id]?.[gi + 1];
                         return (
                           <span key={gi} className={`mr-1.5 ${v ? "text-ink" : "text-ink-soft/40"}`}>
                             {v ?? "-"}
                           </span>
                         );
-                      })}
+                      })}</span>
                       {backFromAbove > 0 && ` · ${backFromAbove} back`}
                     </span>
+                  </span>
+
+                  <span className="hidden shrink-0 items-center sm:flex">
+                    {Array.from({ length: gamesPerSquad }, (_, gi) => {
+                      const v = gameMap[row.entry_id]?.[gi + 1];
+                      return (
+                        <span key={gi} className={`font-score w-11 text-center text-sm ${v ? "text-ink" : "text-ink-soft/30"}`}>
+                          {v ?? "-"}
+                        </span>
+                      );
+                    })}
                   </span>
 
                   <span className="hidden w-16 shrink-0 text-right sm:block">
