@@ -124,7 +124,7 @@ export default function StandingsBoard({
                   }}
                 />
 
-                <span className="relative flex items-center gap-2">
+                <span className="relative flex items-center gap-1.5">
                   <span
                     className={`font-score w-7 shrink-0 text-center text-lg leading-none ${
                       i === 0 ? "text-accent" : isMe ? "text-accent" : "text-ink-soft"
@@ -133,7 +133,7 @@ export default function StandingsBoard({
                     {i + 1}
                   </span>
 
-                  <span className="min-w-0 flex-1">
+                  <span className="min-w-0 flex-1 pr-2">
                     <span className={`block truncate ${isMe ? "text-accent font-semibold" : "text-ink"}`}>
                       {row.entry_name}
                       {isMe && <span className="text-ink-soft ml-2 text-[12px] uppercase">you</span>}
@@ -151,15 +151,15 @@ export default function StandingsBoard({
                     </span>
                   </span>
 
-                  <span className="hidden shrink-0 text-right sm:block">
-                    <span className="text-ink-soft block text-[12px] uppercase tracking-wide">Avg</span>
+                  <span className="hidden w-16 shrink-0 text-right sm:block">
+                    <span className="text-ink-soft block text-[10px] uppercase">Avg</span>
                     <span className="font-score text-ink block leading-none">
                       {row.games_played ? Math.round(row.scratch_total / row.games_played) : "—"}
                     </span>
                   </span>
 
-                  <span className="hidden w-24 shrink-0 text-right sm:block">
-                    <span className="text-ink-soft block text-[12px] uppercase tracking-wide">Scratch</span>
+                  <span className="hidden w-20 shrink-0 text-right sm:block">
+                    <span className="text-ink-soft block text-[10px] uppercase">Scratch</span>
                     <span className="font-score text-ink-soft block leading-none">
                       {row.scratch_total}
                       {row.handicap_total > row.scratch_total && (
@@ -168,7 +168,7 @@ export default function StandingsBoard({
                     </span>
                   </span>
 
-                  <span className="w-20 shrink-0 text-right">
+                  <span className="w-16 shrink-0 text-right">
                     <span className={`font-score block text-xl leading-none ${isMe ? "text-accent" : "text-ink"}`}>
                       {row.handicap_total}
                     </span>
