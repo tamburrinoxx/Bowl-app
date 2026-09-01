@@ -155,7 +155,11 @@ export default function StandingsBoard({
                     {Array.from({ length: gamesPerSquad }, (_, gi) => {
                       const v = gameMap[row.entry_id]?.[gi + 1];
                       return (
-                        <span key={gi} className={`font-score w-9 text-center text-[13px] ${v ? "text-ink" : "text-ink-soft/30"}`}>
+                        <span key={gi} className={`font-score w-9 rounded text-center text-[13px] ${
+                            v && v > 279
+                              ? "bg-accent/20 text-accent font-bold"
+                              : v ? "text-ink" : "text-ink-soft/30"
+                          }`}>
                           {v ?? "-"}
                         </span>
                       );
