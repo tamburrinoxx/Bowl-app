@@ -107,7 +107,7 @@ export default function StandingsBoard({
               )}
 
               <div
-                className={`relative rounded-xl px-2 py-1.5 ${
+                className={`relative w-full rounded-xl px-2 py-1.5 ${
                   isMe
                     ? "bg-accent/15 ring-accent/50 ring-1"
                     : i < cashLine
@@ -127,7 +127,7 @@ export default function StandingsBoard({
                     {i + 1}
                   </span>
 
-                  <span className="min-w-[8.5rem] flex-1 pr-2">
+                  <span className="min-w-0 flex-1 pr-2">
                     <span className={`block break-words text-[15px] leading-[1.05] ${isMe ? "text-accent font-semibold" : "text-ink"}`}>
                       {row.entry_name}
                       {isMe && <span className="text-ink-soft ml-2 text-[12px] uppercase">you</span>}
