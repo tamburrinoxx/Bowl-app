@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import AutoScroll from "./auto-scroll";
 
 export const revalidate = 10;
 
@@ -53,7 +54,7 @@ export default async function RyderTvPage({
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-4xl flex-1 space-y-1.5 overflow-y-auto">
+      <AutoScroll>
         {rows.map((m) => {
           const p = pts(m);
           const done = m.score_a != null && m.score_b != null;
@@ -74,7 +75,7 @@ export default async function RyderTvPage({
             </div>
           );
         })}
-      </div>
+      </AutoScroll>
 
     </main>
   );
