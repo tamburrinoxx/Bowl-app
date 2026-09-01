@@ -247,6 +247,30 @@ function YouBar({
             <span className="text-ink-soft ml-1 text-base">of {rows.length}</span>
           </p>
         </div>
+        {/* YB_STATS */}
+        <div className="flex items-end gap-8">
+          <div className="text-right">
+            <p className="text-ink-soft text-[12px] font-semibold uppercase tracking-[0.2em]">Scratch</p>
+            <p className="font-score text-ink-soft text-2xl leading-none">{row.scratch_total}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-ink-soft text-[12px] font-semibold uppercase tracking-[0.2em]">Avg</p>
+            <p className="font-score text-ink-soft text-2xl leading-none">
+              {row.games_played ? Math.round(row.scratch_total / row.games_played) : "\u2014"}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-ink-soft text-[12px] font-semibold uppercase tracking-[0.2em]">
+              {index === 0 ? "Lead" : "To next"}
+            </p>
+            <p className="font-score text-ink-soft text-2xl leading-none">
+              {index === 0
+                ? (rows[1] ? row.handicap_total - rows[1].handicap_total : "\u2014")
+                : toNext}
+            </p>
+          </div>
+        </div>
+
         <div className="text-right">
           <p className="text-ink-soft text-[12px] font-semibold uppercase tracking-[0.2em]">Total</p>
           <p className="font-score text-ink text-3xl leading-none">{row.handicap_total}</p>
