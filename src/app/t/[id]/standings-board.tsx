@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/payouts";
 import ScoreTicker from "./score-ticker";
+import FitName from "./fit-name";
 
 export interface BoardRow {
   entry_id: string;
@@ -134,10 +135,10 @@ export default function StandingsBoard({
                   </span>
 
                   <span className="min-w-0 flex-1 pr-2">
-                    <span className={`block truncate ${isMe ? "text-accent font-semibold" : "text-ink"}`}>
+                    <FitName className={isMe ? "text-accent font-semibold" : "text-ink"}>
                       {row.entry_name}
                       {isMe && <span className="text-ink-soft ml-2 text-[12px] uppercase">you</span>}
-                    </span>
+                    </FitName>
                     <span className="text-ink-soft text-[11px]">
                       <span className="sm:hidden">{Array.from({ length: gamesPerSquad }, (_, gi) => {
                         const v = gameMap[row.entry_id]?.[gi + 1];
