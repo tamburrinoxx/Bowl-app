@@ -108,7 +108,7 @@ export default function StandingsBoard({
               )}
 
               <div
-                className={`relative overflow-hidden rounded-xl px-2 py-1.5 ${
+                className={`relative rounded-xl px-2 py-1.5 ${
                   isMe
                     ? "bg-accent/15 ring-accent/50 ring-1"
                     : i < cashLine
