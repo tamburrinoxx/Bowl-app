@@ -151,6 +151,13 @@ export default function StandingsBoard({
                     </span>
                   </span>
 
+                  <span className="hidden w-16 shrink-0 text-right sm:block">
+                    <span className="text-ink-soft block text-[10px] uppercase">Avg</span>
+                    <span className="font-score text-ink block leading-none">
+                      {row.games_played ? Math.round(row.scratch_total / row.games_played) : "—"}
+                    </span>
+                  </span>
+
                   <span className="hidden shrink-0 items-center sm:flex">
                     {Array.from({ length: gamesPerSquad }, (_, gi) => {
                       const v = gameMap[row.entry_id]?.[gi + 1];
@@ -162,12 +169,6 @@ export default function StandingsBoard({
                     })}
                   </span>
 
-                  <span className="hidden w-16 shrink-0 text-right sm:block">
-                    <span className="text-ink-soft block text-[10px] uppercase">Avg</span>
-                    <span className="font-score text-ink block leading-none">
-                      {row.games_played ? Math.round(row.scratch_total / row.games_played) : "—"}
-                    </span>
-                  </span>
 
                   <span className="hidden w-20 shrink-0 text-right sm:block">
                     <span className="text-ink-soft block text-[10px] uppercase">Scratch</span>
