@@ -157,7 +157,7 @@ export default function StandingsBoard({
                       return (
                         <span key={gi} className={`font-score w-9 rounded text-center text-[13px] ${
                             v && v > 279
-                              ? "bg-accent/20 text-accent font-bold"
+                              ? "text-accent font-bold"
                               : v ? "text-ink" : "text-ink-soft/30"
                           }`}>
                           {v ?? "-"}
