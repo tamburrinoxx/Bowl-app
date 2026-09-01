@@ -108,7 +108,7 @@ export default function StandingsBoard({
               )}
 
               <div
-                className={`relative overflow-hidden rounded-xl px-3 py-1.5 ${
+                className={`relative overflow-hidden rounded-xl px-2 py-1.5 ${
                   isMe
                     ? "bg-accent/15 ring-accent/50 ring-1"
                     : i < cashLine
@@ -128,7 +128,7 @@ export default function StandingsBoard({
                     {i + 1}
                   </span>
 
-                  <span className="min-w-0 flex-1 pr-2">
+                  <span className="min-w-[7rem] flex-1 pr-2">
                     <FitName className={isMe ? "text-accent font-semibold" : "text-ink"}>
                       {row.entry_name}
                       {isMe && <span className="text-ink-soft ml-2 text-[12px] uppercase">you</span>}
@@ -145,7 +145,7 @@ export default function StandingsBoard({
                     </span>
                   </span>
 
-                  <span className="hidden w-16 shrink-0 text-right sm:block">
+                  <span className="hidden w-12 shrink-0 text-right sm:block">
                     <span className="text-ink-soft block text-[10px] uppercase">Avg</span>
                     <span className="font-score text-ink block leading-none">
                       {row.games_played ? Math.round(row.scratch_total / row.games_played) : "—"}
@@ -156,7 +156,7 @@ export default function StandingsBoard({
                     {Array.from({ length: gamesPerSquad }, (_, gi) => {
                       const v = gameMap[row.entry_id]?.[gi + 1];
                       return (
-                        <span key={gi} className={`font-score w-11 text-center text-sm ${v ? "text-ink" : "text-ink-soft/30"}`}>
+                        <span key={gi} className={`font-score w-9 text-center text-[13px] ${v ? "text-ink" : "text-ink-soft/30"}`}>
                           {v ?? "-"}
                         </span>
                       );
@@ -164,14 +164,14 @@ export default function StandingsBoard({
                   </span>
 
 
-                  <span className="hidden w-20 shrink-0 text-right sm:block">
+                  <span className="hidden w-16 shrink-0 text-right sm:block">
                     <span className="text-ink-soft block text-[10px] uppercase">Scratch</span>
                     <span className="font-score text-ink-soft block leading-none">
                       {row.scratch_total}
                     </span>
                   </span>
 
-                  <span className="hidden w-14 shrink-0 text-right sm:block">
+                  <span className="hidden w-12 shrink-0 text-right sm:block">
                     <span className="text-ink-soft block text-[10px] uppercase">Hdcp</span>
                     <span className="font-score text-accent block leading-none">
                       {row.handicap_total > row.scratch_total
@@ -180,7 +180,7 @@ export default function StandingsBoard({
                     </span>
                   </span>
 
-                  <span className="hidden w-14 shrink-0 text-right sm:block">
+                  <span className="hidden w-12 shrink-0 text-right sm:block">
                     <span className="text-ink-soft block text-[10px] uppercase">Back</span>
                     <span className="font-score text-ink-soft block leading-none">
                       {backFromAbove > 0 ? backFromAbove : "\u2014"}
