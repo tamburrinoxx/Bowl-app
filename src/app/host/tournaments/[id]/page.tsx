@@ -9,7 +9,6 @@ import { formatMoney } from "@/lib/payouts";
 import AddEntryPanel from "./add-entry-panel";
 import PayoutsPanel from "./payouts-panel";
 import SidePotsPanel from "./side-pots-panel";
-import RyderPanel from "./ryder-panel";
 import TickerSwitch from "./ticker-switch";
 import CollapseSection from "./collapse-section";
 import CheckInPanel from "./check-in-panel";
@@ -136,7 +135,12 @@ export default async function HostTournamentPage({
 
         {tournament.is_ryder && (
           <CollapseSection title="Ryder Cup">
-            <RyderPanel tournamentId={tournament.id} />
+            <Link
+              href={`/host/tournaments/${tournament.id}/ryder`}
+              className="inline-block rounded bg-[#B6FF2E] px-4 py-2 font-bold text-black"
+            >
+              Open Ryder Cup
+            </Link>
           </CollapseSection>
         )}
 
