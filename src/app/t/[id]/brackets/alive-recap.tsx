@@ -68,15 +68,15 @@ export default function AliveRecap({
       <div className="space-y-1.5">
         {rows.map((r) => (
           <div key={r.id} className="flex items-center gap-3 rounded-xl bg-white/5 px-3 py-1.5">
-            <span className="text-ink min-w-0 flex-1 truncate text-sm">{names[r.id] ?? "—"}</span>
-            <span className="text-ink-soft w-10 text-center text-[12px]">{r.wins}W</span>
-            <span className="text-ink w-10 text-center text-[12px]">
+            <span className="text-ink min-w-0 flex-1 truncate text-base">{names[r.id] ?? "—"}</span>
+            <span className="text-ink-soft w-14 text-center text-sm">{r.wins}W</span>
+            <span className="text-ink w-16 text-center text-sm">
               {r.first > 0 ? `${r.first}\u00d7 1st` : ""}
             </span>
-            <span className="text-ink-soft w-12 text-center text-[12px]">
+            <span className="text-ink-soft w-16 text-center text-sm">
               {r.second > 0 ? `${r.second}\u00d7 2nd` : ""}
             </span>
-            <span className="font-score text-accent w-16 text-right">
+            <span className="font-score text-accent w-20 text-right text-lg">
               {r.money > 0 ? formatMoney(r.money) : ""}
             </span>
           </div>
