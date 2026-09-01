@@ -278,6 +278,11 @@ export default function BracketsRunner({
     if (!s || s.a === "" || s.b === "") return;
     const a = Number(s.a);
     const b = Number(s.b);
+    if (a < 50 || a > 300 || b < 50 || b > 300) {
+      setIsError(true);
+      setMessage("Scores must be between 50 and 300 — check that entry.");
+      return;
+    }
     if (a === b) {
       setIsError(true);
       setMessage("Ties can't advance — roll off or adjust.");
