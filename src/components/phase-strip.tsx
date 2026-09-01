@@ -17,14 +17,14 @@ export function PhaseStrip({ status }: { status: string; tournamentId?: string }
   const currentIndex = Math.max(0, PHASES.findIndex((p) => p.key === status));
 
   return (
-    <div className="mb-6 flex items-stretch gap-px overflow-x-auto">
+    <div className="mb-4 flex items-center gap-2 overflow-x-auto">
       {PHASES.map((p, i) => {
         const done = i < currentIndex;
         const now = i === currentIndex;
         return (
           <div
             key={p.key}
-            className={`relative min-w-[7.5rem] flex-1 border px-3 pb-3 pt-2 ${
+            className={`relative shrink-0 rounded-full border px-3 py-1 ${
               now
                 ? "border-accent bg-accent/10"
                 : done
@@ -35,7 +35,7 @@ export function PhaseStrip({ status }: { status: string; tournamentId?: string }
             }`}
           >
             <span
-              className={`absolute right-0 top-0 flex h-5 w-5 items-center justify-center border-b border-l text-[12px] ${
+              className={`absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
                 now
                   ? "border-accent/50 text-accent"
                   : done
@@ -47,20 +47,20 @@ export function PhaseStrip({ status }: { status: string; tournamentId?: string }
             </span>
 
             <span
-              className={`font-score block text-[12px] uppercase tracking-widest ${
+              className={`font-score mr-1 inline text-[10px] uppercase tracking-widest ${
                 now ? "text-accent" : "text-ink-soft/60"
               }`}
             >
               {i + 1}
             </span>
             <span
-              className={`block text-sm font-medium ${
+              className={`inline text-xs font-medium ${
                 now ? "text-accent" : done ? "text-ink" : "text-ink-soft"
               }`}
             >
               {p.label}
             </span>
-            <span className="text-ink-soft block text-[13px] leading-tight">
+            <span className="text-ink-soft ml-1 inline text-[11px] leading-tight">
               {now ? p.hint : ""}
             </span>
           </div>
