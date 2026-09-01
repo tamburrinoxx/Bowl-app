@@ -175,13 +175,20 @@ export default function StandingsBoard({
                     <span className="text-ink-soft block text-[10px] uppercase">Scratch</span>
                     <span className="font-score text-ink-soft block leading-none">
                       {row.scratch_total}
-                      {row.handicap_total > row.scratch_total && (
-                        <span className="text-accent"> +{row.handicap_total - row.scratch_total}</span>
-                      )}
+                    </span>
+                  </span>
+
+                  <span className="hidden w-14 shrink-0 text-right sm:block">
+                    <span className="text-ink-soft block text-[10px] uppercase">Hdcp</span>
+                    <span className="font-score text-accent block leading-none">
+                      {row.handicap_total > row.scratch_total
+                        ? `+${row.handicap_total - row.scratch_total}`
+                        : "\u2014"}
                     </span>
                   </span>
 
                   <span className="w-16 shrink-0 text-right">
+                    <span className="text-ink-soft hidden text-[10px] uppercase sm:block">Total</span>
                     <span className={`font-score block text-xl leading-none ${isMe ? "text-accent" : "text-ink"}`}>
                       {row.handicap_total}
                     </span>
