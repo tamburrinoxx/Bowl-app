@@ -27,6 +27,27 @@ export default function StandingsBoard({
   const supabase = createClient();
   const [myEntryId, setMyEntryId] = useState<string | null>(null);
 
+  const [gameMap, setGameMap] = useState<Record<string, Record<number, number>>>({});
+
+  useEffect(() => {
+    if (!rows.length) return;
+    let off = false;
+    (async () => {
+      const { data } = await supabase
+        .from("games")
+        .select("entry_id, game_number, scratch_score")
+        .in("entry_id", rows.map((r) => r.entry_id));
+      if (off) return;
+      const m: Record<string, Record<number, number>> = {};
+      for (const g of (data as { entry_id: string; game_number: number; scratch_score: number }[]) ?? []) {
+        (m[g.entry_id] ||= {})[g.game_number] =
+          (m[g.entry_id][g.game_number] ?? 0) + g.scratch_score;
+      }
+      setGameMap(m);
+    })();
+    return () => { off = true; };
+  }, [rows, supabase]);
+
   useEffect(() => {
     let cancelled = false;
     async function findMe() {
@@ -118,7 +139,14 @@ export default function StandingsBoard({
                       {isMe && <span className="text-ink-soft ml-2 text-[12px] uppercase">you</span>}
                     </span>
                     <span className="text-ink-soft text-[11px]">
-                      {row.games_played}/{gamesPerSquad} games
+                      {Array.from({ length: gamesPerSquad }, (_, gi) => {
+                        const v = gameMap[row.entry_id]?.[gi + 1];
+                        return (
+                          <span key={gi} className={`mr-1.5 ${v ? "text-ink" : "text-ink-soft/40"}`}>
+                            {v ?? "-"}
+                          </span>
+                        );
+                      })}
                       {backFromAbove > 0 && ` · ${backFromAbove} back`}
                     </span>
                   </span>
