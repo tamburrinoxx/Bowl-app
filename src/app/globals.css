@@ -146,3 +146,8 @@ body {
   from { transform: translateX(-50%); }
   to { transform: translateX(0); }
 }
+
+/* pf-bottom-pad */
+@media (max-width: 639px) {
+  body { padding-bottom: 3.25rem; }
+}

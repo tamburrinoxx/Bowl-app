@@ -37,7 +37,7 @@ export default function AppNav() {
 
   return (
     <>
-      <header className="lane-edge sticky top-0 z-50 border-b border-white/10 bg-[#1f2329]/90 backdrop-blur">
+      <header className="lane-edge sticky top-0 z-50 hidden sm:block border-b border-white/10 bg-[#1f2329]/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-6">
           <Link href="/host/tournaments" className="shrink-0">
             <Logo className="text-lg" />
@@ -77,6 +77,32 @@ export default function AppNav() {
           </button>
         </div>
       </header>
+
+      <nav className="bottom-nav fixed bottom-0 left-0 right-0 z-50 flex border-t border-white/10 bg-[#1f2329]/95 backdrop-blur sm:hidden">
+        {QUICK.map((l) => {
+          const active =
+            l.href === "/t" ? pathname === "/t" : pathname.startsWith(l.href);
+          return (
+            <Link
+              key={l.href}
+              href={l.href}
+              className={`flex-1 py-3 text-center text-[11px] font-medium ${
+                active ? "text-accent" : "text-ink-soft"
+              }`}
+            >
+              {l.label}
+            </Link>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label="Menu-bottom"
+          className="text-ink-soft flex-1 py-3 text-center text-[11px] font-medium"
+        >
+          Menu
+        </button>
+      </nav>
 
       {open && (
         <div
