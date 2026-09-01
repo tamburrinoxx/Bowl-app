@@ -37,7 +37,7 @@ export default function AppNav() {
 
   return (
     <>
-      <header className="lane-edge fixed top-0 left-0 right-0 z-50 hidden sm:block border-b border-white/10 bg-[#1f2329]/90 backdrop-blur">
+      <header className="lane-edge sticky top-0 z-50 hidden sm:block border-b border-white/10 bg-[#1f2329]/90 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-6">
           <Link href="/host/tournaments" className="shrink-0">
             <Logo className="text-lg" />
