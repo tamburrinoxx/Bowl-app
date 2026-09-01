@@ -49,7 +49,7 @@ export function BracketTree({
 
   return (
     <div className="overflow-x-auto pb-2">
-      <div className="flex min-w-[560px] gap-5" style={{ minHeight }}>
+      <div className="flex min-w-[680px] gap-5" style={{ minHeight }}>
         {rounds.map((r) => {
           const inRound = matches
             .filter((m) => m.round_number === r)
@@ -57,7 +57,7 @@ export function BracketTree({
           const isFinal = r === lastRound;
 
           return (
-            <div key={r} className="flex min-w-[150px] flex-1 flex-col">
+            <div key={r} className="flex min-w-[180px] flex-1 flex-col">
               <p className="text-ink-soft mb-2 text-center text-[12px] uppercase tracking-[0.2em]">
                 {isFinal ? "Final" : `Round ${r}`}
               </p>
@@ -80,7 +80,7 @@ export function BracketTree({
           );
         })}
 
-        <div className="flex min-w-[150px] flex-col">
+        <div className="flex min-w-[170px] flex-col">
           <p className="text-ink-soft mb-2 text-center text-[12px] uppercase tracking-[0.2em]">
             Champion
           </p>
@@ -148,7 +148,7 @@ function Slot({
         </span>
       </span>
 
-      <span className="shrink-0">
+      <span className="shrink-0 pl-1">
         {renderScore ? (
           renderScore(match, side)
         ) : (
