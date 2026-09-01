@@ -84,7 +84,7 @@ export default async function PublicBracketsPage({
             <AliveRecap
               matches={allMatches}
               names={names}
-              pots={(pots as { id: string; name: string }[]) ?? []}
+              pots={(pots as { id: string; name: string; buy_in: number; bracket_size: number }[]) ?? []}
             />
           )}
 

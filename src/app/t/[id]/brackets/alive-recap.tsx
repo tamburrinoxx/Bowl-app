@@ -1,3 +1,6 @@
+import { bracketPayout } from "@/lib/bracketPots";
+import { formatMoney } from "@/lib/payouts";
+
 type M = {
   side_pot_id: string | null;
   bracket_group: number | null;
@@ -7,6 +10,8 @@ type M = {
   winner_entry_id: string | null;
 };
 
+type Pot = { id: string; name: string; buy_in: number; bracket_size: number };
+
 export default function AliveRecap({
   matches,
   names,
@@ -14,37 +19,69 @@ export default function AliveRecap({
 }: {
   matches: M[];
   names: Record<string, string>;
-  pots: { id: string; name: string }[];
+  pots: Pot[];
 }) {
-  const tally: Record<string, { wins: number; round: number }> = {};
+  const potById: Record<string, Pot> = {};
+  for (const p of pots) potById[p.id] = p;
+
+  const stat: Record<string, { wins: number; first: number; second: number; money: number }> = {};
+  const get = (id: string) => (stat[id] ||= { wins: 0, first: 0, second: 0, money: 0 });
+
+  // final round per bracket group decides 1st and 2nd
+  const lastRound: Record<string, number> = {};
   for (const m of matches) {
-    if (!m.winner_entry_id) continue;
-    const t = (tally[m.winner_entry_id] ||= { wins: 0, round: 0 });
-    t.wins += 1;
-    t.round = Math.max(t.round, m.round_number);
+    const key = `${m.side_pot_id}:${m.bracket_group}`;
+    lastRound[key] = Math.max(lastRound[key] ?? 0, m.round_number);
   }
 
-  const alive = Object.entries(tally)
-    .map(([id, t]) => ({ id, ...t }))
-    .sort((a, b) => b.wins - a.wins || b.round - a.round);
+  for (const m of matches) {
+    if (!m.winner_entry_id) continue;
+    get(m.winner_entry_id).wins += 1;
 
-  if (alive.length === 0) return null;
+    const key = `${m.side_pot_id}:${m.bracket_group}`;
+    if (m.round_number !== lastRound[key]) continue;
+
+    const pot = m.side_pot_id ? potById[m.side_pot_id] : undefined;
+    if (!pot) continue;
+    const pay = bracketPayout(Number(pot.buy_in), pot.bracket_size || 8);
+
+    const loser = m.entry_a === m.winner_entry_id ? m.entry_b : m.entry_a;
+    const w = get(m.winner_entry_id);
+    w.first += 1;
+    w.money += pay.winner;
+    if (loser) {
+      const l = get(loser);
+      l.second += 1;
+      l.money += pay.runnerUp;
+    }
+  }
+
+  const rows = Object.entries(stat)
+    .map(([id, s]) => ({ id, ...s }))
+    .sort((a, b) => b.money - a.money || b.first - a.first || b.wins - a.wins);
+
+  if (rows.length === 0) return null;
 
   return (
     <section className="glass-panel mb-6 p-6">
-      <h2 className="font-display text-ink mb-3 text-xl">Still alive</h2>
+      <h2 className="font-display text-ink mb-3 text-xl">Bracket recap</h2>
       <div className="space-y-1.5">
-        {alive.map((a) => (
-          <div key={a.id} className="flex items-center gap-3 rounded-xl bg-white/5 px-3 py-1.5">
-            <span className="text-ink flex-1 truncate text-sm">{names[a.id] ?? "—"}</span>
-            <span className="text-ink-soft text-[11px] uppercase">Round {a.round}</span>
-            <span className="font-score text-accent w-10 text-right">{a.wins}W</span>
+        {rows.map((r) => (
+          <div key={r.id} className="flex items-center gap-3 rounded-xl bg-white/5 px-3 py-1.5">
+            <span className="text-ink min-w-0 flex-1 truncate text-sm">{names[r.id] ?? "—"}</span>
+            <span className="text-ink-soft w-10 text-center text-[12px]">{r.wins}W</span>
+            <span className="text-ink w-10 text-center text-[12px]">
+              {r.first > 0 ? `${r.first}\u00d7 1st` : ""}
+            </span>
+            <span className="text-ink-soft w-12 text-center text-[12px]">
+              {r.second > 0 ? `${r.second}\u00d7 2nd` : ""}
+            </span>
+            <span className="font-score text-accent w-16 text-right">
+              {r.money > 0 ? formatMoney(r.money) : ""}
+            </span>
           </div>
         ))}
       </div>
-      <p className="text-ink-soft mt-2 text-[11px]">
-        {pots.length > 1 ? "Wins counted across all bracket pots." : ""}
-      </p>
     </section>
   );
 }
