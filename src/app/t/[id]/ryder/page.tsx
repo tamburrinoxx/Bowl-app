@@ -32,12 +32,12 @@ export default async function RyderTvPage({
   const totalB = rows.reduce((s, m) => s + pts(m)[1], 0);
 
   return (
-    <main className="min-h-screen px-8 py-8">
-      <h1 className="font-display text-ink mb-6 text-center text-3xl">
+    <main className="flex h-screen flex-col px-8 py-6">
+      <h1 className="font-display text-ink mb-4 shrink-0 text-center text-3xl">
         {tournament?.name ?? "Ryder Cup"}
       </h1>
 
-      <div className="mb-8 flex items-center justify-center gap-12">
+      <div className="mb-6 flex shrink-0 items-center justify-center gap-12">
         <div className="text-center">
           <p className="text-ink-soft text-lg uppercase">
             {t.find((x) => x.side === "A")?.name ?? "Team A"}
@@ -53,7 +53,7 @@ export default async function RyderTvPage({
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl space-y-1.5">
+      <div className="mx-auto w-full max-w-4xl flex-1 space-y-1.5 overflow-y-auto">
         {rows.map((m) => {
           const p = pts(m);
           const done = m.score_a != null && m.score_b != null;
