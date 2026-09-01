@@ -148,7 +148,7 @@ function Slot({
         </span>
       </span>
 
-      <span className="shrink-0 pl-1">
+      <span className="shrink-0 pl-1 pr-4">
         {renderScore ? (
           renderScore(match, side)
         ) : (
