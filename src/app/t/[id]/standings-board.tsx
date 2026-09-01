@@ -142,7 +142,6 @@ export default function StandingsBoard({
                           </span>
                         );
                       })}</span>
-                      {backFromAbove > 0 && ` · ${backFromAbove} back`}
                     </span>
                   </span>
 
@@ -178,6 +177,13 @@ export default function StandingsBoard({
                       {row.handicap_total > row.scratch_total
                         ? `+${row.handicap_total - row.scratch_total}`
                         : "\u2014"}
+                    </span>
+                  </span>
+
+                  <span className="hidden w-14 shrink-0 text-right sm:block">
+                    <span className="text-ink-soft block text-[10px] uppercase">Back</span>
+                    <span className="font-score text-ink-soft block leading-none">
+                      {backFromAbove > 0 ? backFromAbove : "\u2014"}
                     </span>
                   </span>
 
