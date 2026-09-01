@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { NavBar } from "@/components/nav-bar";
 import { BracketTree } from "@/components/bracket-tree";
+import AliveRecap from "./alive-recap";
 import { bracketPayout } from "@/lib/bracketPots";
 
 export default async function PublicBracketsPage({
@@ -78,6 +79,14 @@ export default async function PublicBracketsPage({
           <h1 className="font-display text-ink mb-8 text-4xl leading-none">
             Brackets
           </h1>
+
+          {allMatches.length > 0 && (
+            <AliveRecap
+              matches={allMatches}
+              names={names}
+              pots={(pots as { id: string; name: string }[]) ?? []}
+            />
+          )}
 
           {!allMatches.length && (
             <p className="glass-panel text-ink-soft p-8 text-sm">
