@@ -10,6 +10,7 @@ import AddEntryPanel from "./add-entry-panel";
 import PayoutsPanel from "./payouts-panel";
 import SidePotsPanel from "./side-pots-panel";
 import TickerSwitch from "./ticker-switch";
+import EliminatorPanel from "./eliminator-panel";
 import CollapseSection from "./collapse-section";
 import CheckInPanel from "./check-in-panel";
 import SideResultsPanel from "./side-results-panel";
@@ -245,6 +246,13 @@ export default async function HostTournamentPage({
             </table>
           </div>
         </CollapseSection>
+        <CollapseSection title="Eliminator">
+          <EliminatorPanel
+            tournamentId={tournament.id}
+            gamesPerSquad={tournament.games_per_squad}
+          />
+        </CollapseSection>
+
         <CollapseSection title="Side Action Results" id="results">
           <div className="mb-8 rounded-2xl bg-white/[0.03] p-5">
             <p className="font-display text-ink mb-3 text-lg">Payout recap</p>
