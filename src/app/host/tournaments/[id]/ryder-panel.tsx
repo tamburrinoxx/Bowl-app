@@ -218,7 +218,9 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
                 </button>
               </p>
               <div className="flex items-center gap-2">
-                <input value={labelDrafts[m.id + ":a"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":a"]: e.target.value }))} className="glass-input min-w-0 flex-1 px-2 py-1 text-sm text-ink" />
+                <input value={labelDrafts[m.id + ":a"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":a"]: e.target.value }))} className={`glass-input min-w-0 flex-1 px-2 py-1 text-sm ${
+                    pointsFor(m)[0] > pointsFor(m)[1] ? "text-accent font-bold" : "text-ink"
+                  }`} />
                 <input
                   inputMode="numeric"
                   value={drafts[m.id + ":a"] ?? ""}
@@ -231,7 +233,9 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
                   onChange={(e) => setDrafts((d) => ({ ...d, [m.id + ":b"]: e.target.value }))}
                   className="glass-input w-14 px-2 py-1 text-center text-ink"
                 />
-                <input value={labelDrafts[m.id + ":b"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":b"]: e.target.value }))} className="glass-input min-w-0 flex-1 px-2 py-1 text-right text-sm text-ink" />
+                <input value={labelDrafts[m.id + ":b"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":b"]: e.target.value }))} className={`glass-input min-w-0 flex-1 px-2 py-1 text-right text-sm ${
+                    pointsFor(m)[1] > pointsFor(m)[0] ? "text-accent font-bold" : "text-ink"
+                  }`} />
               </div>
             </div>
           ))}
