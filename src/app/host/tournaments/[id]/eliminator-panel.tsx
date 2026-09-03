@@ -80,13 +80,8 @@ export default function EliminatorPanel({
   useEffect(() => { load(); }, [load]);
 
   const alive = rows.filter((r) => r.cutAfter === null);
-  const nextGame = Math.min(
-    Math.max(1, Number(elimGames) || 1),
-    Math.max(
-      1,
-      ...rows.map((r) => Object.keys(r.scores).map(Number).filter((n) => !isNaN(n)).length),
-    ),
-  );
+  const lastCut = Math.max(0, ...rows.map((r) => r.cutAfter ?? 0));
+  const nextGame = Math.min(Math.max(1, Number(elimGames) || 1), lastCut + 1);
   const gameCount = Math.max(1, Number(elimGames) || 1);
   const perGameCut = Math.floor(buyerCount / gameCount);
   const fund = buyerCount * Number(pot?.buy_in ?? 0);
