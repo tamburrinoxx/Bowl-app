@@ -27,6 +27,7 @@ export default function EliminatorPanel({
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [places, setPlaces] = useState("5");
+  const [elimGames, setElimGames] = useState(String(gamesPerSquad));
 
   const load = useCallback(async () => {
     const { data: pots } = await supabase
@@ -80,13 +81,14 @@ export default function EliminatorPanel({
 
   const alive = rows.filter((r) => r.cutAfter === null);
   const nextGame = Math.min(
-    gamesPerSquad,
+    Math.max(1, Number(elimGames) || 1),
     Math.max(
       1,
       ...rows.map((r) => Object.keys(r.scores).map(Number).filter((n) => !isNaN(n)).length),
     ),
   );
-  const perGameCut = Math.floor(buyerCount / Math.max(1, gamesPerSquad));
+  const gameCount = Math.max(1, Number(elimGames) || 1);
+  const perGameCut = Math.floor(buyerCount / gameCount);
   const fund = buyerCount * Number(pot?.buy_in ?? 0);
   const placeCount = Math.max(1, Number(places) || 1);
 
@@ -137,7 +139,7 @@ export default function EliminatorPanel({
     return <p className="text-ink-soft text-sm">No eliminator pot on this tournament.</p>;
   }
 
-  const cols = Array.from({ length: gamesPerSquad }, (_, i) => i + 1);
+  const cols = Array.from({ length: gameCount }, (_, i) => i + 1);
   const share = placeCount > 0 ? Math.round(fund / placeCount / 5) * 5 : 0;
 
   return (
@@ -146,6 +148,11 @@ export default function EliminatorPanel({
         <span className="text-ink-soft text-sm">
           {alive.length} alive of {buyerCount} · fund {formatMoney(fund)} · cutting {perGameCut} per game
         </span>
+        <label className="text-ink-soft flex flex-col text-xs">
+          Games
+          <input value={elimGames} onChange={(e) => setElimGames(e.target.value)}
+            inputMode="numeric" className="glass-input mt-1 w-16 px-2 py-1 text-ink" />
+        </label>
         <label className="text-ink-soft flex flex-col text-xs">
           Places paid
           <input value={places} onChange={(e) => setPlaces(e.target.value)}
