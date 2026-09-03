@@ -98,9 +98,19 @@ export default function EliminatorPanel({
       setMsg(`Every live bowler needs a game ${nextGame} score first.`);
       return;
     }
-    const drop = ranked.slice(Math.max(1, ranked.length - perGameCut));
-    if (!drop.length) { setMsg("Nobody to cut."); return; }
-    if (!confirm(`Cut ${drop.length} bowlers after game ${nextGame}?`)) return;
+    const answer = window.prompt(
+      `How many to cut after game ${nextGame}? ${ranked.length} still alive.`,
+      String(Math.min(perGameCut, ranked.length - 1)),
+    );
+    if (answer === null) return;
+    const howMany = Number(answer);
+    if (!Number.isFinite(howMany) || howMany < 1 || howMany >= ranked.length) {
+      setMsg(`Enter a number between 1 and ${ranked.length - 1}.`);
+      return;
+    }
+    const drop = ranked.slice(ranked.length - howMany);
+    const names = drop.map((d) => d.name).join(", ");
+    if (!confirm(`Cut these ${drop.length} after game ${nextGame}?\n\n${names}`)) return;
 
     setBusy(true);
     const { error } = await supabase.from("eliminator_cuts").insert(
