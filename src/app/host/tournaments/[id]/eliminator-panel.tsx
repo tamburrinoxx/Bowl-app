@@ -28,6 +28,7 @@ export default function EliminatorPanel({
   const [busy, setBusy] = useState(false);
   const [places, setPlaces] = useState("5");
   const [elimGames, setElimGames] = useState(String(gamesPerSquad));
+  const [cutCount, setCutCount] = useState("");
 
   const load = useCallback(async () => {
     const { data: pots } = await supabase
@@ -98,13 +99,8 @@ export default function EliminatorPanel({
       setMsg(`Every live bowler needs a game ${nextGame} score first.`);
       return;
     }
-    const answer = window.prompt(
-      `How many to cut after game ${nextGame}? ${ranked.length} still alive.`,
-      String(Math.min(perGameCut, ranked.length - 1)),
-    );
-    if (answer === null) return;
-    const howMany = Number(answer);
-    if (!Number.isFinite(howMany) || howMany < 1 || howMany >= ranked.length) {
+    const howMany = Number(cutCount) || perGameCut;
+    if (howMany < 1 || howMany >= ranked.length) {
       setMsg(`Enter a number between 1 and ${ranked.length - 1}.`);
       return;
     }
@@ -157,6 +153,12 @@ export default function EliminatorPanel({
           Games
           <input value={elimGames} onChange={(e) => setElimGames(e.target.value)}
             inputMode="numeric" className="glass-input mt-1 w-16 px-2 py-1 text-ink" />
+        </label>
+        <label className="text-ink-soft flex flex-col text-xs">
+          Cut how many
+          <input value={cutCount} onChange={(e) => setCutCount(e.target.value)}
+            inputMode="numeric" placeholder={String(perGameCut)}
+            className="glass-input mt-1 w-20 px-2 py-1 text-ink" />
         </label>
         <label className="text-ink-soft flex flex-col text-xs">
           Places paid
