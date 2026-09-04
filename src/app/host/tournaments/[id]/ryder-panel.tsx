@@ -114,6 +114,12 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
+  function winColor(m: Match, side: "a" | "b") {
+    const p = pointsFor(m);
+    const won = side === "a" ? p[0] > p[1] : p[1] > p[0];
+    return won ? { color: "#B6FF2E", fontWeight: 700 } : undefined;
+  }
+
   function pointsFor(m: Match) {
     if (m.score_a == null || m.score_b == null) return [0, 0];
     if (m.score_a > m.score_b) return [1, 0];
@@ -251,22 +257,22 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
                 </button>
               </p>
               <div className="flex items-center gap-2">
-                <input value={labelDrafts[m.id + ":a"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":a"]: e.target.value }))} className={`glass-input min-w-0 flex-1 px-2 py-1 text-sm ${
+                <input value={labelDrafts[m.id + ":a"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":a"]: e.target.value }))} style={winColor(m, "a")} className={`glass-input min-w-0 flex-1 px-2 py-1 text-sm ${
                     pointsFor(m)[0] > pointsFor(m)[1] ? "text-accent font-bold" : "text-ink"
                   }`} />
                 <input
                   inputMode="numeric"
                   value={drafts[m.id + ":a"] ?? ""}
-                  onChange={(e) => setDrafts((d) => ({ ...d, [m.id + ":a"]: e.target.value }))}
+                  onChange={(e) => setDrafts((d) => ({ ...d, [m.id + ":a"]: e.target.value }))} style={winColor(m, "a")}
                   className="glass-input w-14 px-2 py-1 text-center text-ink"
                 />
                 <input
                   inputMode="numeric"
                   value={drafts[m.id + ":b"] ?? ""}
-                  onChange={(e) => setDrafts((d) => ({ ...d, [m.id + ":b"]: e.target.value }))}
+                  onChange={(e) => setDrafts((d) => ({ ...d, [m.id + ":b"]: e.target.value }))} style={winColor(m, "b")}
                   className="glass-input w-14 px-2 py-1 text-center text-ink"
                 />
-                <input value={labelDrafts[m.id + ":b"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":b"]: e.target.value }))} className={`glass-input min-w-0 flex-1 px-2 py-1 text-right text-sm ${
+                <input value={labelDrafts[m.id + ":b"] ?? ""} onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":b"]: e.target.value }))} style={winColor(m, "b")} className={`glass-input min-w-0 flex-1 px-2 py-1 text-right text-sm ${
                     pointsFor(m)[1] > pointsFor(m)[0] ? "text-accent font-bold" : "text-ink"
                   }`} />
               </div>
