@@ -209,12 +209,12 @@ export default function EliminatorPanel({
                   className={`font-score w-11 text-center text-[13px] ${
                     out && r.cutAfter !== null && n > r.cutAfter
                       ? "text-ink-soft/20"
-                      : out ? "text-ink-soft/50" : "text-ink"
+                      : out ? "text-ink-soft/50" : "text-accent"
                   }`}>
                   {r.scores[n] ?? "-"}
                 </span>
               ))}
-              <span className={`font-score w-14 text-right ${out ? "text-ink-soft/50" : "text-ink"}`}>
+              <span className={`font-score w-14 text-right ${out ? "text-ink-soft/50" : "text-accent"}`}>
                 {r.total}
               </span>
               <span className="font-score text-accent w-16 text-right text-sm">
