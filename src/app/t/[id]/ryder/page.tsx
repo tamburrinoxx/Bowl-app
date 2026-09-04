@@ -21,7 +21,9 @@ export default async function RyderTvPage({
   const rows = (matches as { id: string; session_label: string; format: string;
     side_a_label: string; side_b_label: string;
     score_a: number | null; score_b: number | null }[]) ?? [];
-  const t = (teams as { name: string; side: string }[]) ?? [];
+  const t = (teams as { name: string; side: string; color: string | null }[]) ?? [];
+  const colorA = t.find((x) => x.side === "A")?.color ?? "#FF4D4D";
+  const colorB = t.find((x) => x.side === "B")?.color ?? "#4D8BFF";
 
   function pts(m: (typeof rows)[number]) {
     if (m.score_a == null || m.score_b == null) return [0, 0];
@@ -43,14 +45,14 @@ export default async function RyderTvPage({
           <p className="text-ink-soft text-lg uppercase">
             {t.find((x) => x.side === "A")?.name ?? "Team A"}
           </p>
-          <p className="font-score text-accent text-8xl leading-none">{totalA}</p>
+          <p className="font-score text-8xl leading-none" style={{ color: colorA }}>{totalA}</p>
         </div>
         <span className="text-ink-soft text-2xl">-</span>
         <div className="text-center">
           <p className="text-ink-soft text-lg uppercase">
             {t.find((x) => x.side === "B")?.name ?? "Team B"}
           </p>
-          <p className="font-score text-accent text-8xl leading-none">{totalB}</p>
+          <p className="font-score text-8xl leading-none" style={{ color: colorB }}>{totalB}</p>
         </div>
       </div>
 
@@ -63,13 +65,13 @@ export default async function RyderTvPage({
               <span className="text-ink-soft w-40 shrink-0 text-xs uppercase">
                 {m.session_label} - {m.format}
               </span>
-              <span className={`flex-1 truncate ${p[0] > p[1] ? "text-accent" : "text-ink"}`}>
+              <span className="flex-1 truncate" style={p[0] > p[1] ? { color: colorA, fontWeight: 700 } : undefined}>
                 {m.side_a_label}
               </span>
               <span className="font-score text-ink w-24 shrink-0 text-center text-xl">
                 {done ? `${m.score_a} - ${m.score_b}` : "vs"}
               </span>
-              <span className={`flex-1 truncate text-right ${p[1] > p[0] ? "text-accent" : "text-ink"}`}>
+              <span className="flex-1 truncate text-right" style={p[1] > p[0] ? { color: colorB, fontWeight: 700 } : undefined}>
                 {m.side_b_label}
               </span>
             </div>
