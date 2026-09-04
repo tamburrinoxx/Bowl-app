@@ -29,6 +29,7 @@ export default function EliminatorPanel({
   const [places, setPlaces] = useState("5");
   const [elimGames, setElimGames] = useState(String(gamesPerSquad));
   const [cutCount, setCutCount] = useState("");
+  const [sortGame, setSortGame] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     const { data: pots } = await supabase
@@ -69,12 +70,6 @@ export default function EliminatorPanel({
       return { entryId: e.id, name: e.entry_name, scores: sc, total: counted, cutAfter };
     });
 
-    out.sort((a, b) => {
-      if (a.cutAfter === null && b.cutAfter !== null) return -1;
-      if (a.cutAfter !== null && b.cutAfter === null) return 1;
-      if (a.cutAfter !== b.cutAfter) return (b.cutAfter ?? 0) - (a.cutAfter ?? 0);
-      return b.total - a.total;
-    });
     setRows(out);
   }, [supabase, tournamentId]);
 
@@ -141,6 +136,16 @@ export default function EliminatorPanel({
   }
 
   const cols = Array.from({ length: gameCount }, (_, i) => i + 1);
+  const activeGame = sortGame ?? nextGame;
+  const sortedRows = [...rows].sort((x, y) => {
+    if (x.cutAfter === null && y.cutAfter !== null) return -1;
+    if (x.cutAfter !== null && y.cutAfter === null) return 1;
+    if (x.cutAfter !== y.cutAfter) return (y.cutAfter ?? 0) - (x.cutAfter ?? 0);
+    const xv = x.scores[activeGame];
+    const yv = y.scores[activeGame];
+    if (xv != null || yv != null) return (yv ?? -1) - (xv ?? -1);
+    return y.total - x.total;
+  });
   const share = placeCount > 0 ? Math.round(fund / placeCount / 5) * 5 : 0;
 
   return (
@@ -175,8 +180,21 @@ export default function EliminatorPanel({
         </button>
       </div>
 
+      <div className="text-ink-soft mb-1 flex items-center gap-2 px-3 text-[10px] uppercase">
+        <span className="w-6" />
+        <span className="min-w-0 flex-1">Bowler</span>
+        {cols.map((n) => (
+          <button key={n} onClick={() => setSortGame(n)}
+            className={`w-11 text-center ${activeGame === n ? "text-accent" : ""}`}>
+            G{n}
+          </button>
+        ))}
+        <span className="w-14 text-right">Total</span>
+        <span className="w-16 text-right">Prize</span>
+      </div>
+
       <div className="space-y-1">
-        {rows.map((r, i) => {
+        {sortedRows.map((r, i) => {
           const out = r.cutAfter !== null;
           const paid = !out && i < placeCount ? share : 0;
           return (
