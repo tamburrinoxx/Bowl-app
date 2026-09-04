@@ -76,6 +76,7 @@ export interface Entry {
   locked_average: number | null;
   locked_handicap: number | null;
   verification_status: VerificationStatus;
+  paid: boolean | null;
 }
 
 export interface Game {

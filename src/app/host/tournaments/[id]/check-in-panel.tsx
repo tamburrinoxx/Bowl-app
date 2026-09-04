@@ -50,6 +50,15 @@ export default function CheckInPanel({
   const [message, setMessage] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState(locked);
 
+  async function togglePaid(entry: Entry) {
+    setBusy(true);
+    const { error } = await supabase
+      .from("entries").update({ paid: !entry.paid }).eq("id", entry.id);
+    setBusy(false);
+    if (error) { setIsError(true); setMessage(error.message); return; }
+    router.refresh();
+  }
+
   async function toggleLock() {
     const next = !isLocked;
     setBusy(true);
@@ -389,8 +398,11 @@ export default function CheckInPanel({
                     </td>
                   );
                 })}
-                <td className="font-score text-accent px-4 py-2 text-right">
-                  {formatMoney(owedFor(entry.id))}
+                <td className="font-score px-4 py-2 text-right">
+                  <button onClick={() => togglePaid(entry)} disabled={busy || isLocked}
+                    className={entry.paid ? "text-ink-soft line-through" : "text-accent"}>
+                    {formatMoney(owedFor(entry.id))}
+                  </button>
                 </td>
                 <td className="px-4 py-2 text-right">
                   <VerifyBadge
