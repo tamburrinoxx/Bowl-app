@@ -29,6 +29,29 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   const [mFormat, setMFormat] = useState("5-man Baker");
   const [mA, setMA] = useState("");
   const [mB, setMB] = useState("");
+  const [roster, setRoster] = useState<{ id: string; side: string; name: string }[]>([]);
+  const [newA, setNewA] = useState("");
+  const [newB, setNewB] = useState("");
+
+  async function addPlayer(side: "A" | "B", name: string) {
+    const clean = name.trim();
+    if (!clean) return;
+    setBusy(true);
+    const { error } = await supabase.from("ryder_roster").insert({
+      tournament_id: tournamentId, side, name: clean,
+    });
+    setBusy(false);
+    if (error) { setMsg(error.message); return; }
+    if (side === "A") setNewA(""); else setNewB("");
+    load();
+  }
+
+  async function removePlayer(id: string) {
+    setBusy(true);
+    await supabase.from("ryder_roster").delete().eq("id", id);
+    setBusy(false);
+    load();
+  }
 
   async function createTeams() {
     setBusy(true);
