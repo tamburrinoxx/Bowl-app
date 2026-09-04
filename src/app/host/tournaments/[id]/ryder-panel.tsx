@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-type Team = { id: string; name: string; side: "A" | "B" };
+type Team = { id: string; name: string; side: "A" | "B"; color: string | null };
 type Match = {
   id: string;
   session_label: string;
@@ -117,7 +117,8 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   function winColor(m: Match, side: "a" | "b") {
     const p = pointsFor(m);
     const won = side === "a" ? p[0] > p[1] : p[1] > p[0];
-    return won ? { color: "#B6FF2E", fontWeight: 700 } : undefined;
+    if (!won) return undefined;
+    return { color: side === "a" ? colorA : colorB, fontWeight: 700 };
   }
 
   function pointsFor(m: Match) {
@@ -131,6 +132,8 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   const totalB = matches.reduce((s, m) => s + pointsFor(m)[1], 0);
   const teamA = teams.find((t) => t.side === "A");
   const teamB = teams.find((t) => t.side === "B");
+  const colorA = teamA?.color ?? "#FF4D4D";
+  const colorB = teamB?.color ?? "#4D8BFF";
 
   async function renameTeam(id: string, name: string) {
     const clean = name.trim();
