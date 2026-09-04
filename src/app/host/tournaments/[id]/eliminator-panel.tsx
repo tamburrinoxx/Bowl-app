@@ -206,11 +206,13 @@ export default function EliminatorPanel({
               </span>
               {cols.map((n) => (
                 <span key={n}
-                  className={`font-score w-11 text-center text-[13px] ${
-                    out && r.cutAfter !== null && n > r.cutAfter
-                      ? "text-ink-soft/20"
-                      : out ? "text-ink-soft/50" : "text-accent"
-                  }`}>
+                  className={`font-score w-11 text-center text-[13px] ${(() => {
+                    const usedGame = n <= lastCut;
+                    if (out) return n > (r.cutAfter ?? 0) ? "text-ink-soft/20" : "text-ink-soft/40";
+                    if (usedGame) return "text-ink-soft/50";
+                    if (n === nextGame) return "text-accent";
+                    return "text-ink-soft/30";
+                  })()}`}>
                   {r.scores[n] ?? "-"}
                 </span>
               ))}
