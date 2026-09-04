@@ -587,9 +587,9 @@ export default function ProfilePage() {
 
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-white/5 p-4 text-center">
-      <p className="font-score text-accent text-xl font-bold">{value}</p>
-      <p className="text-ink-soft text-xs mt-1">{label}</p>
+    <div className="flex min-h-[5.5rem] flex-col items-center justify-center rounded-2xl bg-white/5 px-2 py-3 text-center">
+      <p className="font-score text-accent text-xl font-bold leading-none">{value}</p>
+      <p className="text-ink-soft mt-1.5 text-[11px] leading-tight">{label}</p>
     </div>
   );
 }
