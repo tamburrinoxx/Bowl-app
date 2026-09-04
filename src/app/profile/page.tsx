@@ -358,8 +358,8 @@ export default function ProfilePage() {
           Sign out
         </button>
       </div>
-      <div className="mx-auto max-w-2xl">
-        <div className="glass-panel p-8 mb-6 flex items-baseline justify-between">
+      <div className="mx-auto max-w-7xl lg:grid lg:grid-cols-4 lg:items-start lg:gap-6">
+        <div className="glass-panel lg:col-start-1 lg:col-span-1 p-8 mb-6 flex items-baseline justify-between">
           <div>
             <p className="font-score text-accent text-xs font-semibold tracking-wide mb-1 uppercase">
               Bowler Profile
@@ -385,7 +385,7 @@ export default function ProfilePage() {
 
         <Link
           href="/profile/score"
-          className="glass-panel p-6 mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
+          className="glass-panel lg:col-start-1 lg:col-span-1 p-6 mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
         >
           <div>
             <p className="font-display text-xl text-ink mb-1">Log a Session</p>
@@ -394,7 +394,7 @@ export default function ProfilePage() {
           <span className="text-accent text-2xl font-light">→</span>
         </Link>
 
-        <section className="glass-panel p-8 mb-6">
+        <section className="glass-panel lg:col-start-1 lg:col-span-1 p-8 mb-6">
           <h2 className="font-display text-xl text-ink mb-4">Recent Stats</h2>
           {stats.gamesCounted ? (
             <div className="grid grid-cols-3 gap-3">
@@ -412,7 +412,7 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="glass-panel p-8 mb-6">
+        <section className="glass-panel lg:col-start-2 lg:col-span-2 p-8 mb-6">
           <h2 className="font-display text-xl text-ink mb-4">
             Last {sessions.length || 5} Leagues / Tournaments
           </h2>
@@ -445,7 +445,7 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="glass-panel p-8 mb-6">
+        <section className="glass-panel lg:col-start-4 lg:col-span-1 p-8 mb-6">
           <h2 className="font-display text-xl text-ink mb-4">Pattern Averages</h2>
           {averages.length ? (
             <div className="space-y-3">
@@ -480,7 +480,7 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="glass-panel p-8">
+        <section className="glass-panel lg:col-start-2 lg:col-span-2 p-8">
           <h2 className="font-display text-xl text-ink mb-4">Notes to Work On</h2>
           <form onSubmit={addNote} className="flex gap-2 mb-4">
             <input
