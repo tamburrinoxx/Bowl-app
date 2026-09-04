@@ -74,9 +74,9 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   }
 
   async function addMatch() {
-    const labelA = picksA.filter(Boolean).join(" / ");
-    const labelB = picksB.filter(Boolean).join(" / ");
-    if (!labelA || !labelB) { setMsg("Pick bowlers for both sides."); return; }
+    const labelA = mA.trim();
+    const labelB = mB.trim();
+    if (!labelA || !labelB) { setMsg("Both sides need a name."); return; }
     setBusy(true);
     const { error } = await supabase.from("ryder_matches").insert({
       tournament_id: tournamentId,
@@ -88,7 +88,7 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
     });
     setBusy(false);
     if (error) { setMsg(error.message); return; }
-    setPicksA([]); setPicksB([]); setMsg(null);
+    setMA(""); setMB(""); setMsg(null);
     load();
   }
 
@@ -215,30 +215,10 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
           <option>Scotch Doubles</option>
           <option>Singles</option>
         </select>
-        <div className="flex flex-wrap gap-1">
-          {Array.from({ length: sizeFor(mFormat) }, (_, i) => (
-            <select key={"a" + i} value={picksA[i] ?? ""}
-              onChange={(e) => setPicksA((p) => { const n = [...p]; n[i] = e.target.value; return n; })}
-              className="glass-input bg-transparent px-2 py-1.5 text-sm text-ink">
-              <option value="">Side A…</option>
-              {roster.filter((r) => r.side === "A").map((r) => (
-                <option key={r.id} value={r.name}>{r.name}</option>
-              ))}
-            </select>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-1">
-          {Array.from({ length: sizeFor(mFormat) }, (_, i) => (
-            <select key={"b" + i} value={picksB[i] ?? ""}
-              onChange={(e) => setPicksB((p) => { const n = [...p]; n[i] = e.target.value; return n; })}
-              className="glass-input bg-transparent px-2 py-1.5 text-sm text-ink">
-              <option value="">Side B…</option>
-              {roster.filter((r) => r.side === "B").map((r) => (
-                <option key={r.id} value={r.name}>{r.name}</option>
-              ))}
-            </select>
-          ))}
-        </div>
+        <input value={mA} onChange={(e) => setMA(e.target.value)}
+          placeholder="Side A" className="glass-input w-32 px-2 py-1.5 text-sm text-ink" />
+        <input value={mB} onChange={(e) => setMB(e.target.value)}
+          placeholder="Side B" className="glass-input w-32 px-2 py-1.5 text-sm text-ink" />
         <button onClick={addMatch} disabled={busy}
           className="rounded bg-[#B6FF2E] px-3 py-1.5 text-sm font-bold text-black disabled:opacity-40">
           Add match
