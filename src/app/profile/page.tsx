@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const [fullName, setFullName] = useState("");
   const [homeCenter, setHomeCenter] = useState("");
   const [handedness, setHandedness] = useState("");
+  const [statRange, setStatRange] = useState("all");
   const [editingProfile, setEditingProfile] = useState(false);
 
   async function deleteSession(id: string, label: string) {
@@ -352,7 +353,14 @@ export default function ProfilePage() {
     );
   }
 
-  const allGames = sessions.flatMap((s) =>
+  const rangeDays: Record<string, number> = { "30": 30, "90": 90, "365": 365 };
+  const cutoff = rangeDays[statRange]
+    ? Date.now() - rangeDays[statRange] * 86400000
+    : null;
+  const statSessions = cutoff
+    ? sessions.filter((s) => new Date(s.played_at).getTime() >= cutoff)
+    : sessions;
+  const allGames = statSessions.flatMap((s) =>
     (s.session_games ?? []).map((g) => g.frame_data)
   );
   const stats = aggregateStats(allGames);
@@ -438,7 +446,16 @@ export default function ProfilePage() {
         </Link>
 
         <section className="glass-panel lg:col-start-4 lg:col-span-1 lg:row-start-1 p-8 mb-6">
-          <h2 className="font-display text-xl text-ink mb-4">Recent Stats</h2>
+          <div className="mb-4 flex items-baseline justify-between gap-2">
+            <h2 className="font-display text-xl text-ink">Recent Stats</h2>
+            <select value={statRange} onChange={(e) => setStatRange(e.target.value)}
+              className="glass-input bg-transparent px-2 py-1 text-xs text-ink">
+              <option value="all">All time</option>
+              <option value="30">30 days</option>
+              <option value="90">90 days</option>
+              <option value="365">1 year</option>
+            </select>
+          </div>
           {stats.gamesCounted ? (
             <div className="grid grid-cols-3 gap-3">
               <StatBox label="Strike %" value={`${stats.strikePct}%`} />
