@@ -27,6 +27,12 @@ export default function ProfilePage() {
   const [homeCenter, setHomeCenter] = useState("");
   const [handedness, setHandedness] = useState("");
   const [editingProfile, setEditingProfile] = useState(false);
+
+  async function deleteSession(id: string, label: string) {
+    if (!confirm(`Delete ${label}? Its games go too.`)) return;
+    await supabase.from("sessions").delete().eq("id", id);
+    location.reload();
+  }
   const [editName, setEditName] = useState("");
   const [editCenter, setEditCenter] = useState("");
   const [usbcId, setUsbcId] = useState("");
@@ -470,7 +476,11 @@ export default function ProfilePage() {
                         {games.map((g) => g.scratch_score).join(" / ")}
                       </p>
                     </div>
-                    <p className="font-score text-accent text-lg font-semibold">{total}</p>
+                    <div className="flex items-center gap-3">
+                      <p className="font-score text-accent text-lg font-semibold">{total}</p>
+                      <button onClick={() => deleteSession(s.id, s.label)}
+                        className="text-ink-soft text-sm hover:text-red-400">x</button>
+                    </div>
                   </div>
                 );
               })}
