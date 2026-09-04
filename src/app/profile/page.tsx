@@ -26,6 +26,9 @@ export default function ProfilePage() {
   const [fullName, setFullName] = useState("");
   const [homeCenter, setHomeCenter] = useState("");
   const [handedness, setHandedness] = useState("");
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editCenter, setEditCenter] = useState("");
   const [usbcId, setUsbcId] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -364,7 +367,41 @@ export default function ProfilePage() {
             <p className="font-score text-accent text-xs font-semibold tracking-wide mb-1 uppercase">
               Bowler Profile
             </p>
-            <h1 className="font-display text-4xl text-ink">{profile.full_name}</h1>
+            {editingProfile ? (
+              <div className="space-y-2">
+                <input value={editName} onChange={(e) => setEditName(e.target.value)}
+                  className="glass-input w-full px-2 py-1 text-ink" placeholder="Full name" />
+                <input value={editCenter} onChange={(e) => setEditCenter(e.target.value)}
+                  className="glass-input w-full px-2 py-1 text-ink" placeholder="Home center" />
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      await supabase.from("profiles").update({
+                        full_name: editName.trim() || profile.full_name,
+                        home_center: editCenter.trim() || null,
+                      }).eq("id", profile.id);
+                      setEditingProfile(false);
+                      location.reload();
+                    }}
+                    className="rounded bg-[#B6FF2E] px-3 py-1 text-sm font-bold text-black"
+                  >Save</button>
+                  <button onClick={() => setEditingProfile(false)}
+                    className="text-ink-soft text-sm">Cancel</button>
+                </div>
+              </div>
+            ) : (
+              <h1 className="font-display text-4xl text-ink">
+                {profile.full_name}
+                <button
+                  onClick={() => {
+                    setEditName(profile.full_name ?? "");
+                    setEditCenter(profile.home_center ?? "");
+                    setEditingProfile(true);
+                  }}
+                  className="text-ink-soft ml-3 align-middle text-xs uppercase"
+                >Edit</button>
+              </h1>
+            )}
             {profile.home_center && (
               <p className="text-ink-soft text-sm mt-1">{profile.home_center}</p>
             )}
@@ -394,7 +431,7 @@ export default function ProfilePage() {
           <span className="text-accent text-2xl font-light">→</span>
         </Link>
 
-        <section className="glass-panel lg:col-start-1 lg:col-span-1 p-8 mb-6">
+        <section className="glass-panel lg:col-start-4 lg:col-span-1 lg:row-start-1 p-8 mb-6">
           <h2 className="font-display text-xl text-ink mb-4">Recent Stats</h2>
           {stats.gamesCounted ? (
             <div className="grid grid-cols-3 gap-3">
@@ -445,7 +482,7 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="glass-panel lg:col-start-4 lg:col-span-1 lg:row-start-1 p-8 mb-6">
+        <section className="glass-panel lg:col-start-1 lg:col-span-1 p-8 mb-6">
           <h2 className="font-display text-xl text-ink mb-4">Pattern Averages</h2>
           {averages.length ? (
             <div className="space-y-3">
