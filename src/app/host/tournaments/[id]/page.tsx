@@ -22,10 +22,13 @@ import StatusSwitch from "./status-switch";
 
 export default async function HostTournamentPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ squad?: string }>;
 }) {
   const { id } = await params;
+  const { squad: activeSquad } = await searchParams;
   const supabase = await createClient();
 
   const {
@@ -46,11 +49,21 @@ export default async function HostTournamentPage({
     redirect("/host/tournaments");
   }
 
-  const { data: entries } = await supabase
+  const { data: allEntries } = await supabase
     .from("entries")
     .select("*")
     .eq("tournament_id", id)
     .returns<Entry[]>();
+
+  const { data: squads } = await supabase
+    .from("squads")
+    .select("id, label")
+    .eq("tournament_id", id)
+    .order("starts_at");
+
+  const entries = activeSquad
+    ? (allEntries ?? []).filter((e) => e.squad_id === activeSquad)
+    : allEntries;
 
   const { data: standings } = await supabase
     .from("standings")
@@ -129,6 +142,21 @@ export default async function HostTournamentPage({
           </p>
           <span className="text-accent text-sm font-medium shrink-0 ml-4">Open →</span>
         </Link>
+
+        {(squads?.length ?? 0) > 0 && (
+          <div className="mb-6 flex flex-wrap gap-2">
+            <a href={`/host/tournaments/${id}`}
+              className={`squad-tab rounded-full px-4 py-1.5 text-sm font-bold ${
+                !activeSquad ? "bg-[#B6FF2E] text-black" : "border border-white/20 text-white/70"
+              }`}>All</a>
+            {(squads ?? []).map((sq) => (
+              <a key={sq.id} href={`/host/tournaments/${id}?squad=${sq.id}`}
+                className={`squad-tab rounded-full px-4 py-1.5 text-sm font-bold ${
+                  activeSquad === sq.id ? "bg-[#B6FF2E] text-black" : "border border-white/20 text-white/70"
+                }`}>{sq.label}</a>
+            ))}
+          </div>
+        )}
 
         <CollapseSection title="Status" id="status">
           <StatusSwitch tournamentId={tournament.id} status={tournament.status} />
