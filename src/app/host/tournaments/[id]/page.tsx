@@ -177,6 +177,14 @@ export default async function HostTournamentPage({
           <SidePotsPanel tournamentId={tournament.id} />
         </section>
 
+        <CollapseSection title="Baker Games">
+          <BakerPanel
+            tournamentId={tournament.id}
+            entries={entries ?? []}
+            bakerGames={tournament.baker_games ?? 0}
+          />
+        </CollapseSection>
+
         <CollapseSection title="Squads">
           <SquadsPanel tournamentId={tournament.id} entries={entries ?? []} />
         </CollapseSection>
@@ -187,14 +195,6 @@ export default async function HostTournamentPage({
             entries={entries ?? []}
             entryFee={tournament.entry_fee}
             locked={tournament.check_in_locked ?? false}
-          />
-        </CollapseSection>
-
-        <CollapseSection title="Baker Games">
-          <BakerPanel
-            tournamentId={tournament.id}
-            entries={entries ?? []}
-            bakerGames={tournament.baker_games ?? 0}
           />
         </CollapseSection>
 
