@@ -122,6 +122,7 @@ export interface StandingsRow {
   verification_status: VerificationStatus;
   games_played: number;
   scratch_total: number;
+  baker_total: number;
   handicap_total: number;
 }
 

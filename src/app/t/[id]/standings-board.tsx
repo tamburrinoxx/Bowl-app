@@ -10,6 +10,7 @@ export interface BoardRow {
   entry_name: string;
   games_played: number;
   scratch_total: number;
+  baker_total: number;
   handicap_total: number;
 }
 
@@ -174,11 +175,18 @@ export default function StandingsBoard({
                     </span>
                   </span>
 
+                  <span className="hidden w-14 shrink-0 text-right sm:block">
+                    <span className="text-ink-soft block text-[10px] uppercase">Baker</span>
+                    <span className="font-score text-ink-soft block leading-none">
+                      {row.baker_total || "\u2014"}
+                    </span>
+                  </span>
+
                   <span className="hidden w-12 shrink-0 text-right sm:block">
                     <span className="text-ink-soft block text-[10px] uppercase">Hdcp</span>
                     <span className="font-score text-accent block leading-none">
-                      {row.handicap_total > row.scratch_total
-                        ? `+${row.handicap_total - row.scratch_total}`
+                      {row.handicap_total - row.scratch_total - row.baker_total > 0
+                        ? `+${row.handicap_total - row.scratch_total - row.baker_total}`
                         : "\u2014"}
                     </span>
                   </span>
@@ -252,6 +260,10 @@ function YouBar({
           <div className="text-right">
             <p className="text-ink-soft text-[12px] font-semibold uppercase tracking-[0.2em]">Scratch</p>
             <p className="font-score text-ink-soft text-2xl leading-none">{row.scratch_total}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-ink-soft text-[12px] font-semibold uppercase tracking-[0.2em]">Baker</p>
+            <p className="font-score text-ink-soft text-2xl leading-none">{row.baker_total || "—"}</p>
           </div>
           <div className="text-right">
             <p className="text-ink-soft text-[12px] font-semibold uppercase tracking-[0.2em]">Avg</p>
