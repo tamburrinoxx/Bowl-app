@@ -286,7 +286,7 @@ export default function AddEntryPanel({
         <input
           type="number"
           min={0}
-          max={300}
+          max={300 * size}
           value={average || (memberAvgSum > 0 ? String(memberAvgSum) : "")}
           onChange={(e) => setAverage(e.target.value)}
           className="glass-input w-24 font-score px-4 py-2.5 text-ink"
