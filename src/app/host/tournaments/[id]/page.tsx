@@ -182,6 +182,8 @@ export default async function HostTournamentPage({
             handicapBase={tournament.handicap_base}
             handicapPercent={tournament.handicap_percent}
             entrySize={tournament.entry_size ?? 1}
+            squads={squads ?? []}
+            activeSquad={activeSquad}
           />
         </CollapseSection>
 

@@ -17,12 +17,16 @@ export default function AddEntryPanel({
   handicapBase,
   handicapPercent,
   entrySize,
+  squads,
+  activeSquad,
 }: {
   tournamentId: string;
   eventType: EventType;
   handicapBase: number;
   handicapPercent: number;
   entrySize: number;
+  squads: { id: string; label: string }[];
+  activeSquad?: string;
 }) {
   const supabase = createClient();
   const router = useRouter();
@@ -36,6 +40,7 @@ export default function AddEntryPanel({
   const [lookupBowlerId, setLookupBowlerId] = useState<string | null>(null);
   const [bowlId2, setBowlId2] = useState("");
   const [bowlId3, setBowlId3] = useState("");
+  const [squadId, setSquadId] = useState(activeSquad ?? "");
   const [memberNames, setMemberNames] = useState<string[]>(["", "", "", "", ""]);
   const [memberIds, setMemberIds] = useState<string[]>(["", "", "", "", ""]);
   const [memberAvgs, setMemberAvgs] = useState<string[]>(["", "", "", "", ""]);
@@ -134,6 +139,7 @@ export default function AddEntryPanel({
         tournament_id: tournamentId,
         entry_name: entryName.trim(),
         entry_type: entryType,
+        squad_id: squadId || null,
         locked_average: avgNum,
         locked_handicap: effective,
       })
@@ -268,6 +274,14 @@ export default function AddEntryPanel({
         />
       </label>
 
+      <label className="block">
+        <span className="text-xs font-medium text-ink-soft block mb-1.5">Squad</span>
+        <select value={squadId} onChange={(e) => setSquadId(e.target.value)}
+          className="glass-input px-4 py-2.5 text-ink">
+          <option value="">No squad</option>
+          {squads.map((sq) => (<option key={sq.id} value={sq.id}>{sq.label}</option>))}
+        </select>
+      </label>
       <label className="block">
         <span className="text-xs font-medium text-ink-soft block mb-1.5">Type</span>
         <select
