@@ -32,7 +32,7 @@ export default function ScoreEntryPanel({
   const [justSaved, setJustSaved] = useState<Set<string>>(new Set());
   const [sortBy, setSortBy] = useState<"lane" | "name" | "added">("lane");
   const [busy, setBusy] = useState(false);
-  const [rosters, setRosters] = useState<Record<string, { bowler_id: string; name: string }[]>>({});
+  const [rosters, setRosters] = useState<Record<string, { bowler_id: string; key: string; name: string }[]>>({});
 
   const loadRosters = useCallback(async () => {
     if (!entries.length) return;
@@ -41,13 +41,14 @@ export default function ScoreEntryPanel({
       .select("entry_id, bowler_id, name, position, profiles(full_name)")
       .in("entry_id", entries.map((e) => e.id))
       .order("position");
-    const map: Record<string, { bowler_id: string; name: string }[]> = {};
+    const map: Record<string, { bowler_id: string; key: string; name: string }[]> = {};
     for (const r of (data as unknown as {
-      entry_id: string; bowler_id: string; name: string | null;
+      entry_id: string; bowler_id: string; name: string | null; position: number;
       profiles: { full_name: string } | null;
     }[]) ?? []) {
       (map[r.entry_id] ||= []).push({
         bowler_id: r.bowler_id,
+        key: r.bowler_id ?? `p${r.position}`,
         name: r.profiles?.full_name ?? r.name ?? "Bowler",
       });
     }
@@ -257,7 +258,7 @@ export default function ScoreEntryPanel({
             {ordered.flatMap((entry) => {
               const roster = rosters[entry.id] ?? [];
               return roster.length > 1
-                ? roster.map((b) => ({ entry, bowlerKey: b.bowler_id, label: b.name }))
+                ? roster.map((b) => ({ entry, bowlerKey: b.key, label: b.name }))
                 : [{ entry, bowlerKey: "solo", label: entry.entry_name }];
             }).map(({ entry, bowlerKey, label }) => (
               <tr key={`${entry.id}:${bowlerKey}`} className="border-t border-white/5">
