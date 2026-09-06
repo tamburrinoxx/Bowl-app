@@ -56,6 +56,7 @@ export interface Tournament {
   check_in_locked: boolean | null;
   show_ticker: boolean | null;
   is_ryder: boolean | null;
+  baker_games: number | null;
 }
 
 export interface Squad {

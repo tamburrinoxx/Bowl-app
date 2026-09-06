@@ -12,6 +12,7 @@ import SidePotsPanel from "./side-pots-panel";
 import TickerSwitch from "./ticker-switch";
 import EliminatorPanel from "./eliminator-panel";
 import SquadsPanel from "./squads-panel";
+import BakerPanel from "./baker-panel";
 import CollapseSection from "./collapse-section";
 import CheckInPanel from "./check-in-panel";
 import SideResultsPanel from "./side-results-panel";
@@ -186,6 +187,14 @@ export default async function HostTournamentPage({
             entries={entries ?? []}
             entryFee={tournament.entry_fee}
             locked={tournament.check_in_locked ?? false}
+          />
+        </CollapseSection>
+
+        <CollapseSection title="Baker Games">
+          <BakerPanel
+            tournamentId={tournament.id}
+            entries={entries ?? []}
+            bakerGames={tournament.baker_games ?? 0}
           />
         </CollapseSection>
 
