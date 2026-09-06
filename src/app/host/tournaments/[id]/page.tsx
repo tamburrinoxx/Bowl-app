@@ -207,6 +207,7 @@ export default async function HostTournamentPage({
                   <th className="px-4 py-3">Entry</th>
                   <th className="px-4 py-3 text-right">Games</th>
                   <th className="px-4 py-3 text-right">Scratch</th>
+                  <th className="px-4 py-3 text-right">Baker</th>
                   <th className="px-4 py-3 text-right">Hdcp</th>
                   <th className="px-4 py-3 text-right text-accent">Total</th>
                   <th className="px-4 py-3 text-right">Winnings</th>
@@ -236,6 +237,9 @@ export default async function HostTournamentPage({
                     </td>
                     <td className="px-4 py-3 text-right font-score text-ink">
                       {row.scratch_total}
+                    </td>
+                    <td className="px-4 py-3 text-right font-score text-ink">
+                      {row.baker_total || 0}
                     </td>
                     <td className="px-4 py-3 text-right font-score text-ink">
                       {row.locked_handicap ?? 0}
