@@ -38,17 +38,17 @@ export default function ScoreEntryPanel({
     if (!entries.length) return;
     const { data } = await supabase
       .from("entry_bowlers")
-      .select("entry_id, bowler_id, position, profiles(full_name)")
+      .select("entry_id, bowler_id, name, position, profiles(full_name)")
       .in("entry_id", entries.map((e) => e.id))
       .order("position");
     const map: Record<string, { bowler_id: string; name: string }[]> = {};
     for (const r of (data as unknown as {
-      entry_id: string; bowler_id: string;
+      entry_id: string; bowler_id: string; name: string | null;
       profiles: { full_name: string } | null;
     }[]) ?? []) {
       (map[r.entry_id] ||= []).push({
         bowler_id: r.bowler_id,
-        name: r.profiles?.full_name ?? "Bowler",
+        name: r.profiles?.full_name ?? r.name ?? "Bowler",
       });
     }
     setRosters(map);
