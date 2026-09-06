@@ -9,6 +9,7 @@ interface ExistingGame {
   id: string;
   entry_id: string;
   bowler_id: string | null;
+  bowler_slot: number | null;
   game_number: number;
   scratch_score: number;
   verified: boolean;
@@ -61,13 +62,14 @@ export default function ScoreEntryPanel({
     if (!entries.length) return;
     const { data } = await supabase
       .from("games")
-      .select("id, entry_id, bowler_id, game_number, scratch_score, verified")
+      .select("id, entry_id, bowler_id, bowler_slot, game_number, scratch_score, verified")
       .in("entry_id", entries.map((e) => e.id));
 
     const byKey: Record<string, ExistingGame> = {};
     const seeded: Record<string, string> = {};
     for (const g of (data as ExistingGame[]) ?? []) {
-      const key = `${g.entry_id}:${g.bowler_id ?? "solo"}:${g.game_number}`;
+      const gk = g.bowler_id ?? (g.bowler_slot != null ? `p${g.bowler_slot}` : "solo");
+      const key = `${g.entry_id}:${gk}:${g.game_number}`;
       byKey[key] = g;
       seeded[key] = String(g.scratch_score);
     }
@@ -85,7 +87,7 @@ export default function ScoreEntryPanel({
     setMessage(null);
     setIsError(false);
 
-    const toInsert: { entry_id: string; bowler_id: string | null; game_number: number; scratch_score: number }[] = [];
+    const toInsert: { entry_id: string; bowler_id: string | null; bowler_slot: number | null; game_number: number; scratch_score: number }[] = [];
     const toUpdate: { id: string; scratch_score: number }[] = [];
 
     for (const [key, raw] of Object.entries(drafts)) {
@@ -98,9 +100,11 @@ export default function ScoreEntryPanel({
         }
       } else {
         const [entryId, bowlerKey, gameNumber] = key.split(":");
+        const isSlot = bowlerKey.startsWith("p");
         toInsert.push({
           entry_id: entryId,
-          bowler_id: bowlerKey === "solo" ? null : bowlerKey,
+          bowler_id: bowlerKey === "solo" || isSlot ? null : bowlerKey,
+          bowler_slot: isSlot ? Number(bowlerKey.slice(1)) : null,
           game_number: Number(gameNumber),
           scratch_score: value,
         });
