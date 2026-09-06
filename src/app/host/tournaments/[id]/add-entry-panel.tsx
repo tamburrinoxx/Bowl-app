@@ -35,6 +35,19 @@ export default function AddEntryPanel({
   const [lookupNote, setLookupNote] = useState<string | null>(null);
   const [lookupBowlerId, setLookupBowlerId] = useState<string | null>(null);
   const [bowlId2, setBowlId2] = useState("");
+  const [bowlId3, setBowlId3] = useState("");
+  const [lookupNote3, setLookupNote3] = useState<string | null>(null);
+  const [lookupBowlerId3, setLookupBowlerId3] = useState<string | null>(null);
+
+  async function lookup3() {
+    setLookupNote3(null);
+    setLookupBowlerId3(null);
+    const { data, error } = await supabase.rpc("lookup_bowler", { p_bowl_id: bowlId3.trim() });
+    const hit = (data as { id: string; full_name: string }[] | null)?.[0];
+    if (error || !hit) { setLookupNote3("No bowler found for that Bowl ID."); return; }
+    setLookupBowlerId3(hit.id);
+    setLookupNote3(`${hit.full_name} linked as bowler 3.`);
+  }
   const [lookupNote2, setLookupNote2] = useState<string | null>(null);
   const [lookupBowlerId2, setLookupBowlerId2] = useState<string | null>(null);
 
@@ -115,6 +128,13 @@ export default function AddEntryPanel({
         position: 2,
       });
     }
+    if (!error && entry && lookupBowlerId3) {
+      await supabase.from("entry_bowlers").insert({
+        entry_id: entry.id,
+        bowler_id: lookupBowlerId3,
+        position: 3,
+      });
+    }
 
     setSaving(false);
 
@@ -182,6 +202,31 @@ export default function AddEntryPanel({
             </button>
           </div>
           {lookupNote2 && <p className="text-accent mt-1 text-xs">{lookupNote2}</p>}
+        </label>
+      )}
+
+      {size >= 3 && (
+        <label className="block">
+          <span className="text-ink-soft mb-1.5 block text-xs uppercase tracking-wide">
+            Bowl ID - 3rd bowler
+          </span>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={bowlId3}
+              onChange={(e) => setBowlId3(e.target.value.toUpperCase())}
+              placeholder="WZWU5G"
+              className="glass-input font-score w-28 px-3 py-2.5 tracking-widest text-ink"
+            />
+            <button
+              type="button"
+              onClick={lookup3}
+              className="pill-button bg-white/8 text-ink px-4 py-2.5 text-xs hover:bg-white/12"
+            >
+              Look up
+            </button>
+          </div>
+          {lookupNote3 && <p className="text-accent mt-1 text-xs">{lookupNote3}</p>}
         </label>
       )}
 
