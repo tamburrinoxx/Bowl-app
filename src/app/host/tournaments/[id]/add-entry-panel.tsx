@@ -37,6 +37,14 @@ export default function AddEntryPanel({
   const [bowlId2, setBowlId2] = useState("");
   const [bowlId3, setBowlId3] = useState("");
   const [memberNames, setMemberNames] = useState<string[]>(["", "", "", "", ""]);
+
+  function fillMember(i: number, name: string) {
+    setMemberNames((m) => {
+      const n = [...m];
+      n[i] = name;
+      return n;
+    });
+  }
   const [lookupNote3, setLookupNote3] = useState<string | null>(null);
   const [lookupBowlerId3, setLookupBowlerId3] = useState<string | null>(null);
 
@@ -47,6 +55,7 @@ export default function AddEntryPanel({
     const hit = (data as { id: string; full_name: string }[] | null)?.[0];
     if (error || !hit) { setLookupNote3("No bowler found for that Bowl ID."); return; }
     setLookupBowlerId3(hit.id);
+    fillMember(2, hit.full_name);
     setLookupNote3(`${hit.full_name} linked as bowler 3.`);
   }
   const [lookupNote2, setLookupNote2] = useState<string | null>(null);
@@ -59,6 +68,7 @@ export default function AddEntryPanel({
     const hit = (data as { id: string; full_name: string; average: number; games_counted: number }[] | null)?.[0];
     if (error || !hit) { setLookupNote2("No bowler found for that Bowl ID."); return; }
     setLookupBowlerId2(hit.id);
+    fillMember(1, hit.full_name);
     setLookupNote2(`${hit.full_name} linked as bowler 2.`);
   }
   const [saving, setSaving] = useState(false);
@@ -87,6 +97,7 @@ export default function AddEntryPanel({
     }
     setEntryName(hit.full_name);
     setLookupBowlerId(hit.bowler_id);
+    fillMember(0, hit.full_name);
     if (hit.games_counted > 0) {
       setAverage(String(hit.average));
       setLookupNote(`${hit.full_name} - ${hit.average} average across ${hit.games_counted} logged games.`);
