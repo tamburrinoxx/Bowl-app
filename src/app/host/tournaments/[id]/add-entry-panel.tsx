@@ -85,7 +85,15 @@ export default function AddEntryPanel({
   const size = Math.max(1, entrySize ?? 1);
   const base = (handicapBase ?? 220) * size;
   const percent = handicapPercent ?? 0.9;
-  const avgNum = average.trim() === "" ? null : Number(average);
+  const memberAvgSum = memberAvgs
+    .slice(0, size)
+    .reduce((sum, v) => sum + (v.trim() && !Number.isNaN(Number(v)) ? Number(v) : 0), 0);
+  const avgNum =
+    average.trim() !== ""
+      ? Number(average)
+      : memberAvgSum > 0
+        ? memberAvgSum
+        : null;
   const computed =
     avgNum === null || Number.isNaN(avgNum)
       ? null
