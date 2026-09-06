@@ -36,6 +36,7 @@ export default function AddEntryPanel({
   const [lookupBowlerId, setLookupBowlerId] = useState<string | null>(null);
   const [bowlId2, setBowlId2] = useState("");
   const [bowlId3, setBowlId3] = useState("");
+  const [memberNames, setMemberNames] = useState<string[]>(["", "", "", "", ""]);
   const [lookupNote3, setLookupNote3] = useState<string | null>(null);
   const [lookupBowlerId3, setLookupBowlerId3] = useState<string | null>(null);
 
@@ -114,6 +115,14 @@ export default function AddEntryPanel({
 
     // Link to a real profile when the entry came from a Bowl ID lookup, so the
     // result reaches their career page.
+    if (!error && entry) {
+      const typed = memberNames.slice(0, size).map((n) => n.trim());
+      const rows = typed
+        .map((n, i) => ({ n, i }))
+        .filter((r) => r.n)
+        .map((r) => ({ entry_id: entry.id, name: r.n, position: r.i + 1 }));
+      if (rows.length) await supabase.from("entry_bowlers").insert(rows);
+    }
     if (!error && entry && lookupBowlerId) {
       await supabase.from("entry_bowlers").insert({
         entry_id: entry.id,
@@ -158,6 +167,29 @@ export default function AddEntryPanel({
       onSubmit={submit}
       className="flex flex-wrap items-end gap-4 rounded-2xl bg-white/5 p-5"
     >
+      <div className="w-full">
+        <span className="text-ink-soft mb-1.5 block text-xs uppercase tracking-wide">
+          Bowler names
+        </span>
+        <div className="flex flex-wrap gap-2">
+          {Array.from({ length: size }, (_, i) => (
+            <input
+              key={i}
+              value={memberNames[i] ?? ""}
+              onChange={(e) =>
+                setMemberNames((m) => {
+                  const n = [...m];
+                  n[i] = e.target.value;
+                  return n;
+                })
+              }
+              placeholder={size === 1 ? "Bowler" : `Bowler ${i + 1}`}
+              className="glass-input w-36 px-3 py-2.5 text-ink"
+            />
+          ))}
+        </div>
+      </div>
+
       <label className="block">
         <span className="text-xs font-medium text-ink-soft block mb-1.5">
           Bowl ID
