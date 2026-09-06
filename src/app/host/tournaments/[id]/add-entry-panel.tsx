@@ -37,6 +37,14 @@ export default function AddEntryPanel({
   const [bowlId2, setBowlId2] = useState("");
   const [bowlId3, setBowlId3] = useState("");
   const [memberNames, setMemberNames] = useState<string[]>(["", "", "", "", ""]);
+  const [memberIds, setMemberIds] = useState<string[]>(["", "", "", "", ""]);
+  const [memberAvgs, setMemberAvgs] = useState<string[]>(["", "", "", "", ""]);
+
+  function setMember(list: string[], set: (v: string[]) => void, i: number, v: string) {
+    const n = [...list];
+    n[i] = v;
+    set(n);
+  }
 
   function fillMember(i: number, name: string) {
     setMemberNames((m) => {
@@ -127,11 +135,16 @@ export default function AddEntryPanel({
     // Link to a real profile when the entry came from a Bowl ID lookup, so the
     // result reaches their career page.
     if (!error && entry) {
-      const typed = memberNames.slice(0, size).map((n) => n.trim());
-      const rows = typed
-        .map((n, i) => ({ n, i }))
-        .filter((r) => r.n)
-        .map((r) => ({ entry_id: entry.id, name: r.n, position: r.i + 1 }));
+      const rows = memberNames.slice(0, size)
+        .map((n, i) => ({ name: n.trim(), bid: (memberIds[i] ?? "").trim(), i }))
+        .filter((r) => r.name)
+        .map((r) => ({
+          entry_id: entry.id,
+          name: r.name,
+          position: r.i + 1,
+          bowler_id:
+            r.i === 0 ? lookupBowlerId : r.i === 1 ? lookupBowlerId2 : r.i === 2 ? lookupBowlerId3 : null,
+        }));
       if (rows.length) await supabase.from("entry_bowlers").insert(rows);
     }
     if (!error && entry && lookupBowlerId) {
@@ -180,98 +193,58 @@ export default function AddEntryPanel({
     >
       <div className="w-full">
         <span className="text-ink-soft mb-1.5 block text-xs uppercase tracking-wide">
-          Bowler names
+          {size === 1 ? "Bowler" : "Team bowlers"}
         </span>
-        <div className="flex flex-wrap gap-2">
-          {Array.from({ length: size }, (_, i) => (
-            <input
-              key={i}
-              value={memberNames[i] ?? ""}
-              onChange={(e) =>
-                setMemberNames((m) => {
-                  const n = [...m];
-                  n[i] = e.target.value;
-                  return n;
-                })
-              }
-              placeholder={size === 1 ? "Bowler" : `Bowler ${i + 1}`}
-              className="glass-input w-36 px-3 py-2.5 text-ink"
-            />
-          ))}
+        <div className="flex flex-wrap gap-3">
+          {Array.from({ length: size }, (_, i) => {
+            const bid = memberIds[i] ?? "";
+            return (
+              <div key={i} className="flex w-40 flex-col gap-2 rounded-xl bg-black/20 p-3">
+                <span className="text-ink-soft text-[10px] uppercase">Bowler {i + 1}</span>
+                <div className="flex gap-1">
+                  <input
+                    value={bid}
+                    onChange={(e) => setMember(memberIds, setMemberIds, i, e.target.value.toUpperCase())}
+                    placeholder="Bowl ID"
+                    className="glass-input font-score w-full px-2 py-1.5 text-xs tracking-widest text-ink"
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!bid.trim()) return;
+                      const { data } = await supabase.rpc("lookup_bowler", { p_bowl_id: bid.trim() });
+                      const hit = (data as { id?: string; bowler_id?: string; full_name: string; average: number }[] | null)?.[0];
+                      if (!hit) return;
+                      setMember(memberNames, setMemberNames, i, hit.full_name);
+                      setMember(memberAvgs, setMemberAvgs, i, String(hit.average));
+                      const id = hit.id ?? hit.bowler_id ?? "";
+                      if (i === 0) setLookupBowlerId(id);
+                      if (i === 1) setLookupBowlerId2(id);
+                      if (i === 2) setLookupBowlerId3(id);
+                    }}
+                    className="pill-button bg-white/8 text-ink shrink-0 px-2 text-[10px]"
+                  >
+                    Look
+                  </button>
+                </div>
+                <input
+                  value={memberNames[i] ?? ""}
+                  onChange={(e) => setMember(memberNames, setMemberNames, i, e.target.value)}
+                  placeholder="Name"
+                  className="glass-input w-full px-2 py-1.5 text-sm text-ink"
+                />
+                <input
+                  value={memberAvgs[i] ?? ""}
+                  onChange={(e) => setMember(memberAvgs, setMemberAvgs, i, e.target.value)}
+                  placeholder="Avg"
+                  inputMode="numeric"
+                  className="glass-input w-full px-2 py-1.5 text-sm text-ink"
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
-
-      <label className="block">
-        <span className="text-xs font-medium text-ink-soft block mb-1.5">
-          Bowl ID
-        </span>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={bowlId}
-            onChange={(e) => setBowlId(e.target.value.toUpperCase())}
-            placeholder="WZWU5G"
-            className="glass-input font-score w-28 px-3 py-2.5 tracking-widest text-ink"
-          />
-          <button
-            type="button"
-            onClick={lookup}
-            className="pill-button bg-white/8 text-ink px-4 py-2.5 text-xs hover:bg-white/12"
-          >
-            Look up
-          </button>
-        </div>
-      </label>
-
-      {entryType !== "single" && (
-        <label className="block">
-          <span className="text-ink-soft mb-1.5 block text-xs uppercase tracking-wide">
-            Bowl ID - 2nd bowler
-          </span>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={bowlId2}
-              onChange={(e) => setBowlId2(e.target.value.toUpperCase())}
-              placeholder="WZWU5G"
-              className="glass-input font-score w-28 px-3 py-2.5 tracking-widest text-ink"
-            />
-            <button
-              type="button"
-              onClick={lookup2}
-              className="pill-button bg-white/8 text-ink px-4 py-2.5 text-xs hover:bg-white/12"
-            >
-              Look up
-            </button>
-          </div>
-          {lookupNote2 && <p className="text-accent mt-1 text-xs">{lookupNote2}</p>}
-        </label>
-      )}
-
-      {size >= 3 && (
-        <label className="block">
-          <span className="text-ink-soft mb-1.5 block text-xs uppercase tracking-wide">
-            Bowl ID - 3rd bowler
-          </span>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={bowlId3}
-              onChange={(e) => setBowlId3(e.target.value.toUpperCase())}
-              placeholder="WZWU5G"
-              className="glass-input font-score w-28 px-3 py-2.5 tracking-widest text-ink"
-            />
-            <button
-              type="button"
-              onClick={lookup3}
-              className="pill-button bg-white/8 text-ink px-4 py-2.5 text-xs hover:bg-white/12"
-            >
-              Look up
-            </button>
-          </div>
-          {lookupNote3 && <p className="text-accent mt-1 text-xs">{lookupNote3}</p>}
-        </label>
-      )}
 
       <label className="block">
         <span className="text-xs font-medium text-ink-soft block mb-1.5">
