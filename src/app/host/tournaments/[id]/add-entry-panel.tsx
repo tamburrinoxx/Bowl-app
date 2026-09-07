@@ -158,6 +158,10 @@ export default function AddEntryPanel({
           position: r.i + 1,
           bowler_id:
             r.i === 0 ? lookupBowlerId : r.i === 1 ? lookupBowlerId2 : r.i === 2 ? lookupBowlerId3 : null,
+          average: memberAvgs[r.i] && !Number.isNaN(Number(memberAvgs[r.i])) ? Number(memberAvgs[r.i]) : null,
+          handicap: memberAvgs[r.i] && !Number.isNaN(Number(memberAvgs[r.i]))
+            ? Math.max(0, Math.floor(((handicapBase ?? 220) - Number(memberAvgs[r.i])) * percent))
+            : null,
         }));
       if (rows.length) await supabase.from("entry_bowlers").insert(rows);
     }
