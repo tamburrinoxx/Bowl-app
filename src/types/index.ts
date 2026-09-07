@@ -57,6 +57,7 @@ export interface Tournament {
   show_ticker: boolean | null;
   is_ryder: boolean | null;
   baker_games: number | null;
+  uses_squads: boolean | null;
 }
 
 export interface Squad {
@@ -118,6 +119,7 @@ export interface StandingsRow {
   entry_id: string;
   tournament_id: string;
   entry_name: string;
+  squad_label: string | null;
   locked_handicap: number | null;
   verification_status: VerificationStatus;
   games_played: number;

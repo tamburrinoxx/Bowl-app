@@ -25,6 +25,7 @@ export default function NewTournamentPage() {
     format: "handicap" as "handicap" | "scratch",
     event_type: "singles" as (typeof EVENT_TYPES)[number]["value"],
     is_ryder: false,
+    uses_squads: false,
     center_name: "",
     entry_fee: "",
     prize_fund: "",
@@ -106,6 +107,7 @@ export default function NewTournamentPage() {
         format: form.format,
         event_type: form.event_type,
         is_ryder: form.is_ryder,
+        uses_squads: form.uses_squads,
         oil_pattern_id: oilPatternId,
         center_name: form.center_name || null,
         entry_fee: form.entry_fee ? Number(form.entry_fee) : null,
@@ -188,6 +190,17 @@ export default function NewTournamentPage() {
                   onChange={(e) => update("is_ryder", e.target.checked)}
                 />
                 Two teams, match play, points
+              </label>
+            </Field>
+
+            <Field label="Multiple squads">
+              <label className="flex items-center gap-2 text-sm text-ink">
+                <input
+                  type="checkbox"
+                  checked={form.uses_squads}
+                  onChange={(e) => update("uses_squads", e.target.checked)}
+                />
+                Separate squads at different times
               </label>
             </Field>
           </div>

@@ -73,6 +73,7 @@ export default function TournamentWizard() {
   const [state, setState] = useState("");
   const [startsAt, setStartsAt] = useState("");
   const [entrySize, setEntrySize] = useState(1);
+  const [usesSquads, setUsesSquads] = useState(false);
   const [entries, setEntries] = useState("24");
   const [lanes, setLanes] = useState("12");
   const [hours, setHours] = useState("4");
@@ -164,6 +165,7 @@ export default function TournamentWizard() {
         format: plan.format,
         event_type: eventType,
         entry_size: entrySize,
+        uses_squads: usesSquads,
         center_name: centerName.trim() || null,
           city: city.trim() || null,
           state: state.trim().toUpperCase() || null,
@@ -357,6 +359,22 @@ export default function TournamentWizard() {
                   onChange={(e) => setStartsAt(e.target.value)}
                   className="glass-input w-full px-4 py-2.5 text-ink"
                 />
+              </Field>
+
+              <Field label="Multiple squads">
+                <label className="flex items-center gap-2 text-sm text-ink">
+                  <input type="checkbox" checked={usesSquads}
+                    onChange={(e) => setUsesSquads(e.target.checked)} />
+                  Separate squads at different times
+                </label>
+              </Field>
+
+              <Field label="Multiple squads">
+                <label className="flex items-center gap-2 text-sm text-ink">
+                  <input type="checkbox" checked={usesSquads}
+                    onChange={(e) => setUsesSquads(e.target.checked)} />
+                  Separate squads at different times
+                </label>
               </Field>
             </>
           )}

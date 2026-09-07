@@ -175,6 +175,12 @@ export default async function HostTournamentPage({
           </CollapseSection>
         )}
 
+        {tournament.uses_squads && (
+        <CollapseSection title="Squads">
+          <SquadsPanel tournamentId={tournament.id} entries={entries ?? []} />
+        </CollapseSection>
+        )}
+
         <CollapseSection title="Add Entry">
           <AddEntryPanel
             tournamentId={tournament.id}
@@ -213,10 +219,6 @@ export default async function HostTournamentPage({
             entries={entries ?? []}
             bakerGames={tournament.baker_games ?? 0}
           />
-        </CollapseSection>
-
-        <CollapseSection title="Squads">
-          <SquadsPanel tournamentId={tournament.id} entries={entries ?? []} />
         </CollapseSection>
 
         <CollapseSection title="Entries &amp; Check-In" id="entries">
