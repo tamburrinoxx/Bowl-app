@@ -369,13 +369,6 @@ export default function TournamentWizard() {
                 </label>
               </Field>
 
-              <Field label="Multiple squads">
-                <label className="flex items-center gap-2 text-sm text-ink">
-                  <input type="checkbox" checked={usesSquads}
-                    onChange={(e) => setUsesSquads(e.target.checked)} />
-                  Separate squads at different times
-                </label>
-              </Field>
             </>
           )}
 
