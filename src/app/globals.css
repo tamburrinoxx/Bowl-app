@@ -152,3 +152,7 @@ body {
   body { padding-bottom: 3.25rem; }
 }
 
+
+@media (min-width: 640px) {
+  html { font-size: 104%; }
+}
