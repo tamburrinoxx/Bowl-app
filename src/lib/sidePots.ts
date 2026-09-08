@@ -197,3 +197,62 @@ export function rollUp(wins: PotWin[]) {
     .map(([entryId, v]) => ({ entryId, ...v }))
     .sort((a, b) => b.amount - a.amount);
 }
+
+
+// --- Individual side action -------------------------------------------------
+// Expands each team entry into one "buyer" per linked bowler, so the existing
+// high-game / eliminator / bracket math can run per bowler. The synthetic id is
+// `${entry_id}:${slot}` and the matching per-bowler scores use the same id.
+
+export interface BowlerLink {
+  entry_id: string;
+  bowler_slot: number | null;
+  bowler_id: string | null;
+  name: string;
+  handicap: number | null;
+}
+
+export interface BowlerGame {
+  entry_id: string;
+  bowler_slot: number | null;
+  bowler_id: string | null;
+  game_number: number;
+  scratch_score: number;
+}
+
+const bowlerKey = (entryId: string, slot: number | null, bid: string | null) =>
+  `${entryId}:${slot ?? bid ?? "solo"}`;
+
+/** Turn team buyers + bowler links into per-bowler buyers. Each bowler inherits
+ *  the team's buy quantity so a team that bought 2 brackets enters each member. */
+export function expandToBowlers(
+  buyers: Buyer[],
+  links: BowlerLink[],
+): Buyer[] {
+  const out: Buyer[] = [];
+  for (const b of buyers) {
+    const mine = links.filter((l) => l.entry_id === b.entryId);
+    if (mine.length === 0) {
+      out.push(b);
+      continue;
+    }
+    for (const l of mine) {
+      out.push({
+        entryId: bowlerKey(l.entry_id, l.bowler_slot, l.bowler_id),
+        name: l.name,
+        handicap: l.handicap ?? 0,
+        quantity: b.quantity,
+      });
+    }
+  }
+  return out;
+}
+
+/** Per-bowler game scores reshaped to the synthetic buyer id. */
+export function expandScores(games: BowlerGame[]): GameScore[] {
+  return games.map((g) => ({
+    entry_id: bowlerKey(g.entry_id, g.bowler_slot, g.bowler_id),
+    game_number: g.game_number,
+    scratch_score: g.scratch_score,
+  }));
+}
