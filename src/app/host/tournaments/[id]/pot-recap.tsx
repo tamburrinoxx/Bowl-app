@@ -7,6 +7,8 @@ import {
   highGameWins,
   highSeriesWins,
   eliminatorWins,
+  expandToBowlers,
+  expandScores,
   bracketWins,
   rollUp,
   type Buyer,
@@ -29,7 +31,7 @@ export default function PotRecap({
   const load = useCallback(async () => {
     const { data: potData } = await supabase
       .from("side_pots")
-      .select("id, name, pot_type, buy_in, scoring, payout_ratio, bracket_size")
+      .select("id, name, pot_type, buy_in, scoring, payout_ratio, bracket_size, per_bowler")
       .eq("tournament_id", tournamentId)
       .order("sort_order");
 
@@ -58,6 +60,31 @@ export default function PotRecap({
     }
 
     const ids = Object.keys(names);
+
+    const { data: linkData } = await supabase
+      .from("entry_bowlers")
+      .select("entry_id, bowler_slot, bowler_id, name, handicap")
+      .in("entry_id", ids.length ? ids : ["none"]);
+    const bowlerLinks = (linkData as {
+      entry_id: string; bowler_slot: number | null; bowler_id: string | null;
+      name: string | null; handicap: number | null;
+    }[] ?? []).map((l) => ({
+      entry_id: l.entry_id,
+      bowler_slot: l.bowler_slot,
+      bowler_id: l.bowler_id,
+      name: l.name ?? names[l.entry_id] ?? "-",
+      handicap: l.handicap,
+    }));
+
+    const { data: bowlerScoreData } = await supabase
+      .from("games")
+      .select("entry_id, bowler_slot, bowler_id, game_number, scratch_score")
+      .in("entry_id", ids.length ? ids : ["none"]);
+    const bowlerGames = (bowlerScoreData as {
+      entry_id: string; bowler_slot: number | null; bowler_id: string | null;
+      game_number: number; scratch_score: number;
+    }[]) ?? [];
+
     const { data: scoreData } = await supabase
       .from("games")
       .select("entry_id, game_number, scratch_score")
@@ -88,12 +115,15 @@ export default function PotRecap({
       const fee = Number(pot.buy_in);
       let potWins: PotWin[] = [];
 
+      const useBuyers = pot.per_bowler ? expandToBowlers(buyers, bowlerLinks) : buyers;
+      const useScores = pot.per_bowler ? expandScores(bowlerGames) : scores;
+
       if (pot.pot_type === "high_game") {
-        potWins = highGameWins(buyers, scores, fee, gamesPerSquad, hc);
+        potWins = highGameWins(useBuyers, useScores, fee, gamesPerSquad, hc);
       } else if (pot.pot_type === "high_series") {
         potWins = highSeriesWins(buyers, scores, fee, pot.payout_ratio, hc);
       } else if (pot.pot_type === "eliminator") {
-        potWins = eliminatorWins(buyers, scores, fee, gamesPerSquad, hc);
+        potWins = eliminatorWins(useBuyers, useScores, fee, gamesPerSquad, hc);
       } else if (pot.pot_type === "brackets") {
         const mine = (matchData ?? []).filter((m: MatchRow) => m.side_pot_id === pot.id);
         potWins = bracketWins(mine, names, fee, pot.bracket_size || 8);
@@ -163,6 +193,7 @@ interface PotRow {
   scoring: string;
   payout_ratio: number;
   bracket_size: number;
+  per_bowler: boolean | null;
 }
 
 interface BuyRow {
