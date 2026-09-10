@@ -13,10 +13,9 @@ const oswald = Oswald({
 export const metadata: Metadata = {
   metadataBase: new URL("https://bowl-app-omega.vercel.app"),
   title: "Pinfall — Tournament Hosting & Handicaps",
-  description: "Live standings, brackets, and verified bowler profiles.",
   openGraph: {
     title: "Pinfall",
-    description: "Live standings, brackets, and verified bowler profiles.",
+    description: "Pattern-aware handicaps, tournament scoring, and verified bowler profiles.",
     images: ["/pinfall-og.png"],
     type: "website",
   },
