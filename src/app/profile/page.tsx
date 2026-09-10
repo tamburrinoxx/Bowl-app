@@ -376,7 +376,7 @@ export default function ProfilePage() {
         </button>
       </div>
       <div className="mx-auto max-w-7xl lg:grid lg:grid-cols-4 lg:auto-rows-min lg:items-start lg:gap-6">
-        <div className="glass-panel lg:col-start-1 lg:col-span-1 p-8 mb-6 flex items-baseline justify-between">
+        <div className="glass-panel lg:col-start-1 lg:col-span-1 p-5 sm:p-8 mb-4 sm:mb-6 flex items-baseline justify-between">
           <div>
             <p className="font-score text-accent text-xs font-semibold tracking-wide mb-1 uppercase">
               Bowler Profile
@@ -404,7 +404,7 @@ export default function ProfilePage() {
                 </div>
               </div>
             ) : (
-              <h1 className="font-display text-4xl text-ink">
+              <h1 className="font-display text-3xl sm:text-4xl text-ink">
                 {profile.full_name}
                 <button
                   onClick={() => {
@@ -436,7 +436,7 @@ export default function ProfilePage() {
 
         <Link
           href="/profile/score"
-          className="glass-panel lg:col-start-1 lg:col-span-1 p-6 mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
+          className="glass-panel lg:col-start-1 lg:col-span-1 p-4 sm:p-6 mb-4 sm:mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
         >
           <div>
             <p className="font-display text-xl text-ink mb-1">Log a Session</p>
@@ -445,7 +445,7 @@ export default function ProfilePage() {
           <span className="text-accent text-2xl font-light">→</span>
         </Link>
 
-        <section className="glass-panel lg:col-start-4 lg:col-span-1 lg:row-start-1 p-8 mb-6">
+        <section className="glass-panel lg:col-start-4 lg:col-span-1 lg:row-start-1 p-5 sm:p-8 mb-4 sm:mb-6">
           <div className="mb-4 flex items-baseline justify-between gap-2">
             <h2 className="font-display text-xl text-ink">Recent Stats</h2>
             <select value={statRange} onChange={(e) => setStatRange(e.target.value)}
@@ -457,7 +457,7 @@ export default function ProfilePage() {
             </select>
           </div>
           {stats.gamesCounted ? (
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <StatBox label="Strike %" value={`${stats.strikePct}%`} />
               <StatBox label="Spare %" value={`${stats.sparePct}%`} />
               <StatBox label="Open %" value={`${stats.openPct}%`} />
@@ -472,7 +472,7 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="glass-panel lg:col-start-2 lg:col-span-2 lg:row-start-1 p-8 mb-6">
+        <section className="glass-panel lg:col-start-2 lg:col-span-2 lg:row-start-1 p-5 sm:p-8 mb-4 sm:mb-6">
           <h2 className="font-display text-xl text-ink mb-4">
             Last {sessions.length || 5} Leagues / Tournaments
           </h2>
@@ -509,7 +509,7 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="glass-panel lg:col-start-1 lg:col-span-1 p-8 mb-6">
+        <section className="glass-panel lg:col-start-1 lg:col-span-1 p-5 sm:p-8 mb-4 sm:mb-6">
           <h2 className="font-display text-xl text-ink mb-4">Pattern Averages</h2>
           {averages.length ? (
             <div className="space-y-3">
@@ -544,7 +544,7 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="glass-panel lg:col-start-2 lg:col-span-2 lg:row-start-2 p-8">
+        <section className="glass-panel lg:col-start-2 lg:col-span-2 lg:row-start-2 p-5 sm:p-8">
           <h2 className="font-display text-xl text-ink mb-4">Notes to Work On</h2>
           <form onSubmit={addNote} className="flex gap-2 mb-4">
             <input

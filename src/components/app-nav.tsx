@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/logo";
+import { createClient } from "@/lib/supabase/client";
 
 const SECTIONS = [
   { group: "Host", links: [
@@ -21,7 +22,7 @@ const SECTIONS = [
   ]},
 ];
 
-const QUICK = [
+const HOST_QUICK = [
   { label: "Tournaments", href: "/host/tournaments" },
   { label: "New", href: "/host/tournaments/wizard" },
   { label: "Public", href: "/t" },
@@ -29,9 +30,35 @@ const QUICK = [
   { label: "All pages", href: "/admin" },
 ];
 
+const BOWLER_QUICK = [
+  { label: "Tournaments", href: "/t" },
+  { label: "Profile", href: "/profile" },
+  { label: "Stats", href: "/profile/career" },
+];
+
 export default function AppNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const [isHost, setIsHost] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    let off = false;
+    (async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", auth.user.id)
+        .single();
+      if (!off) setIsHost(data?.role === "host");
+    })();
+    return () => { off = true; };
+  }, []);
+
+  const QUICK = isHost ? HOST_QUICK : BOWLER_QUICK;
+  const VISIBLE = isHost ? SECTIONS : SECTIONS.filter((x) => x.group === "Bowler");
 
   if (pathname === "/" || pathname === "/login") return null;
 
@@ -125,7 +152,7 @@ export default function AppNav() {
               </button>
             </div>
 
-            {SECTIONS.map((s) => (
+            {VISIBLE.map((s) => (
               <div key={s.group} className="mb-6">
                 <p className="text-ink-soft mb-2 text-xs font-medium uppercase tracking-wide">
                   {s.group}

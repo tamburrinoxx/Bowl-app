@@ -1,7 +1,20 @@
 import { Logo } from "@/components/logo";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (auth.user) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", auth.user.id)
+      .single();
+    redirect(data?.role === "host" ? "/host/tournaments" : "/profile");
+  }
+
   return (
     <main className="min-h-screen flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">

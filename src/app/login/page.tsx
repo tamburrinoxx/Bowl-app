@@ -114,7 +114,14 @@ export default function LoginPage() {
   return (
     <main className="min-h-screen px-6 py-12">
       <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-2">
-        <div className="max-w-lg">
+        <div className="mb-2 text-center lg:hidden">
+          <Logo className="mb-3 justify-center text-4xl" />
+          <p className="text-ink-soft text-sm">
+            Every game. Every tournament. One profile.
+          </p>
+        </div>
+
+        <div className="hidden max-w-lg lg:block">
           <Logo className="mb-8 text-3xl" />
 
           <h1 className="font-display text-ink mb-4 text-5xl leading-[0.95]">
@@ -198,6 +205,7 @@ export default function LoginPage() {
             </label>
             <input
               type="email"
+              autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -212,6 +220,7 @@ export default function LoginPage() {
             </label>
             <input
               type="password"
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
               required
               minLength={6}
               value={password}
