@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import BackLink from "@/components/back-link";
 import { createClient } from "@/lib/supabase/client";
 import type { FrameData } from "@/lib/bowling";
@@ -42,9 +42,9 @@ export default function ScoreEntryPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const searchParams = useSearchParams();
-  const leagueId = searchParams.get("league");
-  const [label, setLabel] = useState(searchParams.get("label") ?? "");
+  const qs = typeof window === "undefined" ? null : new URLSearchParams(window.location.search);
+  const leagueId = qs?.get("league") ?? null;
+  const [label, setLabel] = useState(qs?.get("label") ?? "");
   const [playedAt, setPlayedAt] = useState(() => new Date().toISOString().slice(0, 10));
   const [games, setGames] = useState<FrameData[][]>([emptyGame(), emptyGame(), emptyGame()]);
   const [activeGame, setActiveGame] = useState(0);
