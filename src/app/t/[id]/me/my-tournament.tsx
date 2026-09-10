@@ -327,11 +327,11 @@ export default function MyTournament({
 
   return (
     <div className="space-y-6">
-      <div className="glass-panel p-8">
+      <div className="glass-panel p-5 sm:p-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-ink-soft text-xs uppercase tracking-wide">Position</p>
-            <p className="font-score text-accent text-5xl">
+            <p className="font-score text-accent text-4xl sm:text-5xl">
               {position || "—"}
               <span className="text-ink-soft ml-2 text-lg">of {standings.length}</span>
             </p>
@@ -341,7 +341,7 @@ export default function MyTournament({
           </div>
           <div className="text-right">
             <p className="text-ink-soft text-xs uppercase tracking-wide">Winning now</p>
-            <p className="font-score text-accent text-4xl">{formatMoney(total)}</p>
+            <p className="font-score text-accent text-3xl sm:text-4xl">{formatMoney(total)}</p>
           </div>
         </div>
 
@@ -354,17 +354,17 @@ export default function MyTournament({
         )}
       </div>
 
-      <div className="glass-panel p-8">
+      <div className="glass-panel p-5 sm:p-8">
         <p className="text-ink-soft mb-3 text-xs font-medium uppercase tracking-wide">
           Your games
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-4 gap-2 sm:flex sm:flex-wrap">
           {Array.from({ length: gamesPerSquad }, (_, i) => i + 1).map((n) => {
             const g = myGames.find((x) => x.game_number === n);
             return (
               <div
                 key={n}
-                className={`rounded-2xl px-4 py-3 text-center ${g ? "bg-accent/15" : "bg-white/5"}`}
+                className={`rounded-2xl px-2 py-2 text-center sm:px-4 sm:py-3 ${g ? "bg-accent/15" : "bg-white/5"}`}
               >
                 <span className="text-ink-soft block text-xs">G{n}</span>
                 <span className={`font-score block text-xl ${g ? "text-accent" : "text-ink-soft"}`}>
@@ -381,7 +381,7 @@ export default function MyTournament({
       </div>
 
       {(potRows.length > 0 || brackets.length > 0) && (
-        <div className="glass-panel p-8">
+        <div className="glass-panel p-5 sm:p-8">
           <p className="text-ink-soft mb-3 text-xs font-medium uppercase tracking-wide">
             Your side action
           </p>

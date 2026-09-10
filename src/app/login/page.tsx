@@ -74,6 +74,18 @@ export default function LoginPage() {
     );
   }
 
+  async function handleReset() {
+    if (!email) { setError("Enter your email first."); return; }
+    setError(""); setMessage(""); setBusy(true);
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+    setBusy(false);
+    if (resetError) setError(resetError.message);
+    else setMessage("Check your email for a reset link.");
+  }
+
+
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -207,6 +219,15 @@ export default function LoginPage() {
               placeholder="At least 6 characters"
               className={inputClass}
             />
+            {mode !== "signup" && (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="text-ink-soft mt-2 ml-1 text-xs underline"
+              >
+                Forgot password?
+              </button>
+            )}
           </div>
 
           {error && (
