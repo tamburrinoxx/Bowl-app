@@ -58,6 +58,39 @@ export default function ScoreEntryPage() {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [hitLogs, setHitLogs] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [restored, setRestored] = useState(false);
+
+  const draftKey = "pinfall_draft" + (leagueId ? ":" + leagueId : "");
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (Date.now() - d.at < 3 * 60 * 60 * 1000) {
+          if (d.label) setLabel(d.label);
+          if (d.playedAt) setPlayedAt(d.playedAt);
+          if (d.games) setGames(d.games);
+          if (d.pinLogs) setPinLogs(d.pinLogs);
+          if (d.pinLog) setPinLog(d.pinLog);
+          if (d.hitLogs) setHitLogs(d.hitLogs);
+          if (typeof d.activeGame === "number") setActiveGame(d.activeGame);
+        } else {
+          localStorage.removeItem(draftKey);
+        }
+      }
+    } catch {}
+    setRestored(true);
+  }, [draftKey]);
+
+  useEffect(() => {
+    if (!restored) return;
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({
+        at: Date.now(), label, playedAt, games, pinLogs, pinLog, hitLogs, activeGame,
+      }));
+    } catch {}
+  }, [restored, draftKey, label, playedAt, games, pinLogs, pinLog, hitLogs, activeGame]);
   const [error, setError] = useState<string | null>(null);
 
   const currentGame = games[activeGame];
@@ -110,7 +143,23 @@ export default function ScoreEntryPage() {
   }
 
   function undoRoll() {
-    if (!pinLog.length) return;
+    if (!pinLog.length) {
+      // Nothing in the current frame — step back and clear the previous one.
+      const target = gameFinished ? 9 : currentFrameIndex - 1;
+      if (target < 0) return;
+      const gameIdx = activeGame;
+      const prior = pinLogs[gameIdx][target] ?? [];
+      const keep = prior.slice(0, -1);
+      updateFrame(gameIdx, target, keep.map((k) => k.length));
+      setPinLogs((prev) => {
+        const next = prev.map((g) => g.map((f) => f.map((r) => [...r])));
+        next[gameIdx][target] = keep.map((r) => [...r]);
+        return next;
+      });
+      setPinLog(keep.map((r) => [...r]));
+      setSelected(new Set());
+      return;
+    }
     const newPinLog = pinLog.slice(0, -1);
     setPinLog(newPinLog);
     setSelected(new Set());
@@ -359,9 +408,11 @@ export default function ScoreEntryPage() {
               <div className="flex gap-3">
                 <button
                   onClick={undoRoll}
-                  disabled={!pinLog.length}
+                  disabled={!pinLog.length && currentFrameIndex <= 0 && !gameFinished}
                   className={`pill-button shrink-0 px-4 py-3 ${
-                    pinLog.length ? "bg-white/10 text-ink" : "bg-white/5 text-ink-soft/30"
+                    pinLog.length || currentFrameIndex > 0 || gameFinished
+                      ? "bg-white/10 text-ink"
+                      : "bg-white/5 text-ink-soft/30"
                   }`}
                 >
                   ↺
