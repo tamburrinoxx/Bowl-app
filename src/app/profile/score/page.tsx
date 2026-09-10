@@ -109,6 +109,22 @@ export default function ScoreEntryPage() {
     });
   }
 
+  function undoRoll() {
+    if (!pinLog.length) return;
+    const newPinLog = pinLog.slice(0, -1);
+    setPinLog(newPinLog);
+    setSelected(new Set());
+    updateFrame(activeGame, currentFrameIndex, newPinLog.map((k) => k.length));
+
+    const gameIdx = activeGame;
+    const frameIdx = currentFrameIndex;
+    setPinLogs((prev) => {
+      const next = prev.map((g) => g.map((f) => f.map((r) => [...r])));
+      next[gameIdx][frameIdx] = newPinLog.map((r) => [...r]);
+      return next;
+    });
+  }
+
   function togglePin(pin: number) {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -341,14 +357,26 @@ export default function ScoreEntryPage() {
           </div>
         )}
               <div className="flex gap-3">
-                {canStrike && (
-                  <button
-                    onClick={() => commitRoll(standingPins)}
-                    className="pill-button flex-1 bg-accent text-on-accent py-3 hover:brightness-110"
-                  >
-                    Strike
-                  </button>
-                )}
+                <button
+                  onClick={undoRoll}
+                  disabled={!pinLog.length}
+                  className={`pill-button shrink-0 px-4 py-3 ${
+                    pinLog.length ? "bg-white/10 text-ink" : "bg-white/5 text-ink-soft/30"
+                  }`}
+                >
+                  ↺
+                </button>
+                <button
+                  onClick={() => canStrike && commitRoll(standingPins)}
+                  disabled={!canStrike}
+                  className={`pill-button flex-1 py-3 ${
+                    canStrike
+                      ? "bg-accent text-on-accent hover:brightness-110"
+                      : "bg-white/5 text-ink-soft/30"
+                  }`}
+                >
+                  Strike
+                </button>
                 <button
                   onClick={() =>
                     commitRoll(standingPins.filter((p) => !selected.has(p)))
