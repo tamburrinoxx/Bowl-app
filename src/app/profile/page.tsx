@@ -26,7 +26,7 @@ export default function ProfilePage() {
   const [fullName, setFullName] = useState("");
   const [homeCenter, setHomeCenter] = useState("");
   const [handedness, setHandedness] = useState("");
-  const [statRange, setStatRange] = useState("all");
+  const [statRange, setStatRange] = useState("12");
   const [editingProfile, setEditingProfile] = useState(false);
 
   async function deleteSession(id: string, label: string) {
@@ -353,16 +353,14 @@ export default function ProfilePage() {
     );
   }
 
-  const rangeDays: Record<string, number> = { "30": 30, "90": 90, "365": 365 };
-  const cutoff = rangeDays[statRange]
-    ? Date.now() - rangeDays[statRange] * 86400000
-    : null;
-  const statSessions = cutoff
-    ? sessions.filter((s) => new Date(s.played_at).getTime() >= cutoff)
-    : sessions;
-  const allGames = statSessions.flatMap((s) =>
+  const ordered = [...sessions].sort(
+    (a, b) => new Date(b.played_at).getTime() - new Date(a.played_at).getTime()
+  );
+  const everyGame = ordered.flatMap((s) =>
     (s.session_games ?? []).map((g) => g.frame_data)
   );
+  const windowSize = statRange === "all" ? everyGame.length : Number(statRange);
+  const allGames = everyGame.slice(0, windowSize);
   const stats = aggregateStats(allGames);
 
   return (
@@ -456,28 +454,21 @@ export default function ProfilePage() {
           <span className="text-accent text-2xl font-light">→</span>
         </Link>
 
-        <Link
-          href="/profile/career"
-          className="glass-panel lg:col-start-1 lg:col-span-1 p-4 sm:p-6 mb-4 sm:mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
-        >
-          <div>
-            <p className="font-display text-xl text-ink mb-1">Career Stats</p>
-            <p className="text-ink-soft text-sm">Strikes, spares, splits and leaves across everything you bowl.</p>
-          </div>
-          <span className="text-accent text-2xl font-light">→</span>
-        </Link>
-
         <section className="glass-panel lg:col-start-4 lg:col-span-1 lg:row-start-1 p-5 sm:p-8 mb-4 sm:mb-6">
           <div className="mb-4 flex items-baseline justify-between gap-2">
             <h2 className="font-display text-xl text-ink">Recent Stats</h2>
             <select value={statRange} onChange={(e) => setStatRange(e.target.value)}
               className="glass-input bg-transparent px-2 py-1 text-xs text-ink">
-              <option value="all">All time</option>
-              <option value="30">30 days</option>
-              <option value="90">90 days</option>
-              <option value="365">1 year</option>
+              <option value="12">Last 12</option>
+              <option value="30">Last 30</option>
+              <option value="60">Last 60</option>
+              <option value="all">All games</option>
             </select>
           </div>
+          <Link href="/profile/career"
+            className="text-accent mb-4 block text-xs hover:underline">
+            Full career stats, splits and leaves →
+          </Link>
           {stats.gamesCounted ? (
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <StatBox label="Strike %" value={`${stats.strikePct}%`} />
