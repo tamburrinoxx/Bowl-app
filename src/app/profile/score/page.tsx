@@ -186,7 +186,7 @@ export default function ScoreEntryPage() {
         </p>
         <h1 className="font-display text-4xl text-ink mb-8">Enter Your Scores</h1>
 
-        <div className="glass-panel p-6 mb-6">
+        <div className="glass-panel p-4 sm:p-6 mb-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
@@ -228,7 +228,7 @@ export default function ScoreEntryPage() {
         </div>
 
         {/* Scoresheet grid */}
-        <div className="glass-panel p-4 mb-4">
+        <div className="glass-panel p-2 sm:p-4 mb-4">
           <div className="grid grid-cols-5">
             {currentGame.map((frame, i) => {
               const marks = frameMarks(frame, i + 1);
@@ -236,7 +236,7 @@ export default function ScoreEntryPage() {
               return (
                 <div
                   key={i}
-                  className={`flex-1 min-w-[52px] border-r border-white/10 last:border-r-0 ${
+                  className={`min-w-0 border-r border-white/10 last:border-r-0 ${
                     isActive ? "bg-accent/10" : ""
                   }`}
                 >
@@ -262,7 +262,7 @@ export default function ScoreEntryPage() {
         </div>
 
         {/* Pin deck */}
-        <div className="glass-panel p-6 mb-4">
+        <div className="glass-panel p-4 sm:p-6 mb-4">
           {gameFinished ? (
             <div className="text-center py-8">
               <p className="text-ink-soft text-sm uppercase tracking-wide mb-1">Game Score</p>
@@ -273,9 +273,9 @@ export default function ScoreEntryPage() {
               <p className="text-center text-ink-soft text-xs uppercase tracking-wide mb-4">
                 Frame {frameNumber} · Tap pins still standing
               </p>
-              <div className="flex flex-col items-center gap-3 mb-6">
+              <div className="flex flex-col items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
                 {PIN_ROWS.map((row, ri) => (
-                  <div key={ri} className="flex gap-3">
+                  <div key={ri} className="flex gap-2 sm:gap-3">
                     {row.map((pin) => {
                       const isAvailable = standingPins.includes(pin);
                       const isSelected = selected.has(pin);
@@ -284,7 +284,7 @@ export default function ScoreEntryPage() {
                           key={pin}
                           disabled={!isAvailable}
                           onClick={() => togglePin(pin)}
-                          className={`w-12 h-12 rounded-full text-sm font-semibold transition-colors ${
+                          className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full text-sm font-semibold transition-colors ${
                             !isAvailable
                               ? "bg-white/5 text-ink-soft/20"
                               : isSelected
