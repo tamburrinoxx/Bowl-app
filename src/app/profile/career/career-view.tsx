@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/payouts";
 import { analysePinLogs, type BowlingStats } from "@/lib/leaves";
+import { BADGES } from "@/lib/achievements";
 
 interface TournamentRow {
   id: string;
@@ -28,6 +29,20 @@ export default function CareerView() {
   const [allGames, setAllGames] = useState<{ log: number[][][]; leagueId: string | null }[]>([]);
   const [leagueOpts, setLeagueOpts] = useState<{ id: string; name: string }[]>([]);
   const [source, setSource] = useState("all");
+  const [badges, setBadges] = useState<{ code: string; earned_at: string }[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: a } = await supabase.auth.getUser();
+      if (!a.user) return;
+      const { data } = await supabase
+        .from("achievements")
+        .select("code, earned_at")
+        .eq("bowler_id", a.user.id)
+        .order("earned_at", { ascending: false });
+      setBadges((data as { code: string; earned_at: string }[]) ?? []);
+    })();
+  }, [supabase]);
 
   useEffect(() => {
     const picked =
@@ -182,6 +197,30 @@ export default function CareerView() {
           </p>
         )}
       </div>
+
+      {badges.length > 0 && (
+        <div className="glass-panel mb-6 p-5 sm:p-8">
+          <p className="text-ink-soft mb-4 text-xs font-medium uppercase tracking-wide">
+            Achievements
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(
+              badges.reduce<Record<string, number>>((acc, b) => {
+                acc[b.code] = (acc[b.code] ?? 0) + 1;
+                return acc;
+              }, {})
+            ).map(([code, n]) => (
+              <div key={code} className="rounded-2xl bg-white/5 px-3 py-2">
+                <p className="text-accent text-sm font-semibold">
+                  {BADGES[code]?.name ?? code}
+                  {n > 1 && <span className="text-ink-soft ml-1 text-xs">×{n}</span>}
+                </p>
+                <p className="text-ink-soft text-[11px]">{BADGES[code]?.blurb ?? ""}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {stats && (
         <div className="glass-panel p-8">

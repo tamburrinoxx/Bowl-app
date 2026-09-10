@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BackLink from "@/components/back-link";
+import { checkSession } from "@/lib/achievements";
 import { createClient } from "@/lib/supabase/client";
 import type { FrameData } from "@/lib/bowling";
 import {
@@ -171,6 +172,24 @@ export default function ScoreEntryPage() {
     }));
 
     const { error: gamesErr } = await supabase.from("session_games").insert(rows);
+
+    const { count } = await supabase
+      .from("sessions")
+      .select("id", { count: "exact", head: true })
+      .eq("bowler_id", user.id);
+    const earned = checkSession(games, pinLogs, (count ?? 0) <= 1);
+    if (earned.length) {
+      const { error: achErr } = await supabase.from("achievements").insert(
+        earned.map((e) => ({
+          bowler_id: user.id,
+          code: e.code,
+          session_id: session.id,
+          detail: e.detail ?? null,
+        }))
+      );
+      if (achErr) console.error("achievements:", achErr);
+    }
+
     setSaving(false);
 
     if (gamesErr) {
