@@ -25,6 +25,17 @@ export default function CareerView() {
   const [rows, setRows] = useState<TournamentRow[]>([]);
   const [stats, setStats] = useState<BowlingStats | null>(null);
   const [sessionGames, setSessionGames] = useState(0);
+  const [allGames, setAllGames] = useState<{ log: number[][][]; leagueId: string | null }[]>([]);
+  const [leagueOpts, setLeagueOpts] = useState<{ id: string; name: string }[]>([]);
+  const [source, setSource] = useState("all");
+
+  useEffect(() => {
+    const picked =
+      source === "all" ? allGames
+      : source === "practice" ? allGames.filter((g) => !g.leagueId)
+      : allGames.filter((g) => g.leagueId === source);
+    setStats(picked.length ? analysePinLogs(picked.map((g) => g.log)) : null);
+  }, [source, allGames]);
 
   const load = useCallback(async () => {
     const { data: auth } = await supabase.auth.getUser();
@@ -99,19 +110,31 @@ export default function CareerView() {
 
     const { data: sessions } = await supabase
       .from("sessions")
-      .select("id")
+      .select("id, label, league_id")
       .eq("bowler_id", user.id);
 
-    const sessionIds = (sessions as { id: string }[])?.map((s) => s.id) ?? [];
+    const sessList = (sessions as { id: string; label: string; league_id: string | null }[]) ?? [];
+    const sessionIds = sessList.map((s) => s.id);
+
     if (sessionIds.length) {
+      const { data: lg } = await supabase
+        .from("leagues").select("id, name")
+        .in("id", sessList.map((x) => x.league_id).filter(Boolean) as string[]);
+      setLeagueOpts((lg as { id: string; name: string }[]) ?? []);
+
       const { data: sg } = await supabase
         .from("session_games")
-        .select("pin_log")
+        .select("pin_log, session_id")
         .in("session_id", sessionIds)
         .not("pin_log", "is", null);
-      const logs = (sg as { pin_log: number[][][] }[])?.map((r) => r.pin_log) ?? [];
-      setSessionGames(logs.length);
-      if (logs.length) setStats(analysePinLogs(logs));
+
+      const raw = (sg as { pin_log: number[][][]; session_id: string }[]) ?? [];
+      const tagged = raw.map((r) => ({
+        log: r.pin_log,
+        leagueId: sessList.find((x) => x.id === r.session_id)?.league_id ?? null,
+      }));
+      setAllGames(tagged);
+      setSessionGames(tagged.length);
     }
 
     setLoading(false);
@@ -162,13 +185,29 @@ export default function CareerView() {
 
       {stats && (
         <div className="glass-panel p-8">
-          <p className="text-ink-soft mb-4 text-xs font-medium uppercase tracking-wide">
-            Your ball, from {sessionGames} logged games
-          </p>
+          <div className="mb-4 flex items-baseline justify-between gap-2">
+            <p className="text-ink-soft text-xs font-medium uppercase tracking-wide">
+              Your ball, {stats.frames} frames
+            </p>
+            <select value={source} onChange={(e) => setSource(e.target.value)}
+              className="glass-input bg-transparent px-2 py-1 text-xs text-ink">
+              <option value="all">All sources</option>
+              <option value="practice">Practice only</option>
+              {leagueOpts.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
+            </select>
+          </div>
           <div className="mb-6 grid grid-cols-3 gap-6">
             <Stat label="Strikes" value={`${stats.strikePct}%`} />
             <Stat label="Spares" value={`${stats.sparePct}%`} />
             <Stat label="Opens" value={stats.opens} />
+          </div>
+
+          <div className="mb-6 grid grid-cols-3 gap-6">
+            <Stat label="Single pin" value={stats.singleSeen ? `${Math.round((stats.singleMade / stats.singleSeen) * 100)}%` : "\u2014"} />
+            <Stat label="Multi pin" value={stats.multiSeen ? `${Math.round((stats.multiMade / stats.multiSeen) * 100)}%` : "\u2014"} />
+            <Stat label="Splits" value={stats.splitSeen ? `${Math.round((stats.splitMade / stats.splitSeen) * 100)}%` : "\u2014"} />
           </div>
 
           <p className="text-ink-soft mb-3 text-xs font-medium uppercase tracking-wide">

@@ -43,6 +43,12 @@ export interface BowlingStats {
   opens: number;
   strikePct: number;
   sparePct: number;
+  singleSeen: number;
+  singleMade: number;
+  multiSeen: number;
+  multiMade: number;
+  splitSeen: number;
+  splitMade: number;
   leaves: LeaveStat[];
 }
 
@@ -51,6 +57,9 @@ export function analysePinLogs(games: number[][][][]): BowlingStats {
   let strikes = 0;
   let spares = 0;
   let opens = 0;
+  let singleSeen = 0, singleMade = 0;
+  let multiSeen = 0, multiMade = 0;
+  let splitSeen = 0, splitMade = 0;
   const leaveMap = new Map<string, LeaveStat>();
 
   for (const game of games) {
@@ -77,6 +86,18 @@ export function analysePinLogs(games: number[][][][]): BowlingStats {
       if (cleared) spares++;
       else opens++;
 
+      const isSplit = NAMED[key]?.includes("split") ?? false;
+      if (isSplit) {
+        splitSeen++;
+        if (cleared) splitMade++;
+      } else if (standing.length === 1) {
+        singleSeen++;
+        if (cleared) singleMade++;
+      } else {
+        multiSeen++;
+        if (cleared) multiMade++;
+      }
+
       const existing = leaveMap.get(key);
       if (existing) {
         existing.seen++;
@@ -102,6 +123,7 @@ export function analysePinLogs(games: number[][][][]): BowlingStats {
     opens,
     strikePct: frames ? Math.round((strikes / frames) * 100) : 0,
     sparePct: spares + opens ? Math.round((spares / (spares + opens)) * 100) : 0,
+    singleSeen, singleMade, multiSeen, multiMade, splitSeen, splitMade,
     leaves,
   };
 }
