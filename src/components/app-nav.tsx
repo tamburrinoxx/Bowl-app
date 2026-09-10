@@ -17,6 +17,7 @@ const SECTIONS = [
   ]},
   { group: "Bowler", links: [
     { label: "Public tournaments", href: "/t" },
+    { label: "My leagues", href: "/profile/leagues" },
     { label: "My profile", href: "/profile" },
     { label: "Practice scoring", href: "/profile/score" },
   ]},

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import BackLink from "@/components/back-link";
 import { createClient } from "@/lib/supabase/client";
 import type { FrameData } from "@/lib/bowling";
 import {
@@ -41,7 +42,9 @@ export default function ScoreEntryPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [label, setLabel] = useState("");
+  const searchParams = useSearchParams();
+  const leagueId = searchParams.get("league");
+  const [label, setLabel] = useState(searchParams.get("label") ?? "");
   const [playedAt, setPlayedAt] = useState(() => new Date().toISOString().slice(0, 10));
   const [games, setGames] = useState<FrameData[][]>([emptyGame(), emptyGame(), emptyGame()]);
   const [activeGame, setActiveGame] = useState(0);
@@ -148,7 +151,7 @@ export default function ScoreEntryPage() {
 
     const { data: session, error: sessionErr } = await supabase
       .from("sessions")
-      .insert({ bowler_id: user.id, label: label.trim(), played_at: playedAt })
+      .insert({ bowler_id: user.id, label: label.trim(), played_at: playedAt, league_id: leagueId })
       .select()
       .single();
 
@@ -179,7 +182,8 @@ export default function ScoreEntryPage() {
   }
 
   return (
-    <main className="min-h-screen px-6 py-12">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
+      <BackLink />
       <div className="mx-auto max-w-2xl">
         <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 uppercase">
           Log a Session

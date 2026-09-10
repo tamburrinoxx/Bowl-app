@@ -445,6 +445,17 @@ export default function ProfilePage() {
           <span className="text-accent text-2xl font-light">→</span>
         </Link>
 
+        <Link
+          href="/profile/leagues"
+          className="glass-panel lg:col-start-1 lg:col-span-1 p-4 sm:p-6 mb-4 sm:mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
+        >
+          <div>
+            <p className="font-display text-xl text-ink mb-1">My Leagues</p>
+            <p className="text-ink-soft text-sm">Create or join a league and track it week to week.</p>
+          </div>
+          <span className="text-accent text-2xl font-light">→</span>
+        </Link>
+
         <section className="glass-panel lg:col-start-4 lg:col-span-1 lg:row-start-1 p-5 sm:p-8 mb-4 sm:mb-6">
           <div className="mb-4 flex items-baseline justify-between gap-2">
             <h2 className="font-display text-xl text-ink">Recent Stats</h2>
