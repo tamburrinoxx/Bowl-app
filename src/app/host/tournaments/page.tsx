@@ -34,13 +34,13 @@ export default async function HostTournamentsPage() {
           { label: "My profile", href: "/profile" },
         ]}
       />
-    <main className="min-h-screen px-6 py-12">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-2xl">
         <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 uppercase">
           Host
         </p>
-        <div className="mb-8 flex items-baseline justify-between gap-4">
-          <h1 className="font-display text-4xl text-ink">Your Tournaments</h1>
+        <div className="mb-6 sm:mb-8 flex flex-col gap-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+          <h1 className="font-display text-3xl sm:text-4xl text-ink">Your Tournaments</h1>
           <div className="flex shrink-0 items-center gap-3">
             <Link
               href="/host/tournaments/new"
