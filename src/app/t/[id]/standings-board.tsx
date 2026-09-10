@@ -86,7 +86,10 @@ export default function StandingsBoard({
     <div className="pb-12">
       {showTicker && <ScoreTicker rows={rows} />}
       {myIndex >= 0 && (
-        <YouBar row={rows[myIndex]} index={myIndex} rows={rows} cashLine={cashLine} payFor={payFor} />
+        <>
+          <YouBarMobile row={rows[myIndex]} index={myIndex} rows={rows} cashLine={cashLine} payFor={payFor} />
+          <YouBar row={rows[myIndex]} index={myIndex} rows={rows} cashLine={cashLine} payFor={payFor} />
+        </>
       )}
 
       <div className="space-y-1.5">
@@ -109,7 +112,7 @@ export default function StandingsBoard({
               )}
 
               <div
-                className={`relative w-full rounded-xl px-2 py-1.5 ${
+                className={`relative w-full rounded-xl px-2 py-2 sm:py-1.5 ${
                   isMe
                     ? "bg-accent/15 ring-accent/50 ring-1"
                     : i < cashLine
@@ -143,11 +146,11 @@ export default function StandingsBoard({
                       <span className="sm:hidden">{Array.from({ length: gamesPerSquad }, (_, gi) => {
                         const v = gameMap[row.entry_id]?.[gi + 1];
                         return (
-                          <span key={gi} className={`mr-1.5 ${v ? "text-ink" : "text-ink-soft/40"}`}>
+                          <span key={gi} className={`mr-0.5 inline-block w-8 text-center text-[12px] ${v ? "text-ink" : "text-ink-soft/25"}`}>
                             {v ?? "-"}
                           </span>
                         );
-                      })}</span>
+                      })}<span className="text-ink-soft/60 ml-1">avg {row.games_played ? Math.round(row.scratch_total / row.games_played) : "—"}</span></span>
                     </span>
                   </span>
 
@@ -209,6 +212,9 @@ export default function StandingsBoard({
                     <span className={`font-score block text-xl leading-none ${isMe ? "text-accent" : "text-ink"}`}>
                       {row.handicap_total}
                     </span>
+                    {backFromAbove > 0 && (
+                      <span className="text-ink-soft block text-[11px] leading-tight sm:hidden">-{backFromAbove}</span>
+                    )}
                     {pay > 0 && (
                       <span className="font-score text-accent block text-[13px]">
                         {formatMoney(pay)}
@@ -252,7 +258,7 @@ function YouBar({
   const toNext = index === 0 ? 0 : rows[index - 1].handicap_total - row.handicap_total;
 
   return (
-    <div className="bg-accent/10 ring-accent/30 mb-5 rounded-2xl p-5 ring-1">
+    <div className="bg-accent/10 ring-accent/30 mb-5 hidden rounded-2xl p-5 ring-1 sm:block">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-ink-soft text-[12px] font-semibold uppercase tracking-[0.2em]">You</p>
@@ -305,6 +311,56 @@ function YouBar({
           <>
             <span className="font-score text-accent">{toCash}</span> pins out of the money
           </>
+        ) : (
+          <span className="text-ink-soft">Standings update as scores go in.</span>
+        )}
+      </p>
+    </div>
+  );
+}
+
+function YouBarMobile({ row, index, rows, cashLine, payFor }: {
+  row: BoardRow; index: number; rows: BoardRow[]; cashLine: number; payFor: Map<number, number>;
+}) {
+  const inMoney = cashLine > 0 && index < cashLine;
+  const pay = payFor.get(index + 1) ?? 0;
+  const toCash = cashLine > 0 && !inMoney ? (rows[cashLine - 1]?.handicap_total ?? 0) - row.handicap_total : 0;
+  const toNext = index === 0 ? 0 : rows[index - 1].handicap_total - row.handicap_total;
+  const gap = index === 0 ? (rows[1] ? row.handicap_total - rows[1].handicap_total : 0) : toNext;
+  const cells = [
+    { k: "Scratch", v: String(row.scratch_total) },
+    { k: "Baker", v: row.baker_total ? String(row.baker_total) : "\u2014" },
+    { k: "Avg", v: row.games_played ? String(Math.round(row.scratch_total / row.games_played)) : "\u2014" },
+    { k: index === 0 ? "Lead" : "To next", v: gap ? String(gap) : "\u2014" },
+  ];
+  return (
+    <div className="bg-accent/10 ring-accent/30 mb-4 rounded-2xl p-4 ring-1 sm:hidden">
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-ink-soft text-[11px] font-semibold uppercase tracking-[0.2em]">You</p>
+          <p className="font-score text-accent text-4xl leading-none">
+            {index + 1}
+            <span className="text-ink-soft ml-1 text-sm">of {rows.length}</span>
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-ink-soft text-[11px] font-semibold uppercase tracking-[0.2em]">Total</p>
+          <p className="font-score text-ink text-4xl leading-none">{row.handicap_total}</p>
+        </div>
+      </div>
+      <div className="mt-3 grid grid-cols-4 gap-1 border-t border-white/10 pt-3">
+        {cells.map((c) => (
+          <div key={c.k} className="text-center">
+            <p className="text-ink-soft text-[10px] uppercase">{c.k}</p>
+            <p className="font-score text-ink-soft text-lg leading-none">{c.v}</p>
+          </div>
+        ))}
+      </div>
+      <p className="text-ink mt-3 text-[13px]">
+        {inMoney ? (
+          <>In the money for <span className="font-score text-accent">{formatMoney(pay)}</span></>
+        ) : toCash > 0 ? (
+          <><span className="font-score text-accent">{toCash}</span> pins out of the money</>
         ) : (
           <span className="text-ink-soft">Standings update as scores go in.</span>
         )}
