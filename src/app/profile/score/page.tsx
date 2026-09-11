@@ -60,6 +60,11 @@ export default function ScoreEntryPage() {
   const [saving, setSaving] = useState(false);
   const [restored, setRestored] = useState(false);
 
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("league");
+    if (p) setLeagueId(p);
+  }, []);
+
   const draftKey = "pinfall_draft";
 
   useEffect(() => {
@@ -193,6 +198,28 @@ export default function ScoreEntryPage() {
   const stats = gameStats(currentGame);
   const finalScore = gameComplete(currentGame) ? scoreGame(currentGame) : null;
 
+  // Max still available: keep what's bowled, strike out the rest.
+  const maxPossible = (() => {
+    if (finalScore !== null) return null;
+    const proj: FrameData[] = currentGame.map((f, i) =>
+      isFrameComplete(f, i + 1) ? f : { ...f, rolls: [...f.rolls] }
+    );
+    for (let i = 0; i < 10; i++) {
+      if (isFrameComplete(proj[i], i + 1)) continue;
+      if (i < 9) {
+        proj[i] = { ...proj[i], rolls: proj[i].rolls.length ? proj[i].rolls : [10] };
+        if (proj[i].rolls.length === 1 && proj[i].rolls[0] !== 10) {
+          proj[i] = { ...proj[i], rolls: [proj[i].rolls[0], 10 - proj[i].rolls[0]] };
+        }
+      } else {
+        const r = [...proj[9].rolls];
+        while (r.length < 3) r.push(r.length === 1 && r[0] !== 10 ? 10 - r[0] : 10);
+        proj[9] = { ...proj[9], rolls: r };
+      }
+    }
+    try { return scoreGame(proj); } catch { return null; }
+  })();
+
   async function handleSave() {
     if (!label.trim()) {
       setError("Give this session a name (e.g. Tuesday League).");
@@ -212,7 +239,8 @@ export default function ScoreEntryPage() {
 
     if (!user) {
       setSaving(false);
-      router.push("/profile");
+      try { localStorage.removeItem(draftKey); } catch {}
+    router.push("/profile");
       return;
     }
 
@@ -263,6 +291,7 @@ export default function ScoreEntryPage() {
       return;
     }
 
+    try { localStorage.removeItem(draftKey); } catch {}
     router.push("/profile");
   }
 
@@ -361,6 +390,9 @@ export default function ScoreEntryPage() {
             <>
               <p className="text-center text-ink-soft text-xs uppercase tracking-wide mb-4">
                 Frame {frameNumber} · Tap pins still standing
+                {maxPossible !== null && (
+                  <span className="text-accent ml-2">max {maxPossible}</span>
+                )}
               </p>
               <div className="flex flex-col items-center gap-2 sm:gap-3 mb-5 sm:mb-6">
                 {PIN_ROWS.map((row, ri) => (
