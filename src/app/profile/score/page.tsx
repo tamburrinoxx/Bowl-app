@@ -44,7 +44,7 @@ export default function ScoreEntryPage() {
   const supabase = createClient();
 
   const qs = typeof window === "undefined" ? null : new URLSearchParams(window.location.search);
-  const leagueId = qs?.get("league") ?? null;
+  const [leagueId, setLeagueId] = useState<string | null>(qs?.get("league") ?? null);
   const [label, setLabel] = useState(qs?.get("label") ?? "");
   const [playedAt, setPlayedAt] = useState(() => new Date().toISOString().slice(0, 10));
   const [games, setGames] = useState<FrameData[][]>([emptyGame(), emptyGame(), emptyGame()]);
@@ -60,7 +60,7 @@ export default function ScoreEntryPage() {
   const [saving, setSaving] = useState(false);
   const [restored, setRestored] = useState(false);
 
-  const draftKey = "pinfall_draft" + (leagueId ? ":" + leagueId : "");
+  const draftKey = "pinfall_draft";
 
   useEffect(() => {
     try {
@@ -75,6 +75,7 @@ export default function ScoreEntryPage() {
           if (d.pinLog) setPinLog(d.pinLog);
           if (d.hitLogs) setHitLogs(d.hitLogs);
           if (typeof d.activeGame === "number") setActiveGame(d.activeGame);
+          if (d.leagueId && !qs?.get("league")) setLeagueId(d.leagueId);
         } else {
           localStorage.removeItem(draftKey);
         }
@@ -87,7 +88,7 @@ export default function ScoreEntryPage() {
     if (!restored) return;
     try {
       localStorage.setItem(draftKey, JSON.stringify({
-        at: Date.now(), label, playedAt, games, pinLogs, pinLog, hitLogs, activeGame,
+        at: Date.now(), label, playedAt, games, pinLogs, pinLog, hitLogs, activeGame, leagueId,
       }));
     } catch {}
   }, [restored, draftKey, label, playedAt, games, pinLogs, pinLog, hitLogs, activeGame]);
