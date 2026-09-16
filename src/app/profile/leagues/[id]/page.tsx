@@ -7,7 +7,7 @@ import BackLink from "@/components/back-link";
 
 type League = { id: string; name: string; center: string | null; night: string | null; join_code: string };
 type Member = { bowler_id: string; full_name: string | null };
-type Week = { id: string; label: string; played_at: string; bowler_id: string };
+type Week = { id: string; label: string; played_at: string; bowler_id: string; scores?: number[] };
 
 export default function LeagueDetail() {
   const supabase = createClient();
@@ -36,13 +36,27 @@ export default function LeagueDetail() {
         .eq("league_id", leagueId)
         .order("played_at", { ascending: false });
 
+      const weekIds = ((w as Week[]) ?? []).map((x) => x.id);
+      let scoreMap: Record<string, number[]> = {};
+      if (weekIds.length) {
+        const { data: sg } = await supabase
+          .from("session_games")
+          .select("session_id, game_number, scratch_score")
+          .in("session_id", weekIds)
+          .order("game_number");
+        for (const g of (sg as { session_id: string; scratch_score: number }[]) ?? []) {
+          (scoreMap[g.session_id] ||= []).push(g.scratch_score);
+        }
+      }
+
+      console.log("weeks", w, "scoreMap", scoreMap);
       if (off) return;
       setLeague((l as League) ?? null);
       setMembers(
         ((m as unknown as { bowler_id: string; profiles: { full_name: string | null } | null }[]) ?? [])
           .map((r) => ({ bowler_id: r.bowler_id, full_name: r.profiles?.full_name ?? null }))
       );
-      setWeeks((w as Week[]) ?? []);
+      setWeeks(((w as Week[]) ?? []).map((x) => ({ ...x, scores: scoreMap[x.id] ?? [] })));
       setLoading(false);
     })();
     return () => { off = true; };
@@ -93,8 +107,16 @@ export default function LeagueDetail() {
                       <p className="text-ink text-sm">{who}</p>
                       <p className="text-ink-soft text-xs">
                         {new Date(w.played_at).toLocaleDateString()}
+                        {w.scores && w.scores.length > 0 && (
+                          <span className="ml-2">{w.scores.join(" · ")}</span>
+                        )}
                       </p>
                     </div>
+                    {w.scores && w.scores.length > 0 && (
+                      <span className="font-score text-accent text-xl">
+                        {w.scores.reduce((a, b) => a + b, 0)}
+                      </span>
+                    )}
                   </div>
                 );
               })}

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import ResumeSession from "@/components/resume-session";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile, PatternAverage, OilPattern, Session, SessionGame, BowlerNote } from "@/types";
 import { aggregateStats } from "@/lib/bowling";
@@ -430,6 +431,10 @@ export default function ProfilePage() {
           <button onClick={handleSignOut} className="text-sm text-accent font-medium">
             Sign out
           </button>
+        </div>
+
+        <div className="lg:col-start-1 lg:col-span-1">
+          <ResumeSession />
         </div>
 
         <Link
