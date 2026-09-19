@@ -37,7 +37,7 @@ export default function LeagueDetail() {
         .order("played_at", { ascending: false });
 
       const weekIds = ((w as Week[]) ?? []).map((x) => x.id);
-      let scoreMap: Record<string, number[]> = {};
+      const scoreMap: Record<string, number[]> = {};
       if (weekIds.length) {
         const { data: sg } = await supabase
           .from("session_games")
@@ -49,7 +49,6 @@ export default function LeagueDetail() {
         }
       }
 
-      console.log("weeks", w, "scoreMap", scoreMap);
       if (off) return;
       setLeague((l as League) ?? null);
       setMembers(
