@@ -9,7 +9,7 @@ export default function LoginPage() {
   const router = useRouter();
   const supabase = createClient();
 
-  const [mode, setMode] = useState<"signin" | "signup">("signup");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
