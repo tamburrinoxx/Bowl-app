@@ -61,6 +61,13 @@ export default function LeagueDetail() {
     return () => { off = true; };
   }, [leagueId, supabase]);
 
+  async function removeWeek(id: string) {
+    if (!confirm("Delete this series? This can't be undone.")) return;
+    await supabase.from("session_games").delete().eq("session_id", id);
+    const { error } = await supabase.from("sessions").delete().eq("id", id);
+    if (!error) setWeeks((prev) => prev.filter((w) => w.id !== id));
+  }
+
   if (loading) {
     return <main className="min-h-screen px-5 py-8"><p className="text-ink-soft">Loading…</p></main>;
   }
@@ -111,11 +118,19 @@ export default function LeagueDetail() {
                         )}
                       </p>
                     </div>
-                    {w.scores && w.scores.length > 0 && (
-                      <span className="font-score text-accent text-xl">
-                        {w.scores.reduce((a, b) => a + b, 0)}
-                      </span>
-                    )}
+                    <span className="flex items-center gap-3">
+                      {w.scores && w.scores.length > 0 && (
+                        <span className="font-score text-accent text-xl">
+                          {w.scores.reduce((a, b) => a + b, 0)}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => removeWeek(w.id)}
+                        className="text-ink-soft/50 hover:text-danger text-xs"
+                      >
+                        Delete
+                      </button>
+                    </span>
                   </div>
                 );
               })}
