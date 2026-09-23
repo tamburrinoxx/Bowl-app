@@ -1,4 +1,5 @@
 "use client";
+import DesktopNotice from "@/components/desktop-notice";
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -220,7 +221,8 @@ export default function TournamentWizard() {
   const canAdvance = step !== 0 || name.trim().length > 0;
 
   return (
-    <main className="min-h-screen px-6 py-12">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
+      <DesktopNotice />
       <div className="mx-auto max-w-2xl">
         <Link
           href="/host/tournaments"

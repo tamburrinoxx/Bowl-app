@@ -1,4 +1,5 @@
 "use client";
+import DesktopNotice from "@/components/desktop-notice";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -136,7 +137,8 @@ export default function NewTournamentPage() {
   }
 
   return (
-    <main className="min-h-screen px-6 py-12">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
+      <DesktopNotice />
       <div className="mx-auto max-w-2xl">
         <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 uppercase">
           Host / New Event
