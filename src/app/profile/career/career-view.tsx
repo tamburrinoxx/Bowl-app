@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/payouts";
 import { analysePinLogs, type BowlingStats } from "@/lib/leaves";
 import { BADGES } from "@/lib/achievements";
+import { StatRow } from "@/components/stat-row";
 
 interface TournamentRow {
   id: string;
@@ -26,10 +27,11 @@ export default function CareerView() {
   const [rows, setRows] = useState<TournamentRow[]>([]);
   const [stats, setStats] = useState<BowlingStats | null>(null);
   const [sessionGames, setSessionGames] = useState(0);
-  const [allGames, setAllGames] = useState<{ log: number[][][]; leagueId: string | null }[]>([]);
+  const [allGames, setAllGames] = useState<{ log: number[][][]; leagueId: string | null; score: number; gameNumber: number; sessionId: string; playedAt: string }[]>([]);
   const [leagueOpts, setLeagueOpts] = useState<{ id: string; name: string }[]>([]);
   const [useLeagues, setUseLeagues] = useState(true);
   const [useOpen, setUseOpen] = useState(true);
+  const [drill, setDrill] = useState<null | "games" | "series">(null);
   const [badges, setBadges] = useState<{ code: string; earned_at: string }[]>([]);
 
   useEffect(() => {
@@ -45,10 +47,41 @@ export default function CareerView() {
     })();
   }, [supabase]);
 
+  const picked = allGames.filter((g) => (g.leagueId ? useLeagues : useOpen));
+
   useEffect(() => {
-    const picked = allGames.filter((g) => (g.leagueId ? useLeagues : useOpen));
     setStats(picked.length ? analysePinLogs(picked.map((g) => g.log)) : null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useLeagues, useOpen, allGames]);
+
+  const gameStats = (() => {
+    if (!picked.length) return null;
+    const scores = picked.map((g) => g.score);
+    const totalPins = scores.reduce((a, b) => a + b, 0);
+    const high = Math.max(...scores);
+    const highCount = scores.filter((x) => x === high).length;
+
+    const bySession: Record<string, { score: number; at: string }> = {};
+    for (const g of picked) {
+      bySession[g.sessionId] ||= { score: 0, at: g.playedAt };
+      bySession[g.sessionId].score += g.score;
+    }
+    const seriesList = Object.values(bySession).sort((a, b) => b.score - a.score);
+
+    const cleanGames = picked.filter((g) => {
+      const a = analysePinLogs([g.log]);
+      return a.frames > 0 && a.opens === 0;
+    }).length;
+
+    return {
+      games: picked.length,
+      average: (totalPins / picked.length).toFixed(2),
+      high, highCount, totalPins, cleanGames,
+      highSeries: seriesList[0]?.score ?? 0,
+      seriesList,
+      scores: picked.map((g) => ({ score: g.score, at: g.playedAt })).sort((a, b) => b.score - a.score),
+    };
+  })();
 
   const load = useCallback(async () => {
     const { data: auth } = await supabase.auth.getUser();
@@ -123,10 +156,10 @@ export default function CareerView() {
 
     const { data: sessions } = await supabase
       .from("sessions")
-      .select("id, label, league_id")
+      .select("id, label, league_id, played_at")
       .eq("bowler_id", user.id);
 
-    const sessList = (sessions as { id: string; label: string; league_id: string | null }[]) ?? [];
+    const sessList = (sessions as { id: string; label: string; league_id: string | null; played_at: string }[]) ?? [];
     const sessionIds = sessList.map((s) => s.id);
 
     if (sessionIds.length) {
@@ -137,15 +170,22 @@ export default function CareerView() {
 
       const { data: sg } = await supabase
         .from("session_games")
-        .select("pin_log, session_id")
+        .select("pin_log, session_id, scratch_score, game_number")
         .in("session_id", sessionIds)
         .not("pin_log", "is", null);
 
-      const raw = (sg as { pin_log: number[][][]; session_id: string }[]) ?? [];
-      const tagged = raw.map((r) => ({
-        log: r.pin_log,
-        leagueId: sessList.find((x) => x.id === r.session_id)?.league_id ?? null,
-      }));
+      const raw = (sg as { pin_log: number[][][]; session_id: string; scratch_score: number; game_number: number }[]) ?? [];
+      const tagged = raw.map((r) => {
+        const sess = sessList.find((x) => x.id === r.session_id);
+        return {
+          log: r.pin_log,
+          leagueId: sess?.league_id ?? null,
+          score: r.scratch_score,
+          gameNumber: r.game_number,
+          sessionId: r.session_id,
+          playedAt: sess?.played_at ?? "",
+        };
+      });
       setAllGames(tagged);
       setSessionGames(tagged.length);
     }
@@ -195,6 +235,45 @@ export default function CareerView() {
           </p>
         )}
       </div>
+
+      {drill && gameStats && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-[#1f2329]">
+          <div className="sticky top-0 flex items-center gap-2 border-b border-white/10 bg-[#1f2329] px-4 py-3">
+            <button onClick={() => setDrill(null)} className="text-accent text-sm">
+              ‹ Back
+            </button>
+            <span className="text-ink mx-auto pr-10 text-sm font-semibold">
+              {drill === "games" ? "All games" : "All 3-game series"}
+            </span>
+          </div>
+          <div className="mx-auto max-w-2xl">
+            {(drill === "games" ? gameStats.scores : gameStats.seriesList).map((r, i) => (
+              <div key={i} className="flex items-center justify-between border-b border-white/5 px-5 py-3">
+                <span className="text-ink-soft text-sm">
+                  {r.at ? new Date(r.at).toLocaleDateString() : "—"}
+                </span>
+                <span className="font-score text-ink text-lg">{r.score}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {gameStats && (
+        <div className="glass-panel mb-6 overflow-hidden p-0">
+          <p className="text-ink-soft px-4 pb-2 pt-4 text-xs font-medium uppercase tracking-wide">
+            Game statistics
+          </p>
+          <StatRow label="Average" value={`${gameStats.average} (${gameStats.games} games)`}
+            onClick={() => setDrill("games")} />
+          <StatRow label="High game" value={`${gameStats.high}${gameStats.highCount > 1 ? ` (x${gameStats.highCount})` : ""}`}
+            onClick={() => setDrill("games")} />
+          <StatRow label="Clean games" value={String(gameStats.cleanGames)} />
+          <StatRow label="High 3-game series" value={String(gameStats.highSeries)}
+            onClick={() => setDrill("series")} />
+          <StatRow label="Total pins" value={String(gameStats.totalPins)} />
+        </div>
+      )}
 
       {badges.length > 0 && (
         <div className="glass-panel mb-6 p-5 sm:p-8">
