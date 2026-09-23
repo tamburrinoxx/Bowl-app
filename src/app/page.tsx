@@ -12,7 +12,7 @@ export default async function Home() {
       .select("role")
       .eq("id", auth.user.id)
       .single();
-    redirect(data?.role === "host" ? "/host/tournaments" : "/profile");
+    redirect("/profile");
   }
 
   return (

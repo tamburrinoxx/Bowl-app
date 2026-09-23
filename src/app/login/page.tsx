@@ -41,7 +41,7 @@ export default function LoginPage() {
       .select("role")
       .eq("id", userId)
       .maybeSingle();
-    return data?.role === "host" ? "/host/tournaments" : "/profile";
+    return "/profile";
   }
 
   async function handleSignUp(e: React.FormEvent) {
