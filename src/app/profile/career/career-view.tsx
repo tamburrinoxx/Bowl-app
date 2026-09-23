@@ -28,7 +28,8 @@ export default function CareerView() {
   const [sessionGames, setSessionGames] = useState(0);
   const [allGames, setAllGames] = useState<{ log: number[][][]; leagueId: string | null }[]>([]);
   const [leagueOpts, setLeagueOpts] = useState<{ id: string; name: string }[]>([]);
-  const [source, setSource] = useState("all");
+  const [useLeagues, setUseLeagues] = useState(true);
+  const [useOpen, setUseOpen] = useState(true);
   const [badges, setBadges] = useState<{ code: string; earned_at: string }[]>([]);
 
   useEffect(() => {
@@ -45,12 +46,9 @@ export default function CareerView() {
   }, [supabase]);
 
   useEffect(() => {
-    const picked =
-      source === "all" ? allGames
-      : source === "practice" ? allGames.filter((g) => !g.leagueId)
-      : allGames.filter((g) => g.leagueId === source);
+    const picked = allGames.filter((g) => (g.leagueId ? useLeagues : useOpen));
     setStats(picked.length ? analysePinLogs(picked.map((g) => g.log)) : null);
-  }, [source, allGames]);
+  }, [useLeagues, useOpen, allGames]);
 
   const load = useCallback(async () => {
     const { data: auth } = await supabase.auth.getUser();
@@ -228,14 +226,19 @@ export default function CareerView() {
             <p className="text-ink-soft text-xs font-medium uppercase tracking-wide">
               Your ball, {stats.frames} frames
             </p>
-            <select value={source} onChange={(e) => setSource(e.target.value)}
-              className="glass-input bg-transparent px-2 py-1 text-xs text-ink">
-              <option value="all">All sources</option>
-              <option value="practice">Practice only</option>
-              {leagueOpts.map((l) => (
-                <option key={l.id} value={l.id}>{l.name}</option>
+            <span className="flex gap-2">
+              {[
+                { label: "Leagues", on: useLeagues, set: setUseLeagues },
+                { label: "Open", on: useOpen, set: setUseOpen },
+              ].map((c) => (
+                <button key={c.label} onClick={() => c.set(!c.on)}
+                  className={`rounded-full px-3 py-1 text-xs ${
+                    c.on ? "bg-accent text-on-accent" : "text-ink-soft bg-white/5"
+                  }`}>
+                  {c.label}
+                </button>
               ))}
-            </select>
+            </span>
           </div>
           <div className="mb-6 grid grid-cols-3 gap-6">
             <Stat label="Strikes" value={`${stats.strikePct}%`} />
