@@ -25,15 +25,15 @@ const SECTIONS = [
 
 const HOST_QUICK = [
   { label: "Tournaments", href: "/host/tournaments" },
-  { label: "New", href: "/host/tournaments/wizard" },
-  { label: "Public", href: "/t" },
-  { label: "Profile", href: "/profile" },
+  { label: "Create", href: "/host/tournaments/wizard" },
+  { label: "Find", href: "/t" },
+  { label: "Bowl", href: "/profile" },
   { label: "All pages", href: "/admin" },
 ];
 
 const BOWLER_QUICK = [
   { label: "Tournaments", href: "/t" },
-  { label: "Profile", href: "/profile" },
+  { label: "Bowl", href: "/profile" },
   { label: "Stats", href: "/profile/career" },
 ];
 
