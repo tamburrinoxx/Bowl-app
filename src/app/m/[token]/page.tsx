@@ -34,11 +34,12 @@ export default function MatchScorer() {
     })();
   }, [token, supabase]);
 
-  async function bump(side: "a" | "b", delta: number) {
+  async function setScore(side: "a" | "b", raw: string) {
     if (!m) return;
+    const v = Math.max(0, Number(raw) || 0);
     const next = {
-      score_a: side === "a" ? Math.max(0, (m.score_a ?? 0) + delta) : m.score_a,
-      score_b: side === "b" ? Math.max(0, (m.score_b ?? 0) + delta) : m.score_b,
+      score_a: side === "a" ? v : m.score_a,
+      score_b: side === "b" ? v : m.score_b,
     };
     setM({ ...m, ...next });
     const { error } = await supabase
@@ -76,13 +77,13 @@ export default function MatchScorer() {
         ].map((s) => (
           <div key={s.key} className="glass-panel mb-4 p-5">
             <p className="text-ink mb-3 text-lg font-semibold">{s.label}</p>
-            <div className="flex items-center justify-between">
-              <button onClick={() => bump(s.key, -1)}
-                className="h-14 w-14 rounded-full bg-white/10 text-2xl text-ink">−</button>
-              <span className="font-score text-accent text-5xl">{s.score}</span>
-              <button onClick={() => bump(s.key, 1)}
-                className="bg-accent text-on-accent h-14 w-14 rounded-full text-2xl">+</button>
-            </div>
+            <input
+              type="number"
+              inputMode="numeric"
+              value={s.score}
+              onChange={(e) => setScore(s.key, e.target.value)}
+              className="font-score text-accent glass-input w-full rounded-2xl bg-white/5 px-4 py-4 text-center text-5xl"
+            />
           </div>
         ))}
 
