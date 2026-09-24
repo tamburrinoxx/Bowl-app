@@ -243,6 +243,12 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
           className="rounded bg-[#B6FF2E] px-3 py-1.5 text-sm font-bold text-black disabled:opacity-40">
           Add match
         </button>
+        {matches.length > 0 && (
+          <button onClick={saveScores} disabled={busy}
+            className="rounded bg-white/10 px-3 py-1.5 text-sm font-bold text-ink disabled:opacity-40">
+            Save scores
+          </button>
+        )}
       </div>
 
       {matches.length === 0 ? (
