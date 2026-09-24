@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
-import { Oswald } from "next/font/google";
+import { Oswald, Inter } from "next/font/google";
 import "./globals.css";
 import AppNav from "@/components/app-nav";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 const oswald = Oswald({
   subsets: ["latin"],
@@ -29,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={oswald.variable}>
+    <html lang="en" className={`${oswald.variable} ${inter.variable}`}>
       <body className="antialiased"><AppNav />
         {children}</body>
     </html>

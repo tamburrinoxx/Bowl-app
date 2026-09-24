@@ -303,7 +303,7 @@ export default function CareerView() {
         <div className="glass-panel p-8">
           <div className="mb-4 flex items-baseline justify-between gap-2">
             <p className="text-ink-soft text-xs font-medium uppercase tracking-wide">
-              Your ball, {stats.frames} frames
+              All time · {stats.frames} frames
             </p>
             <span className="flex gap-2">
               {[
@@ -346,6 +346,9 @@ export default function CareerView() {
                   <span className="flex items-center gap-3">
                     <span className="h-1.5 w-24 overflow-hidden rounded-full bg-white/10">
                       <span className="bg-accent block h-full" style={{ width: `${pct}%` }} />
+                    </span>
+                    <span className="font-score text-ink-soft w-12 text-right text-xs">
+                      {l.converted}/{l.seen}
                     </span>
                     <span className={`font-score w-10 text-right text-sm ${pct >= 50 ? "text-accent" : "text-ink-soft"}`}>
                       {pct}%

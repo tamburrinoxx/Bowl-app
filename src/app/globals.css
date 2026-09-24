@@ -33,7 +33,7 @@
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --font-display: var(--font-oswald), "Oswald", sans-serif;
-  --font-body: var(--font-oswald), "Oswald", sans-serif;
+  --font-body: var(--font-inter), "Inter", system-ui, sans-serif;
   --font-score: var(--font-oswald), "Oswald", sans-serif;
 }
 
