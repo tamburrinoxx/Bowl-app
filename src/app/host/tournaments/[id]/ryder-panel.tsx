@@ -135,6 +135,17 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   const colorA = teamA?.color ?? "#FF4D4D";
   const colorB = teamB?.color ?? "#4D8BFF";
 
+  async function shareMatch(m: { share_token?: string; side_a_label: string; side_b_label: string }) {
+    if (!m.share_token) { setMsg("No share link on this match yet."); return; }
+    const url = `${window.location.origin}/m/${m.share_token}`;
+    const text = `Score our match: ${m.side_a_label} vs ${m.side_b_label}\n${url}`;
+    if (navigator.share) {
+      try { await navigator.share({ text }); return; } catch {}
+    }
+    await navigator.clipboard.writeText(url);
+    setMsg("Link copied.");
+  }
+
   async function renameTeam(id: string, name: string) {
     const clean = name.trim();
     if (!clean) return;
@@ -251,9 +262,15 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
                   );
                 })()}
                 <button
+                  onClick={() => shareMatch(m)}
+                  className="text-accent ml-auto px-2 text-xs"
+                >
+                  Share
+                </button>
+                <button
                   onClick={() => deleteMatch(m.id, `${m.side_a_label} vs ${m.side_b_label}`)}
                   disabled={busy}
-                  className="text-ink-soft ml-auto px-2 hover:text-red-400"
+                  className="text-ink-soft px-2 hover:text-red-400"
                   aria-label="Delete match"
                 >
                   x
