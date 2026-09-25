@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Arsenal from "@/components/arsenal";
 import ResumeSession from "@/components/resume-session";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile, PatternAverage, OilPattern, Session, SessionGame, BowlerNote } from "@/types";
@@ -526,6 +527,8 @@ export default function ProfilePage() {
             </p>
           )}
         </section>
+
+        <div className="lg:col-start-1 lg:col-span-1"><Arsenal /></div>
 
         <section className="glass-panel lg:col-start-1 lg:col-span-1 p-5 sm:p-8 mb-4 sm:mb-6">
           <h2 className="font-display text-xl text-ink mb-4">Pattern Averages</h2>

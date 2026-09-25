@@ -49,6 +49,28 @@ export default function ScoreEntryPage() {
   const [playedAt, setPlayedAt] = useState(() => new Date().toISOString().slice(0, 10));
   const [games, setGames] = useState<FrameData[][]>([emptyGame(), emptyGame(), emptyGame()]);
   const [activeGame, setActiveGame] = useState(0);
+  const [balls, setBalls] = useState<{ id: string; name: string }[]>([]);
+  const [gameBalls, setGameBalls] = useState<(string | null)[]>([null, null, null]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user) return;
+      const { data } = await supabase
+        .from("balls").select("id, name")
+        .eq("bowler_id", auth.user.id).eq("retired", false)
+        .order("created_at");
+      setBalls((data as { id: string; name: string }[]) ?? []);
+    })();
+  }, [supabase]);
+
+  function pickBall(id: string) {
+    setGameBalls((prev) => {
+      const next = [...prev];
+      for (let i = activeGame; i < next.length; i++) next[i] = id;
+      return next;
+    });
+  }
   const [pinLog, setPinLog] = useState<number[][]>([]);
   // Which physical pins fell on each roll, kept per game and frame. The frame
   // scores only carry counts, so this is the only record of what was left.
@@ -263,6 +285,7 @@ export default function ScoreEntryPage() {
       pin_log: pinLogs[i],
       hit_log: Object.fromEntries(Object.entries(hitLogs).filter(([k]) => k.startsWith(i + "-")).map(([k, v]) => [k.split("-")[1], v])),
       scratch_score: scoreGame(g),
+      ball_id: gameBalls[i] ?? null,
     }));
 
     const { error: gamesErr } = await supabase.from("session_games").insert(rows);
@@ -344,6 +367,25 @@ export default function ScoreEntryPage() {
             </button>
           ))}
         </div>
+
+        {balls.length > 0 && (
+          <div className="mb-4 flex items-center gap-2 overflow-x-auto">
+            <span className="text-ink-soft shrink-0 text-[11px] uppercase tracking-wide">Ball</span>
+            {balls.map((b) => (
+              <button
+                key={b.id}
+                onClick={() => pickBall(b.id)}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs ${
+                  gameBalls[activeGame] === b.id
+                    ? "bg-accent text-on-accent"
+                    : "text-ink-soft bg-white/5"
+                }`}
+              >
+                {b.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Scoresheet grid */}
         <div className="glass-panel p-2 sm:p-4 mb-4">
