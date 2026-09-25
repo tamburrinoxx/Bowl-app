@@ -26,6 +26,9 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: { card: "summary_large_image", images: ["/pinfall-og.png"] },
+  manifest: "/manifest.json",
+  appleWebApp: { capable: true, title: "Pinfall", statusBarStyle: "black-translucent" },
+  icons: { apple: "/apple-touch-icon.png" },
   description: "Pattern-aware handicaps, tournament scoring, and verified bowler profiles.",
 };
 
