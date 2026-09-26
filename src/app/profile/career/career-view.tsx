@@ -169,13 +169,19 @@ export default function CareerView() {
         .in("id", sessList.map((x) => x.league_id).filter(Boolean) as string[]);
       setLeagueOpts((lg as { id: string; name: string }[]) ?? []);
 
-      const { data: sg } = await supabase
-        .from("session_games")
-        .select("pin_log, session_id, scratch_score, game_number")
-        .in("session_id", sessionIds)
-        .not("pin_log", "is", null);
-
-      const raw = (sg as { pin_log: number[][][]; session_id: string; scratch_score: number; game_number: number }[]) ?? [];
+      type SG = { pin_log: number[][][]; session_id: string; scratch_score: number; game_number: number };
+      const raw: SG[] = [];
+      for (let from = 0; ; from += 1000) {
+        const { data: page } = await supabase
+          .from("session_games")
+          .select("pin_log, session_id, scratch_score, game_number")
+          .in("session_id", sessionIds)
+          .not("pin_log", "is", null)
+          .range(from, from + 999);
+        const rows = (page as SG[]) ?? [];
+        raw.push(...rows);
+        if (rows.length < 1000) break;
+      }
       const tagged = raw.map((r) => {
         const sess = sessList.find((x) => x.id === r.session_id);
         return {
