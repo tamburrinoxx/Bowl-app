@@ -49,7 +49,23 @@ export interface BowlingStats {
   multiMade: number;
   splitSeen: number;
   splitMade: number;
+  makeableSeen: number;
+  makeableMade: number;
+  firstBallStrikePct: number;
   leaves: LeaveStat[];
+}
+
+const ROW: Record<number, number> = { 1:0, 2:1,3:1, 4:2,5:2,6:2, 7:3,8:3,9:3,10:3 };
+const COL: Record<number, number> = { 1:3, 2:2,3:4, 4:1,5:3,6:5, 7:0,8:2,9:4,10:6 };
+
+export function isSplitLeave(standing: number[]): boolean {
+  if (standing.includes(1) || standing.length < 2) return false;
+  const cols = standing.map((p) => COL[p]).sort((a, b) => a - b);
+  for (let i = 1; i < cols.length; i++) {
+    if (cols[i] - cols[i - 1] >= 2) return true;
+  }
+  const rows = new Set(standing.map((p) => ROW[p]));
+  return rows.size > 1 && cols[cols.length - 1] - cols[0] >= 3;
 }
 
 export function analysePinLogs(games: number[][][][]): BowlingStats {
@@ -86,7 +102,7 @@ export function analysePinLogs(games: number[][][][]): BowlingStats {
       if (cleared) spares++;
       else opens++;
 
-      const isSplit = NAMED[key]?.includes("split") ?? false;
+      const isSplit = isSplitLeave(standing);
       if (isSplit) {
         splitSeen++;
         if (cleared) splitMade++;
@@ -124,6 +140,9 @@ export function analysePinLogs(games: number[][][][]): BowlingStats {
     strikePct: frames ? Math.round((strikes / frames) * 100) : 0,
     sparePct: spares + opens ? Math.round((spares / (spares + opens)) * 100) : 0,
     singleSeen, singleMade, multiSeen, multiMade, splitSeen, splitMade,
+    makeableSeen: singleSeen + multiSeen,
+    makeableMade: singleMade + multiMade,
+    firstBallStrikePct: frames ? Math.round((strikes / frames) * 1000) / 10 : 0,
     leaves,
   };
 }

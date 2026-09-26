@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/payouts";
-import { analysePinLogs, type BowlingStats } from "@/lib/leaves";
+import { analysePinLogs, isSplitLeave, type BowlingStats } from "@/lib/leaves";
 import { BADGES } from "@/lib/achievements";
 import { StatRow } from "@/components/stat-row";
 
@@ -31,6 +31,7 @@ export default function CareerView() {
   const [leagueOpts, setLeagueOpts] = useState<{ id: string; name: string }[]>([]);
   const [useLeagues, setUseLeagues] = useState(true);
   const [useOpen, setUseOpen] = useState(true);
+  const [leaveView, setLeaveView] = useState<null | "all" | "makeable" | "single" | "multi" | "split">(null);
   const [drill, setDrill] = useState<null | "games" | "series">(null);
   const [badges, setBadges] = useState<{ code: string; earned_at: string }[]>([]);
 
@@ -236,6 +237,44 @@ export default function CareerView() {
         )}
       </div>
 
+      {leaveView && stats && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-[#1f2329]">
+          <div className="sticky top-0 flex items-center border-b border-white/10 bg-[#1f2329] px-4 py-3">
+            <button onClick={() => setLeaveView(null)} className="text-accent text-sm">
+              &lsaquo; Back
+            </button>
+            <span className="text-ink mx-auto pr-10 text-sm font-semibold">
+              {leaveView === "all" ? "All leaves"
+                : leaveView === "makeable" ? "Makeable leaves"
+                : leaveView === "single" ? "Single pin"
+                : leaveView === "multi" ? "Multiple pins" : "Splits"}
+            </span>
+          </div>
+          <div className="mx-auto max-w-2xl">
+            {stats.leaves
+              .filter((l) => {
+                const sp = isSplitLeave(l.pins);
+                if (leaveView === "split") return sp;
+                if (leaveView === "makeable") return !sp;
+                if (leaveView === "single") return !sp && l.pins.length === 1;
+                if (leaveView === "multi") return !sp && l.pins.length > 1;
+                return true;
+              })
+              .map((l) => (
+                <div key={l.key} className="flex items-center justify-between border-b border-white/5 px-5 py-3">
+                  <span className="text-ink text-sm">{l.name}</span>
+                  <span className="flex items-center gap-3">
+                    <span className="text-ink-soft font-score text-xs">{l.converted}/{l.seen}</span>
+                    <span className="font-score text-accent w-12 text-right text-sm">
+                      {Math.round((l.converted / l.seen) * 100)}%
+                    </span>
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
       {drill && gameStats && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-[#1f2329]">
           <div className="sticky top-0 flex items-center gap-2 border-b border-white/10 bg-[#1f2329] px-4 py-3">
@@ -319,16 +358,25 @@ export default function CareerView() {
               ))}
             </span>
           </div>
-          <div className="mb-6 grid grid-cols-3 gap-6">
-            <Stat label="Strikes" value={`${stats.strikePct}%`} />
-            <Stat label="Spares" value={`${stats.sparePct}%`} />
-            <Stat label="Opens" value={stats.opens} />
-          </div>
-
-          <div className="mb-6 grid grid-cols-3 gap-6">
-            <Stat label="Single pin" value={stats.singleSeen ? `${Math.round((stats.singleMade / stats.singleSeen) * 100)}%` : "\u2014"} />
-            <Stat label="Multi pin" value={stats.multiSeen ? `${Math.round((stats.multiMade / stats.multiSeen) * 100)}%` : "\u2014"} />
-            <Stat label="Splits" value={stats.splitSeen ? `${Math.round((stats.splitMade / stats.splitSeen) * 100)}%` : "\u2014"} />
+          <div className="mb-6 overflow-hidden rounded-2xl bg-white/[0.03]">
+            <StatRow label="First ball strikes"
+              value={`${stats.firstBallStrikePct}% (${stats.strikes}/${stats.frames})`} />
+            <StatRow label="Spares"
+              value={`${stats.sparePct}% (${stats.spares}/${stats.spares + stats.opens})`}
+              onClick={() => setLeaveView("all")} />
+            <StatRow indent={1} label="Makeable"
+              value={stats.makeableSeen ? `${Math.round((stats.makeableMade / stats.makeableSeen) * 100)}% (${stats.makeableMade}/${stats.makeableSeen})` : "-"}
+              onClick={() => setLeaveView("makeable")} />
+            <StatRow indent={2} label="Single pin"
+              value={stats.singleSeen ? `${Math.round((stats.singleMade / stats.singleSeen) * 100)}% (${stats.singleMade}/${stats.singleSeen})` : "-"}
+              onClick={() => setLeaveView("single")} />
+            <StatRow indent={2} label="Multiple pins"
+              value={stats.multiSeen ? `${Math.round((stats.multiMade / stats.multiSeen) * 100)}% (${stats.multiMade}/${stats.multiSeen})` : "-"}
+              onClick={() => setLeaveView("multi")} />
+            <StatRow indent={1} label="Splits"
+              value={stats.splitSeen ? `${Math.round((stats.splitMade / stats.splitSeen) * 100)}% (${stats.splitMade}/${stats.splitSeen})` : "-"}
+              onClick={() => setLeaveView("split")} />
+            <StatRow label="Opens" value={String(stats.opens)} />
           </div>
 
           <p className="text-ink-soft mb-3 text-xs font-medium uppercase tracking-wide">
