@@ -7,8 +7,9 @@ import ResumeSession from "@/components/resume-session";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile, PatternAverage, OilPattern, Session, SessionGame, BowlerNote } from "@/types";
 import { aggregateStats, scoreGame } from "@/lib/bowling";
+import { analysePinLogs } from "@/lib/leaves";
 
-type SessionWithGames = Session & { session_games: SessionGame[] };
+type SessionWithGames = Session & { session_games: SessionGame[]; league_id?: string | null; imported?: boolean };
 
 export default function ProfilePage() {
   const supabase = createClient();
@@ -361,9 +362,22 @@ export default function ProfilePage() {
   const everyGame = ordered.flatMap((s) =>
     (s.session_games ?? []).map((g) => g.frame_data)
   );
+  // League average: league or imported sessions from the last 12 months.
+  const yearAgo = Date.now() - 365 * 86400000;
+  const leagueGames = ordered
+    .filter((x) => (x.league_id || x.imported) && new Date(x.played_at).getTime() >= yearAgo)
+    .flatMap((x) => (x.session_games ?? []).map((g) => g.frame_data));
+
   const windowSize = statRange === "all" ? everyGame.length : Number(statRange);
   const allGames = everyGame.slice(0, windowSize);
   const stats = aggregateStats(allGames);
+
+  // Pin-level breakdown for the same window.
+  const windowLogs = ordered
+    .flatMap((x) => (x.session_games ?? []).map((g) => (g as { pin_log?: number[][][] }).pin_log))
+    .filter(Boolean)
+    .slice(0, windowSize) as number[][][][];
+  const pin = windowLogs.length ? analysePinLogs(windowLogs) : null;
 
   return (
     <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
@@ -427,10 +441,10 @@ export default function ProfilePage() {
                 </p>
               </div>
               <div>
-                <p className="text-ink-soft text-xs uppercase tracking-wide">Average</p>
+                <p className="text-ink-soft text-xs uppercase tracking-wide">League avg</p>
                 <p className="font-score text-ink text-2xl">
-                  {everyGame.length
-                    ? (everyGame.reduce((t, g) => t + scoreGame(g), 0) / everyGame.length).toFixed(2)
+                  {leagueGames.length
+                    ? (leagueGames.reduce((t, g) => t + scoreGame(g), 0) / leagueGames.length).toFixed(2)
                     : "\u2014"}
                 </p>
               </div>
@@ -487,9 +501,10 @@ export default function ProfilePage() {
           </Link>
           {stats.gamesCounted ? (
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              <StatBox label="Strike %" value={`${stats.strikePct}%`} />
-              <StatBox label="Spare %" value={`${stats.sparePct}%`} />
-              <StatBox label="Open %" value={`${stats.openPct}%`} />
+              <StatBox label="First Ball Strike" value={pin ? `${pin.strikePct}%` : "\u2014"} />
+              <StatBox label="Spare %" value={pin ? `${pin.sparePct}%` : "\u2014"} />
+              <StatBox label="Missed Makable" value={pin && pin.makeableSeen ? `${Math.round(((pin.makeableSeen - pin.makeableMade) / pin.makeableSeen) * 100)}%` : "\u2014"} />
+              <StatBox label="Splits Left" value={pin && pin.frames ? `${Math.round((pin.splitSeen / pin.frames) * 100)}%` : "\u2014"} />
               <StatBox label="Avg Score" value={String(stats.avgScore)} />
               <StatBox label="High Game" value={String(stats.highGame)} />
               <StatBox label="Games Logged" value={String(stats.gamesCounted)} />
