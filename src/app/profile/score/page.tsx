@@ -327,7 +327,7 @@ export default function ScoreEntryPage() {
         </p>
         <h1 className="font-display text-4xl text-ink mb-8">Enter Your Scores</h1>
 
-        <div className="glass-panel p-4 sm:p-6 mb-6">
+        <div className="glass-panel mb-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-ink-soft block mb-1.5 ml-1">
@@ -388,7 +388,7 @@ export default function ScoreEntryPage() {
         )}
 
         {/* Scoresheet grid */}
-        <div className="glass-panel p-2 sm:p-4 mb-4">
+        <div className="glass-panel p-2 sm: mb-4">
           <div className="grid grid-cols-5">
             {currentGame.map((frame, i) => {
               const marks = frameMarks(frame, i + 1);
@@ -422,7 +422,7 @@ export default function ScoreEntryPage() {
         </div>
 
         {/* Pin deck */}
-        <div className="glass-panel p-4 sm:p-6 mb-4">
+        <div className="glass-panel mb-4">
           {gameFinished ? (
             <div className="text-center py-8">
               <p className="text-ink-soft text-sm uppercase tracking-wide mb-1">Game Score</p>

@@ -279,7 +279,7 @@ export default function TournamentWizard() {
           {STEPS[step].lead}
         </p>
 
-        <div className="glass-panel space-y-6 p-8">
+        <div className="glass-panel space-y-6">
           {step === 0 && (
             <>
               <Field label="Describe it in your own words">

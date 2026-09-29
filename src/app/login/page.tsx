@@ -112,7 +112,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen px-6 py-12">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
       <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-2">
         <div className="mb-2 text-center lg:hidden">
           <Logo className="mb-3 justify-center text-4xl" />
@@ -172,7 +172,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="w-full max-w-sm glass-panel p-8 lg:justify-self-end">
+        <div className="w-full max-w-sm glass-panel lg:justify-self-end">
           <p className="font-score text-accent mb-2 text-[13px] font-semibold uppercase tracking-[0.2em]">
             {mode === "signup" ? "Get started" : "Welcome back"}
           </p>

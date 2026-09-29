@@ -62,13 +62,13 @@ export default async function PublicTournamentPage({
           { label: "All tournaments", href: "/t" },
         ]}
       />
-    <main className="min-h-screen px-6 py-12">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-3xl">
         <Link href="/t" className="text-accent text-sm font-medium mb-6 inline-block">
           ← All Tournaments
         </Link>
 
-        <div className="glass-panel p-8 mb-6 flex items-baseline justify-between">
+        <div className="glass-panel mb-6 flex items-baseline justify-between">
           <div>
             <p className="font-score text-accent text-xs font-semibold tracking-wide mb-1 uppercase">
               {tournament.center_name ?? "Live Standings"}
@@ -102,7 +102,7 @@ export default async function PublicTournamentPage({
           handicapPercent={tournament.handicap_percent}
         />
 
-        <section className="glass-panel p-8">
+        <section className="glass-panel">
           <h2 className="font-display text-xl text-ink mb-4">Standings</h2>
           <StandingsBoard
             rows={standings ?? []}
@@ -112,7 +112,7 @@ export default async function PublicTournamentPage({
           />
         </section>
 
-        <section className="glass-panel p-8 mt-6">
+        <section className="glass-panel mt-6">
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
             <h2 className="font-display text-xl text-ink">Side Action</h2>
             <Link

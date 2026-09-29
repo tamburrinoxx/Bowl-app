@@ -212,7 +212,7 @@ export default function MatchesPanel({
   );
 
   return (
-    <section className="glass-panel p-8 mb-6">
+    <section className="glass-panel mb-6">
       <h2 className="font-display text-xl text-ink mb-4">{stage.name}</h2>
 
       {stages.length > 1 && (

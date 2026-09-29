@@ -230,12 +230,12 @@ export default function MyTournament({
   }, [load]);
 
   if (loading) {
-    return <p className="glass-panel text-ink-soft p-8 text-sm">Loading…</p>;
+    return <p className="glass-panel text-ink-soft text-sm">Loading…</p>;
   }
 
   if (!signedIn) {
     return (
-      <div className="glass-panel flex flex-wrap items-center justify-between gap-4 p-8">
+      <div className="glass-panel flex flex-wrap items-center justify-between gap-4">
         <p className="text-ink-soft text-sm">
           Sign in to see your scores, standing and winnings.
         </p>
@@ -248,7 +248,7 @@ export default function MyTournament({
 
   if (!entryId) {
     return (
-      <div className="glass-panel flex flex-wrap items-center justify-between gap-4 p-8">
+      <div className="glass-panel flex flex-wrap items-center justify-between gap-4">
         <p className="text-ink-soft text-sm">You&apos;re not entered in this tournament.</p>
         <Link href={`/t/${tournamentId}`} className="pill-button bg-accent text-on-accent px-5 py-2.5 text-sm">
           Join
@@ -327,7 +327,7 @@ export default function MyTournament({
 
   return (
     <div className="space-y-6">
-      <div className="glass-panel p-5 sm:p-8">
+      <div className="glass-panel">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-ink-soft text-xs uppercase tracking-wide">Position</p>
@@ -354,7 +354,7 @@ export default function MyTournament({
         )}
       </div>
 
-      <div className="glass-panel p-5 sm:p-8">
+      <div className="glass-panel">
         <p className="text-ink-soft mb-3 text-xs font-medium uppercase tracking-wide">
           Your games
         </p>
@@ -381,7 +381,7 @@ export default function MyTournament({
       </div>
 
       {(potRows.length > 0 || brackets.length > 0) && (
-        <div className="glass-panel p-5 sm:p-8">
+        <div className="glass-panel">
           <p className="text-ink-soft mb-3 text-xs font-medium uppercase tracking-wide">
             Your side action
           </p>

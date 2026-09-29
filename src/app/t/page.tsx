@@ -21,7 +21,7 @@ export default async function PublicTournamentsPage({ searchParams }: { searchPa
   const shown = stateFilter ? rows.filter((t) => t.state === stateFilter) : rows;
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-12">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-2xl">
         <Logo className="mb-3 text-2xl" />
         <h1 className="font-display text-2xl sm:text-4xl text-ink mb-3 sm:mb-4">Tournaments</h1>
@@ -40,7 +40,7 @@ export default async function PublicTournamentsPage({ searchParams }: { searchPa
               <Link
                 key={t.id}
                 href={`/t/${t.id}`}
-                className="glass-panel p-4 sm:p-6 flex items-center justify-between hover:bg-white/8 transition-colors block"
+                className="glass-panel flex items-center justify-between hover:bg-white/8 transition-colors block"
               >
                 <div>
                   <p className="font-display text-lg sm:text-xl text-ink mb-0.5">{t.name}</p>
@@ -65,7 +65,7 @@ export default async function PublicTournamentsPage({ searchParams }: { searchPa
             ))}
           </div>
         ) : (
-          <p className="text-ink-soft text-sm glass-panel p-6">
+          <p className="text-ink-soft text-sm glass-panel">
             No tournaments have been created yet.
           </p>
         )}

@@ -38,7 +38,7 @@ export default function Arsenal() {
   }
 
   return (
-    <section className="glass-panel p-5 sm:p-8 mb-4 sm:mb-6">
+    <section className="glass-panel mb-4 sm:mb-6">
       <h2 className="font-display text-xl text-ink mb-3">My Arsenal</h2>
 
       <form onSubmit={add} className="mb-3 flex gap-2">

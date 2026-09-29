@@ -31,7 +31,7 @@ export default async function QrPage({
 
   if (!tournament) {
     return (
-      <main className="min-h-screen px-6 py-12">
+      <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
         <p className="text-ink-soft mx-auto max-w-2xl">Tournament not found.</p>
       </main>
     );

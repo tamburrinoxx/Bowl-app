@@ -21,7 +21,7 @@ export default function ShareLink({ tournamentId }: { tournamentId: string }) {
   }
 
   return (
-    <div className="glass-panel mb-6 flex flex-wrap items-center justify-between gap-4 p-5">
+    <div className="glass-panel mb-6 flex flex-wrap items-center justify-between gap-4">
       <div className="min-w-0">
         <p className="text-ink text-sm font-medium">Share with bowlers</p>
         <p className="text-ink-soft truncate text-xs">{url || "…"}</p>

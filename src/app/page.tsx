@@ -31,7 +31,7 @@ export default async function Home() {
         <div className="space-y-4">
           <Link
             href="/login"
-            className="glass-panel p-6 flex items-center justify-between group hover:bg-white/8 transition-colors"
+            className="glass-panel flex items-center justify-between group hover:bg-white/8 transition-colors"
           >
             <div>
               <p className="font-display text-xl text-ink mb-1">
@@ -48,7 +48,7 @@ export default async function Home() {
 
           <Link
             href="/profile"
-            className="glass-panel p-6 flex items-center justify-between group hover:bg-white/8 transition-colors"
+            className="glass-panel flex items-center justify-between group hover:bg-white/8 transition-colors"
           >
             <div>
               <p className="font-display text-xl text-ink mb-1">Bowler</p>

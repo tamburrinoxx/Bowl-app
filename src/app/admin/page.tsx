@@ -37,7 +37,7 @@ export default async function AdminPage() {
   return (
     <>
       <NavBar title="Every page" />
-      <main className="min-h-screen px-6 py-12">
+      <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
         <div className="mx-auto max-w-3xl">
           <h1 className="font-display text-ink mb-2 text-4xl">All Pages</h1>
           <p className="text-ink-soft mb-8 text-sm">
@@ -72,7 +72,7 @@ export default async function AdminPage() {
           </p>
 
           {!tournaments?.length ? (
-            <p className="glass-panel text-ink-soft p-5 text-sm">
+            <p className="glass-panel text-ink-soft text-sm">
               {user
                 ? "No tournaments yet — build one and its pages appear here."
                 : "Sign in to see your tournaments."}
@@ -80,7 +80,7 @@ export default async function AdminPage() {
           ) : (
             <div className="space-y-3">
               {tournaments.map((t) => (
-                <div key={t.id} className="glass-panel p-5">
+                <div key={t.id} className="glass-panel">
                   <div className="mb-3 flex items-baseline justify-between gap-3">
                     <p className="text-ink font-medium">{t.name}</p>
                     <span className="text-ink-soft text-xs uppercase">

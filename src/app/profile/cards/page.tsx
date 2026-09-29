@@ -43,7 +43,7 @@ export default function CardsPage() {
         {loading ? (
           <p className="text-ink-soft text-sm">Loading…</p>
         ) : cards.length === 0 ? (
-          <div className="glass-panel p-6 text-center">
+          <div className="glass-panel text-center">
             <p className="text-ink-soft text-sm">No cards yet.</p>
             <p className="text-ink-soft/70 mt-1 text-xs">
               Cards come from real results — a 200 game, a clean game, a split conversion.

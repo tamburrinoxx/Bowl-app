@@ -18,7 +18,7 @@ export default async function MyTournamentPage({
 
   if (!tournament) {
     return (
-      <main className="min-h-screen px-6 py-12">
+      <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
         <p className="text-ink-soft mx-auto max-w-2xl">Tournament not found.</p>
       </main>
     );
@@ -39,7 +39,7 @@ export default async function MyTournamentPage({
           { label: "All tournaments", href: "/t" },
         ]}
       />
-      <main className="min-h-screen px-6 py-12">
+      <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
         <div className="mx-auto max-w-2xl">
           <h1 className="font-display text-ink mb-8 text-4xl">Your Day</h1>
           <MyTournament

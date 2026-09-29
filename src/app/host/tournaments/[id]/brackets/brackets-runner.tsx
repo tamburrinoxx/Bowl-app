@@ -312,7 +312,7 @@ export default function BracketsRunner({
 
   if (!pots.length) {
     return (
-      <p className="text-ink-soft glass-panel p-8 text-sm">
+      <p className="text-ink-soft glass-panel text-sm">
         No bracket pot on this tournament. Add one under Side Action.
       </p>
     );
@@ -345,7 +345,7 @@ export default function BracketsRunner({
         </div>
       )}
 
-      <div className="glass-panel mb-6 flex flex-wrap items-center justify-between gap-4 p-6">
+      <div className="glass-panel mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-ink font-medium">{pot.name}</p>
           <p className="text-ink-soft text-xs">
@@ -407,7 +407,7 @@ export default function BracketsRunner({
           const pay = bracketPayout(Number(pot.buy_in), pot.bracket_size || 8);
 
           return (
-            <div key={g} className="glass-panel p-6">
+            <div key={g} className="glass-panel">
               <div className="mb-5 flex flex-wrap items-baseline justify-between gap-3">
                 <p className="font-display text-ink text-lg">Bracket {g}</p>
                 <p className="text-ink-soft font-score text-xs">
@@ -498,7 +498,7 @@ function BracketControls({
   const complete = chosen.every((n) => n > 0);
 
   return (
-    <div className="glass-panel mb-6 p-6">
+    <div className="glass-panel mb-6">
       <p className="text-ink-soft mb-3 text-xs font-medium uppercase tracking-wide">
         Which game feeds each round
       </p>
@@ -636,7 +636,7 @@ function PayoutRecap({
   const paidOut = rows.reduce((s, r) => s + r.won, 0);
 
   return (
-    <div className="glass-panel mb-6 p-6">
+    <div className="glass-panel mb-6">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
         <p className="font-display text-ink text-lg">Who&apos;s winning</p>
         <p className="font-score text-accent text-xs">{formatMoney(paidOut)} decided</p>

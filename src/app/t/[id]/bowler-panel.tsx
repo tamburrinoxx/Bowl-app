@@ -196,7 +196,7 @@ export default function BowlerPanel({
 
   if (loading) {
     return (
-      <div className="glass-panel mb-6 p-8">
+      <div className="glass-panel mb-6">
         <p className="text-ink-soft text-sm">Checking your entry…</p>
       </div>
     );
@@ -204,7 +204,7 @@ export default function BowlerPanel({
 
   if (!userId) {
     return (
-      <div className="glass-panel mb-6 flex items-center justify-between gap-4 p-8">
+      <div className="glass-panel mb-6 flex items-center justify-between gap-4">
         <p className="text-ink-soft text-sm">
           Bowling in this? Sign in to enter and post your scores.
         </p>
@@ -224,7 +224,7 @@ export default function BowlerPanel({
   if (!entryId) {
     if (!isOpen) {
       return (
-        <div className="glass-panel mb-6 p-8">
+        <div className="glass-panel mb-6">
           <p className="text-ink-soft text-sm">
             Signups aren&apos;t open yet — the host still has this one in{" "}
             {tournamentStatus.replace("_", " ")}.
@@ -234,7 +234,7 @@ export default function BowlerPanel({
     }
 
     return (
-      <div className="glass-panel mb-6 p-8">
+      <div className="glass-panel mb-6">
         <h2 className="font-display text-ink mb-4 text-xl">Join this tournament</h2>
         <div className="flex flex-wrap items-end gap-4">
           <label className="block">
@@ -286,7 +286,7 @@ export default function BowlerPanel({
   const filled = Object.values(drafts).filter((v) => v !== "").length;
 
   return (
-    <div className="glass-panel mb-6 p-8">
+    <div className="glass-panel mb-6">
       <h2 className="font-display text-ink mb-4 text-xl">Your scores</h2>
 
       <div className="mb-4 flex flex-wrap gap-3">

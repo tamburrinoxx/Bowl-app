@@ -60,7 +60,7 @@ export default async function HostTournamentsPage() {
         {tournaments?.length ? (
           <div className="space-y-3">
             {tournaments.map((t) => (
-              <div key={t.id} className="glass-panel p-6">
+              <div key={t.id} className="glass-panel">
               <Link
                 href={`/host/tournaments/${t.id}`}
                 className="block transition-opacity hover:opacity-80"
@@ -95,7 +95,7 @@ export default async function HostTournamentsPage() {
             ))}
           </div>
         ) : (
-          <div className="glass-panel p-6">
+          <div className="glass-panel">
             <p className="text-ink-soft mb-4 text-sm">
               You haven&apos;t created a tournament yet.
             </p>

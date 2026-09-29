@@ -21,7 +21,7 @@ export default async function PublicBracketsPage({
 
   if (!tournament) {
     return (
-      <main className="min-h-screen px-6 py-12">
+      <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
         <p className="text-ink-soft mx-auto max-w-2xl">Tournament not found.</p>
       </main>
     );
@@ -71,7 +71,7 @@ export default async function PublicBracketsPage({
           { label: "Your day", href: `/t/${id}/me` },
         ]}
       />
-      <main className="min-h-screen px-6 py-12">
+      <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
         <div className="mx-auto max-w-4xl">
           <p className="font-score text-accent mb-2 text-[13px] font-semibold uppercase tracking-[0.2em]">
             {tournament.name}
@@ -89,7 +89,7 @@ export default async function PublicBracketsPage({
           )}
 
           {!allMatches.length && (
-            <p className="glass-panel text-ink-soft p-8 text-sm">
+            <p className="glass-panel text-ink-soft text-sm">
               Brackets haven&apos;t been drawn yet. Check back once the host
               finalises them.
             </p>
@@ -119,7 +119,7 @@ export default async function PublicBracketsPage({
                   {groups.map((g) => {
                     const inGroup = mine.filter((m) => m.bracket_group === g);
                     return (
-                      <div key={g} className="glass-panel p-6">
+                      <div key={g} className="glass-panel">
                         <p className="font-display text-ink mb-4 text-lg">
                           Bracket {g}
                         </p>

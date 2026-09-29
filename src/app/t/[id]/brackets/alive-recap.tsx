@@ -63,7 +63,7 @@ export default function AliveRecap({
   if (rows.length === 0) return null;
 
   return (
-    <section className="glass-panel mb-6 p-6">
+    <section className="glass-panel mb-6">
       <h2 className="font-display text-ink mb-3 text-xl">Bracket recap</h2>
       <div className="space-y-1.5">
         {rows.map((r) => (

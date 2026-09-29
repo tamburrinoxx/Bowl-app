@@ -147,7 +147,7 @@ export default function NewTournamentPage() {
           Set Up a Tournament
         </h1>
 
-        <form onSubmit={handleSubmit} className="glass-panel p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="glass-panel space-y-6">
           <Field label="Tournament name">
             <input
               required

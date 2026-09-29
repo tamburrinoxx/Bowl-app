@@ -15,21 +15,21 @@ export default async function HostRyderPage({
 
   if (!tournament) {
     return (
-      <main className="min-h-screen px-6 py-12">
+      <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
         <p className="text-ink-soft">Tournament not found.</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 sm:py-10">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-4xl">
         <Link href={`/host/tournaments/${id}`} className="text-accent text-sm">
           &larr; {tournament.name}
         </Link>
         <h1 className="font-display text-ink mb-6 mt-2 text-3xl">Ryder Cup</h1>
 
-        <div className="glass-panel p-6">
+        <div className="glass-panel">
           <RyderPanel tournamentId={id} />
         </div>
 

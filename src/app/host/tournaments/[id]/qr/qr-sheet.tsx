@@ -34,7 +34,7 @@ export default function QrSheet({
   }
 
   return (
-    <main className="min-h-screen px-6 py-12 print:p-0">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12 print:p-0">
       <div className="mx-auto max-w-2xl">
         <div className="mb-6 flex flex-wrap gap-3 print:hidden">
           <button

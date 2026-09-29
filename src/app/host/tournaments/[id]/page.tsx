@@ -110,11 +110,11 @@ export default async function HostTournamentPage({
           { label: "Public view", href: `/t/${tournament.id}` },
         ]}
       />
-    <main className="min-h-screen px-6 py-12">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-5xl">
         <PhaseStrip status={tournament.status} />
 
-        <div className="glass-panel p-8 mb-6 flex items-baseline justify-between">
+        <div className="glass-panel mb-6 flex items-baseline justify-between">
           <div>
             <p className="font-score text-accent text-xs font-semibold tracking-wide mb-1 uppercase">
               {tournament.center_name ?? "Host Dashboard"}
@@ -129,7 +129,7 @@ export default async function HostTournamentPage({
         <Link
           href={`/t/${tournament.id}`}
           target="_blank"
-          className="glass-panel p-4 mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
+          className="glass-panel mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
         >
           <p className="text-ink-soft text-sm">
             Public live-standings page — share this link with bowlers
@@ -194,7 +194,7 @@ export default async function HostTournamentPage({
           />
         </CollapseSection>
 
-        <section className="glass-panel p-8 mb-6">
+        <section className="glass-panel mb-6">
           <div className="mb-4 flex items-baseline justify-between">
             <h2 id="side" className="font-display text-xl text-ink">Side Action</h2>
             <Link

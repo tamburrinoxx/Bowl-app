@@ -6,7 +6,7 @@ export default function CollapseSection({ title, id, children }: {
 }) {
   const [open, setOpen] = useState(true);
   return (
-    <section className="glass-panel p-8 mb-6">
+    <section className="glass-panel mb-6">
       <button onClick={() => setOpen(!open)}
         className="mb-4 flex w-full items-center justify-between">
         <h2 id={id} className="font-display text-xl text-ink">{title}</h2>

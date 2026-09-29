@@ -84,7 +84,7 @@ export default function LeaguesPage() {
         {loading ? (
           <p className="text-ink-soft text-sm">Loading…</p>
         ) : leagues.length === 0 ? (
-          <div className="glass-panel p-6 text-center">
+          <div className="glass-panel text-center">
             <p className="text-ink-soft text-sm">No leagues yet.</p>
             <p className="text-ink-soft/70 mt-1 text-xs">Tap + to create one or join with a code.</p>
           </div>
@@ -111,7 +111,7 @@ export default function LeaguesPage() {
         {sheet && (
           <div className="fixed inset-0 z-50 flex items-end bg-black/60 sm:items-center sm:justify-center"
             onClick={() => setSheet(null)}>
-            <div className="glass-panel w-full rounded-b-none p-6 sm:max-w-md sm:rounded-2xl"
+            <div className="glass-panel w-full rounded-b-none sm:max-w-md sm:rounded-2xl"
               onClick={(e) => e.stopPropagation()}>
               <div className="mb-4 flex gap-2">
                 <button onClick={() => { setErr(""); setSheet("create"); }}

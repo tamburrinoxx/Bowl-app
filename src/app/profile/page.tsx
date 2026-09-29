@@ -6,7 +6,7 @@ import Arsenal from "@/components/arsenal";
 import ResumeSession from "@/components/resume-session";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile, PatternAverage, OilPattern, Session, SessionGame, BowlerNote } from "@/types";
-import { aggregateStats } from "@/lib/bowling";
+import { aggregateStats, scoreGame } from "@/lib/bowling";
 
 type SessionWithGames = Session & { session_games: SessionGame[] };
 
@@ -221,7 +221,7 @@ export default function ProfilePage() {
   if (!profile) {
     return (
       <main className="min-h-screen flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-sm glass-panel p-8">
+        <div className="w-full max-w-sm glass-panel">
           <p className="font-score text-accent text-xs font-semibold tracking-wide mb-2 text-center uppercase">
             Bowler Profile
           </p>
@@ -366,7 +366,7 @@ export default function ProfilePage() {
   const stats = aggregateStats(allGames);
 
   return (
-    <main className="min-h-screen px-6 py-12">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-2xl flex justify-end mb-4">
         <button
           onClick={async () => { await supabase.auth.signOut(); window.location.href = "/login"; }}
@@ -376,7 +376,7 @@ export default function ProfilePage() {
         </button>
       </div>
       <div className="mx-auto max-w-7xl lg:grid lg:grid-cols-4 lg:auto-rows-min lg:items-start lg:gap-6">
-        <div className="glass-panel lg:col-start-1 lg:col-span-1 p-5 sm:p-8 mb-4 sm:mb-6 flex items-baseline justify-between">
+        <div className="glass-panel lg:col-start-1 lg:col-span-1 mb-4 sm:mb-6 flex items-baseline justify-between">
           <div>
             <p className="font-score text-accent text-xs font-semibold tracking-wide mb-1 uppercase">
               Bowler Profile
@@ -419,12 +419,22 @@ export default function ProfilePage() {
             {profile.home_center && (
               <p className="text-ink-soft text-sm mt-1">{profile.home_center}</p>
             )}
-            <p className="text-ink-soft mt-3 text-xs uppercase tracking-wide">
-              Bowl ID
-            </p>
-            <p className="font-score text-accent text-2xl tracking-widest">
-              {profile.bowl_id}
-            </p>
+            <div className="mt-3 flex items-start gap-8">
+              <div>
+                <p className="text-ink-soft text-xs uppercase tracking-wide">Bowl ID</p>
+                <p className="font-score text-accent text-2xl tracking-widest">
+                  {profile.bowl_id}
+                </p>
+              </div>
+              <div>
+                <p className="text-ink-soft text-xs uppercase tracking-wide">Average</p>
+                <p className="font-score text-ink text-2xl">
+                  {everyGame.length
+                    ? (everyGame.reduce((t, g) => t + scoreGame(g), 0) / everyGame.length).toFixed(2)
+                    : "\u2014"}
+                </p>
+              </div>
+            </div>
             <p className="text-ink-soft mt-1 text-xs">
               Give this to a host to enter a tournament with your verified average.
             </p>
@@ -440,7 +450,7 @@ export default function ProfilePage() {
 
         <Link
           href="/profile/score"
-          className="glass-panel lg:col-start-1 lg:col-span-1 p-4 sm:p-6 mb-4 sm:mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
+          className="glass-panel lg:col-start-1 lg:col-span-1 mb-4 sm:mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
         >
           <div>
             <p className="font-display text-xl text-ink mb-1">Log a Session</p>
@@ -451,7 +461,7 @@ export default function ProfilePage() {
 
         <Link
           href="/profile/leagues"
-          className="glass-panel lg:col-start-1 lg:col-span-1 p-4 sm:p-6 mb-4 sm:mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
+          className="glass-panel lg:col-start-1 lg:col-span-1 mb-4 sm:mb-6 flex items-center justify-between hover:bg-white/8 transition-colors"
         >
           <div>
             <p className="font-display text-xl text-ink mb-1">My Leagues</p>
@@ -460,7 +470,7 @@ export default function ProfilePage() {
           <span className="text-accent text-2xl font-light">→</span>
         </Link>
 
-        <section className="glass-panel lg:col-start-4 lg:col-span-1 lg:row-start-1 p-5 sm:p-8 mb-4 sm:mb-6">
+        <section className="glass-panel lg:col-start-4 lg:col-span-1 lg:row-start-1 mb-4 sm:mb-6">
           <div className="mb-4 flex items-baseline justify-between gap-2">
             <h2 className="font-display text-xl text-ink">Recent Stats</h2>
             <select value={statRange} onChange={(e) => setStatRange(e.target.value)}
@@ -491,7 +501,7 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="glass-panel lg:col-start-2 lg:col-span-2 lg:row-start-1 p-5 sm:p-8 mb-4 sm:mb-6">
+        <section className="glass-panel lg:col-start-2 lg:col-span-2 lg:row-start-1 mb-4 sm:mb-6">
           <h2 className="font-display text-xl text-ink mb-4">
             Last {sessions.length || 5} Leagues / Tournaments
           </h2>
@@ -530,7 +540,7 @@ export default function ProfilePage() {
 
         <div className="lg:col-start-1 lg:col-span-1"><Arsenal /></div>
 
-        <section className="glass-panel lg:col-start-1 lg:col-span-1 p-5 sm:p-8 mb-4 sm:mb-6">
+        <section className="glass-panel lg:col-start-1 lg:col-span-1 mb-4 sm:mb-6">
           <h2 className="font-display text-xl text-ink mb-4">Pattern Averages</h2>
           {averages.length ? (
             <div className="space-y-3">
@@ -565,7 +575,7 @@ export default function ProfilePage() {
           )}
         </section>
 
-        <section className="glass-panel lg:col-start-2 lg:col-span-2 lg:row-start-2 p-5 sm:p-8">
+        <section className="glass-panel lg:col-start-2 lg:col-span-2 lg:row-start-2">
           <h2 className="font-display text-xl text-ink mb-4">Notes to Work On</h2>
           <form onSubmit={addNote} className="flex gap-2 mb-4">
             <input

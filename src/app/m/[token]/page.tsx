@@ -53,18 +53,18 @@ export default function MatchScorer() {
   }
 
   if (loading) {
-    return <main className="min-h-screen px-5 py-10"><p className="text-ink-soft">Loading…</p></main>;
+    return <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12"><p className="text-ink-soft">Loading…</p></main>;
   }
   if (!m) {
     return (
-      <main className="min-h-screen px-5 py-10">
+      <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
         <p className="text-ink-soft">That match link isn&apos;t valid.</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen px-5 py-8">
+    <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-md">
         <p className="text-ink-soft mb-1 text-xs uppercase tracking-[0.2em]">
           {m.session_label} · {m.format}
@@ -75,7 +75,7 @@ export default function MatchScorer() {
           { key: "a" as const, label: m.side_a_label, score: m.score_a ?? 0 },
           { key: "b" as const, label: m.side_b_label, score: m.score_b ?? 0 },
         ].map((s) => (
-          <div key={s.key} className="glass-panel mb-4 p-5">
+          <div key={s.key} className="glass-panel mb-4">
             <p className="text-ink mb-3 text-lg font-semibold">{s.label}</p>
             <input
               type="number"
@@ -91,7 +91,7 @@ export default function MatchScorer() {
           {saved ? "Saved" : ""}
         </p>
 
-        <div className="glass-panel mt-8 p-5 text-center">
+        <div className="glass-panel mt-8 text-center">
           <p className="text-ink text-sm font-semibold">Track your own bowling</p>
           <p className="text-ink-soft mb-3 mt-1 text-xs">
             Scores, averages and every leave you throw at — one profile that follows you.

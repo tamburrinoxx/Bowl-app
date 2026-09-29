@@ -69,10 +69,10 @@ export default function LeagueDetail() {
   }
 
   if (loading) {
-    return <main className="min-h-screen px-5 py-8"><p className="text-ink-soft">Loading…</p></main>;
+    return <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12"><p className="text-ink-soft">Loading…</p></main>;
   }
   if (!league) {
-    return <main className="min-h-screen px-5 py-8"><p className="text-ink-soft">League not found.</p></main>;
+    return <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12"><p className="text-ink-soft">League not found.</p></main>;
   }
 
   return (
@@ -99,7 +99,7 @@ export default function LeagueDetail() {
           + Add this week
         </button>
 
-        <section className="glass-panel mb-4 p-5 sm:p-6">
+        <section className="glass-panel mb-4">
           <h2 className="font-display text-ink mb-3 text-xl">Weeks logged</h2>
           {weeks.length === 0 ? (
             <p className="text-ink-soft text-sm">Nothing yet — add this week to get started.</p>
@@ -138,7 +138,7 @@ export default function LeagueDetail() {
           )}
         </section>
 
-        <section className="glass-panel p-5 sm:p-6">
+        <section className="glass-panel">
           <h2 className="font-display text-ink mb-3 text-xl">Members</h2>
           <div className="space-y-1">
             {members.map((m) => (
