@@ -39,7 +39,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${oswald.variable} ${inter.variable}`}>
-      <body className="antialiased"><AppNav />
+      <body className="antialiased sm:pl-56"><AppNav />
         {children}</body>
     </html>
   );

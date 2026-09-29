@@ -66,46 +66,31 @@ export default function AppNav() {
 
   return (
     <>
-      <header className="lane-edge sticky top-0 z-50 hidden sm:block border-b border-white/10 bg-[#1f2329]">
-        <div className="mx-auto flex h-14 max-w-5xl items-center gap-4 px-6">
-          <Link href="/host/tournaments" className="shrink-0">
-            <Logo className="text-lg" />
-          </Link>
-
-          <nav className="ml-auto hidden items-center gap-1 sm:flex">
-            {QUICK.map((l) => {
-              const active =
-                l.href === "/t" ? pathname === "/t" : pathname.startsWith(l.href);
-              return (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-                    active
-                      ? "bg-accent/15 text-accent"
-                      : "text-ink-soft hover:text-ink hover:bg-white/8"
-                  }`}
-                >
-                  {l.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            aria-label="Open menu"
-            className="text-ink-soft hover:text-ink ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full hover:bg-white/8 sm:ml-0"
-          >
-            <span className="flex flex-col gap-[3px]">
-              <span className="block h-[2px] w-4 bg-current" />
-              <span className="block h-[2px] w-4 bg-current" />
-              <span className="block h-[2px] w-4 bg-current" />
-            </span>
-          </button>
+      <aside className="fixed left-0 top-0 z-50 hidden h-full w-56 flex-col border-r border-white/10 bg-[#1f2329] sm:flex">
+        <div className="px-5 py-5">
+          <Link href="/profile"><Logo className="text-lg" /></Link>
         </div>
-      </header>
+        <nav className="flex-1 overflow-y-auto px-3 pb-6">
+          {VISIBLE.map((sec) => (
+            <div key={sec.group} className="mb-5">
+              <p className="text-ink-soft/60 mb-1.5 px-2 text-[10px] font-semibold uppercase tracking-[0.15em]">
+                {sec.group}
+              </p>
+              {sec.links.map((l) => {
+                const active = l.href === "/t" ? pathname === "/t" : pathname.startsWith(l.href);
+                return (
+                  <Link key={l.href} href={l.href}
+                    className={`block rounded-xl px-3 py-2 text-sm transition-colors ${
+                      active ? "bg-accent/15 text-accent" : "text-ink-soft hover:bg-white/8 hover:text-ink"
+                    }`}>
+                    {l.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+      </aside>
 
       <nav className="bottom-nav fixed bottom-0 left-0 right-0 z-50 flex border-t border-white/10 bg-[#1f2329]/95 backdrop-blur sm:hidden">
         {QUICK.map((l) => {
