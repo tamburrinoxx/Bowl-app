@@ -40,7 +40,7 @@ export default function QrSheet({
           <button
             type="button"
             onClick={() => window.print()}
-            className="pill-button bg-accent text-on-accent px-6 py-2.5 text-sm hover:brightness-110"
+            className="pill-button bg-flame text-on-flame px-6 py-2.5 text-sm hover:brightness-110"
           >
             Print lane card
           </button>

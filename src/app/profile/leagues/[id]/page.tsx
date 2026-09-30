@@ -94,7 +94,7 @@ export default function LeagueDetail() {
 
         <button
           onClick={() => router.push(`/profile/score?league=${league.id}&label=${encodeURIComponent(league.name)}`)}
-          className="pill-button bg-accent text-on-accent mb-6 w-full py-3.5 text-base"
+          className="pill-button bg-flame text-on-flame mb-6 w-full py-3.5 text-base"
         >
           + Add this week
         </button>

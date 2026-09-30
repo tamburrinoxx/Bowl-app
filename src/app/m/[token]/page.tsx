@@ -96,7 +96,7 @@ export default function MatchScorer() {
           <p className="text-ink-soft mb-3 mt-1 text-xs">
             Scores, averages and every leave you throw at — one profile that follows you.
           </p>
-          <Link href="/login" className="pill-button bg-accent text-on-accent px-5 py-2.5 text-sm">
+          <Link href="/login" className="pill-button bg-flame text-on-flame px-5 py-2.5 text-sm">
             Create a free profile
           </Link>
         </div>

@@ -329,7 +329,7 @@ export default function ScoreEntryPanel({
           type="button"
           onClick={saveAll}
           disabled={saving}
-          className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
+          className="pill-button bg-flame text-on-flame px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
         >
           {saving ? "Saving…" : "Save scores"}
         </button>

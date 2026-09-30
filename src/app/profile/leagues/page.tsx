@@ -136,7 +136,7 @@ export default function LeaguesPage() {
                     placeholder="Thursday" className={inputClass} />
                   <input value={center} onChange={(e) => setCenter(e.target.value)}
                     placeholder="Home center" className={inputClass} />
-                  <button type="submit" className="pill-button bg-accent text-on-accent w-full py-3 text-sm">
+                  <button type="submit" className="pill-button bg-flame text-on-flame w-full py-3 text-sm">
                     Create league
                   </button>
                 </form>
@@ -144,7 +144,7 @@ export default function LeaguesPage() {
                 <form onSubmit={joinLeague} className="space-y-3">
                   <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())}
                     placeholder="6-digit code" className={inputClass} />
-                  <button type="submit" className="pill-button bg-accent text-on-accent w-full py-3 text-sm">
+                  <button type="submit" className="pill-button bg-flame text-on-flame w-full py-3 text-sm">
                     Join league
                   </button>
                 </form>

@@ -50,7 +50,7 @@ export default async function HostTournamentsPage() {
             </Link>
             <Link
               href="/host/tournaments/wizard"
-              className="pill-button bg-accent text-on-accent px-5 py-2.5 text-sm hover:brightness-110"
+              className="pill-button bg-flame text-on-flame px-5 py-2.5 text-sm hover:brightness-110"
             >
               Build one
             </Link>
@@ -101,7 +101,7 @@ export default async function HostTournamentsPage() {
             </p>
             <Link
               href="/host/tournaments/new"
-              className="pill-button bg-accent text-on-accent inline-block px-5 py-2.5 text-sm hover:brightness-110"
+              className="pill-button bg-flame text-on-flame inline-block px-5 py-2.5 text-sm hover:brightness-110"
             >
               Create your first
             </Link>

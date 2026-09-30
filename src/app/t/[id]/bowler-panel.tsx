@@ -210,7 +210,7 @@ export default function BowlerPanel({
         </p>
         <Link
           href="/login"
-          className="pill-button bg-accent text-on-accent shrink-0 px-5 py-2.5 text-sm hover:brightness-110"
+          className="pill-button bg-flame text-on-flame shrink-0 px-5 py-2.5 text-sm hover:brightness-110"
         >
           Sign in
         </Link>
@@ -264,7 +264,7 @@ export default function BowlerPanel({
             type="button"
             onClick={join}
             disabled={busy || !entryName.trim()}
-            className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
+            className="pill-button bg-flame text-on-flame px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
           >
             {busy ? "Joining…" : "Join"}
           </button>
@@ -320,7 +320,7 @@ export default function BowlerPanel({
           type="button"
           onClick={saveAll}
           disabled={busy || filled === 0}
-          className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-40"
+          className="pill-button bg-flame text-on-flame px-6 py-2.5 hover:brightness-110 disabled:opacity-40"
         >
           {busy ? "Saving…" : "Save scores"}
         </button>

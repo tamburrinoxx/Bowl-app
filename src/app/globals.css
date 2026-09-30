@@ -10,6 +10,9 @@
   --accent: #b6ff2e;
   --accent-soft: rgba(182, 255, 46, 0.14);
   --on-accent: #1f2329;
+  --flame: #ff7a1a;
+  --flame-soft: rgba(255, 122, 26, 0.16);
+  --on-flame: #1f2329;
   --success: #34c759;
   --warning: #ff9f0a;
   --danger: #ff453a;
@@ -29,6 +32,9 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-on-accent: var(--on-accent);
+  --color-flame: var(--flame);
+  --color-flame-soft: var(--flame-soft);
+  --color-on-flame: var(--on-flame);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);

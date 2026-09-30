@@ -358,7 +358,7 @@ export default function BracketsRunner({
             type="button"
             onClick={() => generate(pot)}
             disabled={busy}
-            className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
+            className="pill-button bg-flame text-on-flame px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
           >
             {busy ? "Generating…" : "Generate brackets"}
           </button>
@@ -532,7 +532,7 @@ function BracketControls({
             type="button"
             disabled={busy || !complete}
             onClick={() => onPull(rounds)}
-            className="pill-button bg-accent text-on-accent px-6 py-2.5 text-sm hover:brightness-110 disabled:opacity-40"
+            className="pill-button bg-flame text-on-flame px-6 py-2.5 text-sm hover:brightness-110 disabled:opacity-40"
           >
             {busy ? "Pulling…" : "Pull scores"}
           </button>

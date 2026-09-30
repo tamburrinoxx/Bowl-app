@@ -48,7 +48,7 @@ export default function Arsenal() {
           placeholder="Storm Phaze II"
           className="glass-input flex-1 rounded-2xl bg-white/5 px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft/50"
         />
-        <button type="submit" className="pill-button bg-accent text-on-accent shrink-0 px-4 text-sm">
+        <button type="submit" className="pill-button bg-flame text-on-flame shrink-0 px-4 text-sm">
           Add
         </button>
       </form>

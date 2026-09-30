@@ -593,7 +593,7 @@ export default function ProfilePage() {
             />
             <button
               type="submit"
-              className="pill-button bg-accent text-on-accent px-5 py-2.5 hover:brightness-110"
+              className="pill-button bg-flame text-on-flame px-5 py-2.5 hover:brightness-110"
             >
               Add
             </button>

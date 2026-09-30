@@ -239,7 +239,7 @@ export default function MyTournament({
         <p className="text-ink-soft text-sm">
           Sign in to see your scores, standing and winnings.
         </p>
-        <Link href="/login" className="pill-button bg-accent text-on-accent px-5 py-2.5 text-sm">
+        <Link href="/login" className="pill-button bg-flame text-on-flame px-5 py-2.5 text-sm">
           Sign in
         </Link>
       </div>
@@ -250,7 +250,7 @@ export default function MyTournament({
     return (
       <div className="glass-panel flex flex-wrap items-center justify-between gap-4">
         <p className="text-ink-soft text-sm">You&apos;re not entered in this tournament.</p>
-        <Link href={`/t/${tournamentId}`} className="pill-button bg-accent text-on-accent px-5 py-2.5 text-sm">
+        <Link href={`/t/${tournamentId}`} className="pill-button bg-flame text-on-flame px-5 py-2.5 text-sm">
           Join
         </Link>
       </div>

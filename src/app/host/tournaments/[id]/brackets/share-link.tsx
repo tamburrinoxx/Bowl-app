@@ -30,7 +30,7 @@ export default function ShareLink({ tournamentId }: { tournamentId: string }) {
         <button
           type="button"
           onClick={copy}
-          className="pill-button bg-accent text-on-accent px-5 py-2.5 text-sm hover:brightness-110"
+          className="pill-button bg-flame text-on-flame px-5 py-2.5 text-sm hover:brightness-110"
         >
           {copied ? "Copied" : "Copy link"}
         </button>

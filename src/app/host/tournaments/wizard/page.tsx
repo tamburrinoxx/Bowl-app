@@ -295,7 +295,7 @@ export default function TournamentWizard() {
                 type="button"
                 onClick={buildFromText}
                 disabled={!freeText.trim() || !name.trim()}
-                className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-40"
+                className="pill-button bg-flame text-on-flame px-6 py-2.5 hover:brightness-110 disabled:opacity-40"
               >
                 Build from this
               </button>
@@ -678,7 +678,7 @@ export default function TournamentWizard() {
                 type="button"
                 disabled={!canAdvance}
                 onClick={() => setStep((s) => s + 1)}
-                className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-40"
+                className="pill-button bg-flame text-on-flame px-6 py-2.5 hover:brightness-110 disabled:opacity-40"
               >
                 Next
               </button>
@@ -687,7 +687,7 @@ export default function TournamentWizard() {
                 type="button"
                 disabled={saving}
                 onClick={save}
-                className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
+                className="pill-button bg-flame text-on-flame px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
               >
                 {saving ? "Creating…" : "Create Tournament"}
               </button>

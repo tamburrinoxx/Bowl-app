@@ -212,7 +212,7 @@ export default function CareerView() {
     return (
       <div className="glass-panel flex flex-wrap items-center justify-between gap-4">
         <p className="text-ink-soft text-sm">Sign in to see your career.</p>
-        <Link href="/login" className="pill-button bg-accent text-on-accent px-5 py-2.5 text-sm">
+        <Link href="/login" className="pill-button bg-flame text-on-flame px-5 py-2.5 text-sm">
           Sign in
         </Link>
       </div>
@@ -421,7 +421,7 @@ export default function CareerView() {
             Bowl a practice session with the pin-tap sheet and your leaves, strike
             rate and spare conversion show up here.
           </p>
-          <Link href="/profile/score" className="pill-button bg-accent text-on-accent mt-4 inline-block px-5 py-2.5 text-sm">
+          <Link href="/profile/score" className="pill-button bg-flame text-on-flame mt-4 inline-block px-5 py-2.5 text-sm">
             Log a session
           </Link>
         </div>

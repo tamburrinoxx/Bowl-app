@@ -171,7 +171,7 @@ export default function PayoutsPanel({
           type="button"
           onClick={generate}
           disabled={busy || fundNum <= 0 || entryCount < 1}
-          className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-40"
+          className="pill-button bg-flame text-on-flame px-6 py-2.5 hover:brightness-110 disabled:opacity-40"
         >
           {busy ? "Working…" : rows.length ? "Regenerate" : "Generate"}
         </button>
@@ -221,7 +221,7 @@ export default function PayoutsPanel({
               type="button"
               onClick={saveEdits}
               disabled={busy}
-              className="pill-button bg-accent text-on-accent px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
+              className="pill-button bg-flame text-on-flame px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
             >
               {busy ? "Saving…" : "Save payouts"}
             </button>
