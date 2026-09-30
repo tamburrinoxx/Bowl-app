@@ -60,6 +60,9 @@ export default function AppNav() {
   }, []);
 
   const QUICK = isHost ? HOST_QUICK : BOWLER_QUICK;
+  const MOBILE_QUICK = isHost
+    ? HOST_QUICK.filter((l) => ["Tournaments", "Find", "Bowl"].includes(l.label))
+    : BOWLER_QUICK;
   const VISIBLE = isHost ? SECTIONS : SECTIONS.filter((x) => x.group === "Bowler");
 
   if (pathname === "/" || pathname === "/login") return null;
@@ -92,8 +95,8 @@ export default function AppNav() {
         </nav>
       </aside>
 
-      <nav className="bottom-nav fixed bottom-0 left-0 right-0 z-50 flex border-t border-white/10 bg-[#1f2329]/95 backdrop-blur sm:hidden">
-        {QUICK.map((l) => {
+      <nav className="bottom-nav fixed bottom-0 left-0 right-0 z-50 flex border-t border-white/10 bg-[#1f2329] pb-[env(safe-area-inset-bottom)] sm:hidden">
+        {MOBILE_QUICK.map((l) => {
           const active =
             l.href === "/t" ? pathname === "/t" : pathname.startsWith(l.href);
           return (
