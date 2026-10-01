@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import BackLink from "@/components/back-link";
 import { checkSession } from "@/lib/achievements";
 import { createClient } from "@/lib/supabase/client";
+import { isSplitLeave } from "@/lib/leaves";
 import type { FrameData } from "@/lib/bowling";
 import {
   scoreGame,
@@ -392,6 +393,9 @@ export default function ScoreEntryPage() {
           <div className="grid grid-cols-5">
             {currentGame.map((frame, i) => {
               const marks = frameMarks(frame, i + 1);
+              const firstRoll = pinLogs[activeGame]?.[i]?.[0] ?? [];
+              const leftStanding = ALL_PINS.filter((p) => !firstRoll.includes(p));
+              const wasSplit = firstRoll.length > 0 && isSplitLeave(leftStanding);
               const isActive = i === currentFrameIndex;
               return (
                 <div
@@ -400,7 +404,11 @@ export default function ScoreEntryPage() {
                     isActive ? "bg-accent/10" : ""
                   }`}
                 >
-                  <p className="text-[12px] text-ink-soft text-center pt-1">{i + 1}</p>
+                  <p className="text-center pt-1">
+                    <span className={`inline-flex h-[18px] w-[18px] items-center justify-center text-[12px] ${
+                      wasSplit ? "rounded-full border border-red-400 text-red-400" : "text-ink-soft"
+                    }`}>{i + 1}</span>
+                  </p>
                   <div className="flex justify-center gap-0.5 h-5 items-center">
                     {marks.length ? (
                       marks.map((m, j) => (
