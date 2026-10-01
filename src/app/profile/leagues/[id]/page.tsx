@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import BackLink from "@/components/back-link";
+import HangsPanel from "@/components/hangs-panel";
 
 type League = { id: string; name: string; center: string | null; night: string | null; join_code: string };
 type Member = { bowler_id: string; full_name: string | null };
@@ -98,6 +99,8 @@ export default function LeagueDetail() {
         >
           + Add this week
         </button>
+
+        <HangsPanel leagueId={leagueId} />
 
         <section className="glass-panel mb-4">
           <h2 className="font-display text-ink mb-3 text-xl">Weeks logged</h2>
