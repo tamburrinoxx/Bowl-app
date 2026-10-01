@@ -404,15 +404,15 @@ export default function ScoreEntryPage() {
                     isActive ? "bg-accent/10" : ""
                   }`}
                 >
-                  <p className="text-center pt-1">
-                    <span className={`inline-flex h-[18px] w-[18px] items-center justify-center text-[12px] ${
-                      wasSplit ? "rounded-full border border-red-400 text-red-400" : "text-ink-soft"
-                    }`}>{i + 1}</span>
-                  </p>
+                  <p className="text-[12px] text-ink-soft text-center pt-1">{i + 1}</p>
                   <div className="flex justify-center gap-0.5 h-5 items-center">
                     {marks.length ? (
                       marks.map((m, j) => (
-                        <span key={j} className="text-xs font-score text-ink">
+                        <span key={j} className={`font-score inline-flex h-[17px] min-w-[17px] items-center justify-center text-xs ${
+                          wasSplit && j === 0
+                            ? "rounded-full border border-red-400 text-red-400"
+                            : "text-ink"
+                        }`}>
                           {m}
                         </span>
                       ))
