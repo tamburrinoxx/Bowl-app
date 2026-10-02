@@ -329,6 +329,13 @@ export default function ScoreEntryPage() {
         </p>
         <h1 className="font-display text-4xl text-ink mb-8">Enter Your Scores</h1>
 
+        {leagueId ? (
+          <p className="text-ink-soft mb-5 text-sm">
+            <span className="text-ink font-semibold">{label || "League"}</span>
+            {" \u00b7 "}
+            {new Date(playedAt + "T00:00:00").toLocaleDateString()}
+          </p>
+        ) : (
         <div className="glass-panel mb-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -355,6 +362,7 @@ export default function ScoreEntryPage() {
             </div>
           </div>
         </div>
+        )}
 
         <div className="flex gap-2 mb-4">
           {[0, 1, 2].map((i) => (

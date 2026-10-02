@@ -49,31 +49,29 @@ export default function HangsPanel({ leagueId, compact = false }: { leagueId: st
   if (compact && !on) return null;
 
   return (
-    <section className="glass-panel mb-4">
+    <section className="glass-panel mb-4 !p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-display text-ink text-xl">Hangs</h2>
-          <p className="text-ink-soft text-xs">
-            Everyone else struck and you didn&apos;t.
-          </p>
+          <h2 className="font-display text-ink text-lg leading-none">Hangs</h2>
+          <p className="text-ink-soft text-[11px] leading-tight">Everyone else struck, you didn&apos;t.</p>
         </div>
         {!compact && <button
           onClick={toggle}
-          className={`h-7 w-12 shrink-0 rounded-full transition-colors ${on ? "bg-flame" : "bg-white/15"}`}
+          className={`h-6 w-11 shrink-0 rounded-full transition-colors ${on ? "bg-flame" : "bg-white/15"}`}
           aria-label="Toggle hangs"
         >
-          <span className={`block h-5 w-5 rounded-full bg-white transition-transform ${on ? "translate-x-6" : "translate-x-1"}`} />
+          <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${on ? "translate-x-6" : "translate-x-1"}`} />
         </button>}
       </div>
 
       {on && (
         <>
-          {!compact && <form onSubmit={add} className="mb-3 mt-4 flex gap-2">
+          {!compact && <form onSubmit={add} className="mb-2 mt-3 flex gap-2">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Bowler name"
-              className="glass-input flex-1 rounded-2xl bg-white/5 px-4 py-2.5 text-sm text-ink placeholder:text-ink-soft/50"
+              className="glass-input flex-1 rounded-2xl bg-white/5 px-3 py-2 text-sm text-ink placeholder:text-ink-soft/50"
             />
             <button type="submit" className="pill-button bg-flame text-on-flame shrink-0 px-4 text-sm">
               Add
@@ -83,15 +81,15 @@ export default function HangsPanel({ leagueId, compact = false }: { leagueId: st
           {rows.length === 0 ? (
             <p className="text-ink-soft text-sm">No bowlers yet.</p>
           ) : (
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {rows.map((h) => (
-                <div key={h.id} className="flex items-center gap-3 rounded-2xl bg-white/5 px-4 py-2.5">
+                <div key={h.id} className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-1.5">
                   <span className="text-ink flex-1 text-sm">{h.name}</span>
                   <button onClick={() => bump(h, -1)}
-                    className="text-ink-soft h-8 w-8 rounded-full bg-white/10 text-lg leading-none">−</button>
-                  <span className="font-score text-accent w-8 text-center text-xl">{h.tally}</span>
+                    className="text-ink-soft h-7 w-7 rounded-full bg-white/10 text-base leading-none">−</button>
+                  <span className="font-score text-accent w-7 text-center text-lg">{h.tally}</span>
                   <button onClick={() => bump(h, 1)}
-                    className="bg-flame text-on-flame h-8 w-8 rounded-full text-lg leading-none">+</button>
+                    className="bg-flame text-on-flame h-7 w-7 rounded-full text-base leading-none">+</button>
                   <button onClick={() => remove(h.id)}
                     className="text-ink-soft/40 hover:text-danger ml-1 text-xs">×</button>
                 </div>
