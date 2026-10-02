@@ -20,6 +20,20 @@ export default function LeagueDetail() {
   const [members, setMembers] = useState<Member[]>([]);
   const [weeks, setWeeks] = useState<Week[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasDraft, setHasDraft] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("pinfall_draft");
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      if (Date.now() - d.at > 3 * 60 * 60 * 1000) return;
+      const thrown = (d.games ?? []).some((g: { rolls: number[] }[]) =>
+        g.some((f) => f.rolls.length > 0)
+      );
+      if (thrown && d.leagueId === leagueId) setHasDraft(true);
+    } catch {}
+  }, [leagueId]);
 
   useEffect(() => {
     let off = false;
@@ -97,7 +111,7 @@ export default function LeagueDetail() {
           onClick={() => router.push(`/profile/score?league=${league.id}&label=${encodeURIComponent(league.name)}`)}
           className="pill-button bg-flame text-on-flame mb-6 w-full py-3.5 text-base"
         >
-          + Add this week
+          {hasDraft ? "Continue this session" : "+ Add this week"}
         </button>
 
         <HangsPanel leagueId={leagueId} />
