@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type Hang = { id: string; name: string; tally: number };
 
-export default function HangsPanel({ leagueId }: { leagueId: string }) {
+export default function HangsPanel({ leagueId, compact = false }: { leagueId: string; compact?: boolean }) {
   const supabase = createClient();
   const [on, setOn] = useState(false);
   const [rows, setRows] = useState<Hang[]>([]);
@@ -46,6 +46,8 @@ export default function HangsPanel({ leagueId }: { leagueId: string }) {
     load();
   }
 
+  if (compact && !on) return null;
+
   return (
     <section className="glass-panel mb-4">
       <div className="flex items-center justify-between">
@@ -55,18 +57,18 @@ export default function HangsPanel({ leagueId }: { leagueId: string }) {
             Everyone else struck and you didn&apos;t.
           </p>
         </div>
-        <button
+        {!compact && <button
           onClick={toggle}
           className={`h-7 w-12 shrink-0 rounded-full transition-colors ${on ? "bg-flame" : "bg-white/15"}`}
           aria-label="Toggle hangs"
         >
           <span className={`block h-5 w-5 rounded-full bg-white transition-transform ${on ? "translate-x-6" : "translate-x-1"}`} />
-        </button>
+        </button>}
       </div>
 
       {on && (
         <>
-          <form onSubmit={add} className="mb-3 mt-4 flex gap-2">
+          {!compact && <form onSubmit={add} className="mb-3 mt-4 flex gap-2">
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -76,7 +78,7 @@ export default function HangsPanel({ leagueId }: { leagueId: string }) {
             <button type="submit" className="pill-button bg-flame text-on-flame shrink-0 px-4 text-sm">
               Add
             </button>
-          </form>
+          </form>}
 
           {rows.length === 0 ? (
             <p className="text-ink-soft text-sm">No bowlers yet.</p>

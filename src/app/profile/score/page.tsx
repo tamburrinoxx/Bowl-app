@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BackLink from "@/components/back-link";
+import HangsPanel from "@/components/hangs-panel";
 import { checkSession } from "@/lib/achievements";
 import { createClient } from "@/lib/supabase/client";
 import { isSplitLeave } from "@/lib/leaves";
@@ -387,6 +388,8 @@ export default function ScoreEntryPage() {
             ))}
           </div>
         )}
+
+        {leagueId && <HangsPanel leagueId={leagueId} compact />}
 
         {/* Scoresheet grid */}
         <div className="glass-panel p-2 sm: mb-4">
