@@ -89,6 +89,17 @@ export default function ScoreEntryPage() {
     if (p) setLeagueId(p);
   }, []);
 
+  // League sessions take the league's name as their label.
+  useEffect(() => {
+    if (!leagueId) return;
+    (async () => {
+      const { data } = await supabase
+        .from("leagues").select("name").eq("id", leagueId).single();
+      const n = (data as { name: string } | null)?.name;
+      if (n) setLabel((cur) => cur.trim() || n);
+    })();
+  }, [leagueId, supabase]);
+
   const draftKey = "pinfall_draft";
 
   useEffect(() => {
