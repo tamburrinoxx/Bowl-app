@@ -591,13 +591,22 @@ export default function ScoreEntryPage() {
           </p>
         )}
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="pill-button w-full bg-accent text-on-accent text-base py-3.5 hover:brightness-110 disabled:opacity-50"
-        >
-          {saving ? "Saving…" : "Save Session"}
-        </button>
+        {allComplete ? (
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="pill-button w-full bg-accent text-on-accent text-base py-3.5 hover:brightness-110 disabled:opacity-50"
+          >
+            {saving ? "Saving…" : "Save Session"}
+          </button>
+        ) : gameComplete(currentGame) && activeGame < games.length - 1 ? (
+          <button
+            onClick={() => setActiveGame(activeGame + 1)}
+            className="pill-button bg-flame text-on-flame w-full py-3.5 text-base"
+          >
+            Next game
+          </button>
+        ) : null}
       </div>
     </main>
   );
