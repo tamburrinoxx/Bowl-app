@@ -457,6 +457,12 @@ export default function ScoreEntryPage() {
             <div className="text-center py-8">
               <p className="text-ink-soft text-sm uppercase tracking-wide mb-1">Game Score</p>
               <p className="font-score text-4xl text-accent font-bold">{finalScore}</p>
+              <button
+                onClick={undoRoll}
+                className="text-ink-soft mt-4 rounded-full bg-white/10 px-4 py-2 text-xs"
+              >
+                ↺ Fix last ball
+              </button>
             </div>
           ) : (
             <>
