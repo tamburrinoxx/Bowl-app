@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { pointsFor } from "@/lib/ryder";
 import AutoScroll from "./auto-scroll";
 
@@ -43,6 +44,9 @@ export default async function RyderTvPage({
 
   return (
     <main className="flex h-screen flex-col px-8 py-6">
+      <Link href={`/t/${id}`} className="text-ink-soft hover:text-ink absolute left-4 top-4 text-sm">
+        ‹ Back
+      </Link>
       <h1 className="font-display text-ink mb-4 shrink-0 text-center text-3xl">
         {tournament?.name ?? "Ryder Cup"}
       </h1>
