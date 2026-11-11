@@ -76,6 +76,16 @@ export default function LeagueDetail() {
     return () => { off = true; };
   }, [leagueId, supabase]);
 
+  async function deleteLeague() {
+    if (!league) return;
+    if (!confirm(`Delete "${league.name}" and every week logged in it? This cannot be undone.`)) return;
+    await supabase.from("hangs").delete().eq("league_id", league.id);
+    await supabase.from("sessions").update({ league_id: null }).eq("league_id", league.id);
+    const { error } = await supabase.from("leagues").delete().eq("id", league.id);
+    if (error) { alert(error.message); return; }
+    router.push("/profile/leagues");
+  }
+
   async function removeWeek(id: string) {
     if (!confirm("Delete this series? This can't be undone.")) return;
     await supabase.from("session_games").delete().eq("session_id", id);
@@ -165,6 +175,13 @@ export default function LeagueDetail() {
             ))}
           </div>
         </section>
+
+        <button
+          onClick={deleteLeague}
+          className="text-ink-soft/50 hover:text-danger mt-6 w-full py-3 text-xs"
+        >
+          Delete this league
+        </button>
       </div>
     </main>
   );
