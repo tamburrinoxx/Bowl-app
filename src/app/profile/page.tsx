@@ -366,7 +366,7 @@ export default function ProfilePage() {
   const yearAgo = Date.now() - 365 * 86400000;
   const leagueGames = ordered
     .filter((x) => (x.league_id || x.imported) && new Date(x.played_at).getTime() >= yearAgo)
-    .flatMap((x) => (x.session_games ?? []).map((g) => g.frame_data));
+    .flatMap((x) => (x.session_games ?? []).map((g) => g.scratch_score ?? 0));
 
   const windowSize = statRange === "all" ? everyGame.length : Number(statRange);
   const allGames = everyGame.slice(0, windowSize);
@@ -436,7 +436,7 @@ export default function ProfilePage() {
                 <p className="text-ink-soft text-xs uppercase tracking-wide">League avg</p>
                 <p className="font-score text-ink text-2xl">
                   {leagueGames.length
-                    ? (leagueGames.reduce((t, g) => t + scoreGame(g), 0) / leagueGames.length).toFixed(2)
+                    ? (leagueGames.reduce((t, g) => t + g, 0) / leagueGames.length).toFixed(2)
                     : "\u2014"}
                 </p>
               </div>
