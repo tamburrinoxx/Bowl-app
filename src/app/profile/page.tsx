@@ -80,7 +80,7 @@ export default function ProfilePage() {
         .select("*, session_games(*)")
         .eq("bowler_id", user.id)
         .order("played_at", { ascending: false })
-        .limit(5);
+        .limit(500);
       setSessions((sessionRows as SessionWithGames[]) ?? []);
 
       const { data: noteRows } = await supabase
@@ -510,11 +510,11 @@ export default function ProfilePage() {
 
         <section className="glass-panel lg:col-start-2 lg:col-span-2 lg:row-start-1 mb-4 sm:mb-6">
           <h2 className="font-display text-xl text-ink mb-4">
-            Last {sessions.length || 5} Leagues / Tournaments
+            Last 5 Leagues / Tournaments
           </h2>
           {sessions.length ? (
             <div className="space-y-3">
-              {sessions.map((s) => {
+              {sessions.slice(0, 5).map((s) => {
                 const games = s.session_games ?? [];
                 const total = games.reduce((sum, g) => sum + g.scratch_score, 0);
                 return (
