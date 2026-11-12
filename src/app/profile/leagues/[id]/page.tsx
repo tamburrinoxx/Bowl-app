@@ -21,6 +21,11 @@ export default function LeagueDetail() {
   const [weeks, setWeeks] = useState<Week[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasDraft, setHasDraft] = useState(false);
+  const [meId, setMeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setMeId(data.user?.id ?? null));
+  }, [supabase]);
 
   useEffect(() => {
     try {
@@ -93,6 +98,17 @@ export default function LeagueDetail() {
     if (!error) setWeeks((prev) => prev.filter((w) => w.id !== id));
   }
 
+  const mine = weeks.filter((w) => w.bowler_id === meId);
+  const myGames = mine.flatMap((w) => w.scores ?? []);
+  const myStats = myGames.length
+    ? {
+        games: myGames.length,
+        avg: (myGames.reduce((a, b) => a + b, 0) / myGames.length).toFixed(2),
+        high: Math.max(...myGames),
+        series: Math.max(...mine.map((w) => (w.scores ?? []).reduce((a, b) => a + b, 0))),
+      }
+    : null;
+
   if (loading) {
     return <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12"><p className="text-ink-soft">Loading…</p></main>;
   }
@@ -125,6 +141,25 @@ export default function LeagueDetail() {
         </button>
 
         <HangsPanel leagueId={leagueId} />
+
+        {myStats && (
+          <section className="glass-panel mb-4">
+            <h2 className="font-display text-ink mb-3 text-xl">Your stats here</h2>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { k: "Average", v: myStats.avg },
+                { k: "High game", v: String(myStats.high) },
+                { k: "High series", v: String(myStats.series) },
+                { k: "Games", v: String(myStats.games) },
+              ].map((c) => (
+                <div key={c.k} className="rounded-xl bg-white/5 px-2 py-2 text-center">
+                  <p className="font-score text-accent text-lg leading-none">{c.v}</p>
+                  <p className="text-ink-soft mt-1 text-[10px] uppercase">{c.k}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="glass-panel mb-4">
           <h2 className="font-display text-ink mb-3 text-xl">Weeks logged</h2>
