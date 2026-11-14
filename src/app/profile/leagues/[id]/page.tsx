@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 import BackLink from "@/components/back-link";
 import HangsPanel from "@/components/hangs-panel";
 
@@ -110,7 +111,7 @@ export default function LeagueDetail() {
     : null;
 
   if (loading) {
-    return <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12"><p className="text-ink-soft">Loading…</p></main>;
+    return <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12"><p className="text-ink-soft">Loadingâ¦</p></main>;
   }
   if (!league) {
     return <main className="min-h-screen px-5 py-8 pb-24 sm:px-6 sm:py-12"><p className="text-ink-soft">League not found.</p></main>;
@@ -124,7 +125,7 @@ export default function LeagueDetail() {
           <div>
             <h1 className="font-display text-ink text-3xl sm:text-4xl">{league.name}</h1>
             <p className="text-ink-soft text-sm">
-              {[league.night, league.center].filter(Boolean).join(" · ") || "—"}
+              {[league.night, league.center].filter(Boolean).join(" Â· ") || "â"}
             </p>
           </div>
           <div className="text-right">
@@ -144,7 +145,10 @@ export default function LeagueDetail() {
 
         {myStats && (
           <section className="glass-panel mb-4">
-            <h2 className="font-display text-ink mb-3 text-xl">Your stats here</h2>
+            <Link href={`/profile/career?league=${leagueId}`} className="mb-3 flex items-baseline justify-between">
+              <h2 className="font-display text-ink text-xl">Your stats</h2>
+              <span className="text-accent text-xs">Leaves, spares and more →</span>
+            </Link>
             <div className="grid grid-cols-4 gap-2">
               {[
                 { k: "Average", v: myStats.avg },
@@ -164,7 +168,7 @@ export default function LeagueDetail() {
         <section className="glass-panel mb-4">
           <h2 className="font-display text-ink mb-3 text-xl">Weeks logged</h2>
           {weeks.length === 0 ? (
-            <p className="text-ink-soft text-sm">Nothing yet — add this week to get started.</p>
+            <p className="text-ink-soft text-sm">Nothing yet â add this week to get started.</p>
           ) : (
             <div className="space-y-2">
               {weeks.map((w) => {
@@ -176,7 +180,7 @@ export default function LeagueDetail() {
                       <p className="text-ink-soft text-xs">
                         {new Date(w.played_at).toLocaleDateString()}
                         {w.scores && w.scores.length > 0 && (
-                          <span className="ml-2">{w.scores.join(" · ")}</span>
+                          <span className="ml-2">{w.scores.join(" Â· ")}</span>
                         )}
                       </p>
                     </div>

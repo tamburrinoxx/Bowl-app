@@ -29,6 +29,20 @@ export default function CareerView() {
   const [sessionGames, setSessionGames] = useState(0);
   const [allGames, setAllGames] = useState<{ log: number[][][]; leagueId: string | null; score: number; gameNumber: number; sessionId: string; playedAt: string }[]>([]);
   const [leagueOpts, setLeagueOpts] = useState<{ id: string; name: string }[]>([]);
+  const [onlyLeague, setOnlyLeague] = useState<string | null>(null);
+  const [onlyLeagueName, setOnlyLeagueName] = useState<string>("");
+
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search).get("league");
+    if (p) setOnlyLeague(p);
+  }, []);
+
+  useEffect(() => {
+    if (!onlyLeague) return;
+    supabase.from("leagues").select("name").eq("id", onlyLeague).single()
+      .then(({ data }) => setOnlyLeagueName((data as { name: string } | null)?.name ?? ""));
+  }, [onlyLeague, supabase]);
+
   const [useLeagues, setUseLeagues] = useState(true);
   const [useOpen, setUseOpen] = useState(true);
   const [leaveView, setLeaveView] = useState<null | "all" | "makeable" | "single" | "multi" | "split">(null);
@@ -48,12 +62,14 @@ export default function CareerView() {
     })();
   }, [supabase]);
 
-  const picked = allGames.filter((g) => (g.leagueId ? useLeagues : useOpen));
+  const picked = onlyLeague
+    ? allGames.filter((g) => g.leagueId === onlyLeague)
+    : allGames.filter((g) => (g.leagueId ? useLeagues : useOpen));
 
   useEffect(() => {
     setStats(picked.length ? analysePinLogs(picked.map((g) => g.log)) : null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useLeagues, useOpen, allGames]);
+  }, [useLeagues, useOpen, allGames, onlyLeague]);
 
   const gameStats = (() => {
     if (!picked.length) return null;
@@ -229,6 +245,16 @@ export default function CareerView() {
 
   return (
     <div className="space-y-6">
+      {onlyLeague && (
+        <div className="bg-accent/10 ring-accent/30 flex items-center justify-between rounded-2xl p-4 ring-1">
+          <p className="text-accent text-sm font-semibold">
+            {onlyLeagueName || "League"} only
+          </p>
+          <a href="/profile/career" className="text-ink-soft text-xs underline">
+            Show everything
+          </a>
+        </div>
+      )}
       <div className="glass-panel">
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
           <Stat label="Tournament avg" value={average || "—"} />
