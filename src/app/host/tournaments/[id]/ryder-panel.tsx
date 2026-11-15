@@ -140,6 +140,7 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
 
   function winColor(m: Match, side: "a" | "b") {
     const r = resultFor(m);
+    if (r.decided && r.a === r.b) return { color: "#B6FF2E", fontWeight: 700 };
     const won = side === "a" ? r.a > r.b : r.b > r.a;
     if (!won) return undefined;
     return { color: side === "a" ? colorA : colorB, fontWeight: 700 };
