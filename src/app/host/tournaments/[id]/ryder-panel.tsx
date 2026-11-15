@@ -32,6 +32,7 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   const [nameA, setNameA] = useState("Team Red");
   const [nameB, setNameB] = useState("Team Blue");
   const [mSession, setMSession] = useState("Session 1");
+  const [filterSession, setFilterSession] = useState("all");
   const [mFormat, setMFormat] = useState("Singles");
   const [mA, setMA] = useState("");
   const [mB, setMB] = useState("");
@@ -295,11 +296,24 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
         )}
       </div>
 
+      {matches.length > 0 && (
+        <div className="mb-2 flex items-center gap-2">
+          <span className="text-ink-soft text-[11px] uppercase">Session</span>
+          <select value={filterSession} onChange={(e) => setFilterSession(e.target.value)}
+            className="glass-input bg-transparent px-2 py-1 text-xs text-ink">
+            <option value="all">All</option>
+            {[...new Set(matches.map((m) => m.session_label))].map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {matches.length === 0 ? (
         <p className="text-ink-soft text-sm">No matches yet.</p>
       ) : (
         <div className="space-y-2">
-          {matches.map((m) => (
+          {matches.filter((m) => filterSession === "all" || m.session_label === filterSession).map((m) => (
             <div key={m.id} className="rounded-xl bg-white/5 px-3 py-2">
               <p className="text-ink-soft mb-1 flex items-center text-[11px] uppercase">
                 <input
