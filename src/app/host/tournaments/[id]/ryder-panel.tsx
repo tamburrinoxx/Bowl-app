@@ -264,8 +264,13 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
       </div>
 
       <div className="mb-4 flex flex-wrap items-end gap-2 rounded-xl bg-black/20 p-3">
-        <input value={mSession} onChange={(e) => setMSession(e.target.value)}
+        <input value={mSession} onChange={(e) => setMSession(e.target.value)} list="ryder-sessions"
           placeholder="Session" className="glass-input w-28 px-2 py-1.5 text-sm text-ink" />
+        <datalist id="ryder-sessions">
+          {[...new Set(matches.map((m) => m.session_label))].map((s) => (
+            <option key={s} value={s} />
+          ))}
+        </datalist>
         <select value={mFormat} onChange={(e) => setMFormat(e.target.value)}
           className="glass-input bg-transparent px-2 py-1.5 text-sm text-ink">
           <option>Team Baker</option>
