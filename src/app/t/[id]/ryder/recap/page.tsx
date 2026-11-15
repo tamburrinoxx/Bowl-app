@@ -122,6 +122,35 @@ export default async function RyderRecap({
           </div>
         </div>
 
+        <div className="mb-6 space-y-4 border-t border-white/10 pt-5">
+          <p className="text-ink-soft text-[11px] uppercase tracking-[0.2em]">
+            Every match
+          </p>
+          {sessions.map((s) => (
+            <div key={s.label}>
+              <p className="text-ink mb-1.5 text-sm font-semibold">{s.label}</p>
+              <div className="space-y-1">
+                {ms.filter((m) => m.session_label === s.label).map((m) => {
+                  const r = res(m);
+                  const ta = (m.scores_a ?? []).reduce((x, y) => x + (y || 0), 0);
+                  const tb = (m.scores_b ?? []).reduce((x, y) => x + (y || 0), 0);
+                  const tie = r.decided && r.a === r.b;
+                  const sa = tie ? { color: "#B6FF2E" } : r.a > r.b ? { color: colorA } : undefined;
+                  const sb = tie ? { color: "#B6FF2E" } : r.b > r.a ? { color: colorB } : undefined;
+                  return (
+                    <div key={m.id} className="flex items-center gap-2 rounded-lg bg-white/[0.04] px-3 py-1.5 text-xs">
+                      <span className="flex-1 truncate" style={sa}>{m.side_a_label}</span>
+                      <span className="font-score text-ink-soft shrink-0">{ta}-{tb}</span>
+                      <span className="font-score text-accent w-10 shrink-0 text-center">{r.a}-{r.b}</span>
+                      <span className="flex-1 truncate text-right" style={sb}>{m.side_b_label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
         <p className="text-ink-soft/50 text-center text-[11px] uppercase tracking-[0.2em]">
           Pinfall
         </p>
