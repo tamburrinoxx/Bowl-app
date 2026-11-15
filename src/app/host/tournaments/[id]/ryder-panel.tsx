@@ -81,11 +81,14 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   }
 
   async function addMatch() {
-    const labelA = mA.trim();
-    const labelB = mB.trim();
-    if (!labelA || !labelB) { setMsg("Both sides need a name."); return; }
+    const nameOf = (id: string) => roster.find((r) => r.id === id)?.name ?? "";
+    const idsA = picksA.filter(Boolean);
+    const idsB = picksB.filter(Boolean);
+    const labelA = idsA.map(nameOf).filter(Boolean).join(", ") || mA.trim();
+    const labelB = idsB.map(nameOf).filter(Boolean).join(", ") || mB.trim();
+    if (!labelA || !labelB) { setMsg("Pick bowlers for both sides."); return; }
     setBusy(true);
-    const { error } = await supabase.from("ryder_matches").insert({
+    const { data, error } = await supabase.from("ryder_matches").insert({
       tournament_id: tournamentId,
       session_label: mSession.trim() || "Session 1",
       format: mFormat,
@@ -94,10 +97,17 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
       sort_order: matches.length + 1,
       side_a_label: labelA,
       side_b_label: labelB,
-    });
+    }).select("id").single();
+    if (error || !data) { setBusy(false); setMsg(error?.message ?? "Could not add."); return; }
+
+    const links = [
+      ...idsA.map((rid) => ({ match_id: data.id, roster_id: rid, side: "A" })),
+      ...idsB.map((rid) => ({ match_id: data.id, roster_id: rid, side: "B" })),
+    ];
+    if (links.length) await supabase.from("ryder_match_players").insert(links);
+
     setBusy(false);
-    if (error) { setMsg(error.message); return; }
-    setMA(""); setMB(""); setMsg(null);
+    setMA(""); setMB(""); setPicksA([]); setPicksB([]); setMsg(null);
     load();
   }
 
@@ -280,10 +290,20 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
           <option>Scotch Doubles</option>
           <option>Singles</option>
         </select>
-        <input value={mA} onChange={(e) => setMA(e.target.value)}
-          placeholder="Side A" className="glass-input w-32 px-2 py-1.5 text-sm text-ink" />
-        <input value={mB} onChange={(e) => setMB(e.target.value)}
-          placeholder="Side B" className="glass-input w-32 px-2 py-1.5 text-sm text-ink" />
+        {([["A", picksA, setPicksA], ["B", picksB, setPicksB]] as const).map(([sd, picks, setPicks]) => (
+          <span key={sd} className="flex gap-1">
+            {Array.from({ length: sizeFor(mFormat) }, (_, i) => (
+              <select key={i} value={picks[i] ?? ""}
+                onChange={(e) => setPicks((p) => { const n = [...p]; n[i] = e.target.value; return n; })}
+                className="glass-input bg-transparent px-1 py-1.5 text-xs text-ink">
+                <option value="">Side {sd}</option>
+                {roster.filter((r) => r.side === sd).map((r) => (
+                  <option key={r.id} value={r.id}>{r.name}</option>
+                ))}
+              </select>
+            ))}
+          </span>
+        ))}
         <button onClick={addMatch} disabled={busy}
           className="rounded bg-[#B6FF2E] px-3 py-1.5 text-sm font-bold text-black disabled:opacity-40">
           Add match
