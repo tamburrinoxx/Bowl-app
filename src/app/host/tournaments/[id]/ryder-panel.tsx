@@ -210,6 +210,7 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
         .update({
           scores_a: arr("a"),
           scores_b: arr("b"),
+          session_label: (labelDrafts[m.id + ":session"] ?? m.session_label).trim() || m.session_label,
           side_a_label: la,
           side_b_label: lb,
           lane: lane || null,
@@ -301,7 +302,14 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
           {matches.map((m) => (
             <div key={m.id} className="rounded-xl bg-white/5 px-3 py-2">
               <p className="text-ink-soft mb-1 flex items-center text-[11px] uppercase">
-                {m.session_label} - {m.format}
+                <input
+                  value={labelDrafts[m.id + ":session"] ?? m.session_label}
+                  onChange={(e) => setLabelDrafts((d) => ({ ...d, [m.id + ":session"]: e.target.value }))}
+                  list="ryder-sessions"
+                  className="glass-input mr-1 w-32 px-1 py-0.5 text-[11px] uppercase text-ink"
+                />
+                {" - "}
+                {m.format}
                 {(() => {
                   const r = resultFor(m);
                   return (
