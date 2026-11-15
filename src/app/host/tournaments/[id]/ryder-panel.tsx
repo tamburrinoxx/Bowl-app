@@ -122,6 +122,22 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
+  function gameWinColor(m: Match, side: "a" | "b", i: number) {
+    const a = (m.scores_a ?? [])[i] ?? 0;
+    const b = (m.scores_b ?? [])[i] ?? 0;
+    if (!a || !b) return undefined;
+    const won = side === "a" ? a > b : b > a;
+    return won ? { color: side === "a" ? colorA : colorB, fontWeight: 700 } : undefined;
+  }
+
+  function totalWinColor(m: Match, side: "a" | "b") {
+    const ta = (m.scores_a ?? []).reduce((x, y) => x + (y || 0), 0);
+    const tb = (m.scores_b ?? []).reduce((x, y) => x + (y || 0), 0);
+    if (!ta || !tb) return undefined;
+    const won = side === "a" ? ta > tb : tb > ta;
+    return won ? { color: side === "a" ? colorA : colorB, fontWeight: 700 } : undefined;
+  }
+
   function winColor(m: Match, side: "a" | "b") {
     const r = resultFor(m);
     const won = side === "a" ? r.a > r.b : r.b > r.a;
@@ -339,11 +355,11 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
                         onChange={(e) =>
                           setDrafts((d) => ({ ...d, [`${m.id}:${side}:${i}`]: e.target.value }))
                         }
-                        style={winColor(m, side)}
+                        style={gameWinColor(m, side, i)}
                         className="glass-input w-12 shrink-0 px-1 py-1 text-center text-sm text-ink"
                       />
                     ))}
-                    <span className="font-score text-ink-soft w-12 shrink-0 text-right text-sm">
+                    <span style={totalWinColor(m, side)} className="font-score text-ink-soft w-12 shrink-0 text-right text-sm">
                       {((side === "a" ? m.scores_a : m.scores_b) ?? []).reduce((x, y) => x + (y || 0), 0) || "\u2014"}
                     </span>
                   </div>
