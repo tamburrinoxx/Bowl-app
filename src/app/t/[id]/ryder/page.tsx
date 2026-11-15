@@ -78,13 +78,13 @@ export default async function RyderTvPage({
               <span className="text-ink-soft w-40 shrink-0 text-xs uppercase">
                 {m.session_label} - {m.format}
               </span>
-              <span className="flex-1 truncate" style={p[0] > p[1] ? { color: colorA, fontWeight: 700 } : undefined}>
+              <span className="flex-1 truncate" style={done && p[0] === p[1] ? { color: "#B6FF2E", fontWeight: 700 } : p[0] > p[1] ? { color: colorA, fontWeight: 700 } : undefined}>
                 {m.side_a_label}
               </span>
               <span className="font-score text-ink w-24 shrink-0 text-center text-xl">
-                {done ? ` - ` : "vs"}
+                {done ? `${ta} - ${tb}` : "vs"}
               </span>
-              <span className="flex-1 truncate text-right" style={p[1] > p[0] ? { color: colorB, fontWeight: 700 } : undefined}>
+              <span className="flex-1 truncate text-right" style={done && p[0] === p[1] ? { color: "#B6FF2E", fontWeight: 700 } : p[1] > p[0] ? { color: colorB, fontWeight: 700 } : undefined}>
                 {m.side_b_label}
               </span>
             </div>
