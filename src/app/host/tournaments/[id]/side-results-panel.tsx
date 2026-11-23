@@ -10,6 +10,7 @@ interface SidePot {
   pot_type: string;
   buy_in: number;
   scoring: string;
+  participant: string;
   payout_ratio: number;
 }
 
@@ -28,9 +29,11 @@ interface GameScore {
 
 export default function SideResultsPanel({
   tournamentId,
+  bakerGames,
   gamesPerSquad,
 }: {
   tournamentId: string;
+  bakerGames: number;
   gamesPerSquad: number;
 }) {
   const supabase = createClient();
@@ -41,7 +44,7 @@ export default function SideResultsPanel({
   const load = useCallback(async () => {
     const { data: potData } = await supabase
       .from("side_pots")
-      .select("id, name, pot_type, buy_in, scoring, payout_ratio")
+      .select("id, name, pot_type, buy_in, scoring, participant, payout_ratio")
       .eq("tournament_id", tournamentId)
       .in("pot_type", ["high_game", "high_series"])
       .order("sort_order");
@@ -71,7 +74,7 @@ export default function SideResultsPanel({
 
     const { data: entryData } = await supabase
       .from("entries")
-      .select("id, entry_name")
+      .select("id, entry_name, locked_handicap")
       .in("id", entryIds);
 
     const { data: gameData } = await supabase
@@ -79,12 +82,21 @@ export default function SideResultsPanel({
       .select("entry_id, bowler_slot, game_number, scratch_score")
       .in("entry_id", entryIds);
 
-    const teamName = new Map(
-      ((entryData as { id: string; entry_name: string }[]) ?? []).map((e) => [
-        e.id,
-        e.entry_name,
-      ]),
-    );
+    const { data: bakerData } = await supabase
+      .from("baker_games")
+      .select("entry_id, game_number, score")
+      .in("entry_id", entryIds);
+
+    const teamName = new Map<string, string>();
+    const teamHcp = new Map<string, number>();
+    for (const e of (entryData as {
+      id: string;
+      entry_name: string;
+      locked_handicap: number | null;
+    }[]) ?? []) {
+      teamName.set(e.id, e.entry_name);
+      teamHcp.set(e.id, Number(e.locked_handicap ?? 0));
+    }
 
     const bowlerMap = new Map<string, { name: string; handicap: number }>();
     for (const b of (bowlerData as {
@@ -104,9 +116,17 @@ export default function SideResultsPanel({
       grouped[pot.id] = buyList
         .filter((b) => b.side_pot_id === pot.id)
         .map((b) => {
+          const team = (teamName.get(b.entry_id) ?? "").replace(/^MOCK /, "");
+          if (pot.participant === "team") {
+            return {
+              entryId: `T:${b.entry_id}`,
+              name: team || "Team",
+              handicap: Math.round((teamHcp.get(b.entry_id) ?? 0) / 3),
+              quantity: b.quantity,
+            };
+          }
           const key = `${b.entry_id}:${b.bowler_slot ?? 1}`;
           const who = bowlerMap.get(key);
-          const team = (teamName.get(b.entry_id) ?? "").replace(/^MOCK /, "");
           return {
             entryId: key,
             name: who ? who.name : team || "Bowler",
@@ -117,8 +137,8 @@ export default function SideResultsPanel({
     }
 
     setBuyers(grouped);
-    setScores(
-      ((gameData as {
+    setScores([
+      ...((gameData as {
         entry_id: string;
         bowler_slot: number | null;
         game_number: number;
@@ -128,7 +148,17 @@ export default function SideResultsPanel({
         game_number: g.game_number,
         scratch_score: g.scratch_score,
       })),
-    );  }, [supabase, tournamentId]);
+      ...((bakerData as {
+        entry_id: string;
+        game_number: number;
+        score: number;
+      }[]) ?? []).map((g) => ({
+        entry_id: `T:${g.entry_id}`,
+        game_number: g.game_number,
+        scratch_score: g.score,
+      })),
+    ]);
+  }, [supabase, tournamentId]);
 
   useEffect(() => {
     load();
@@ -145,7 +175,7 @@ export default function SideResultsPanel({
             pot={pot}
             buyers={buyers[pot.id] ?? []}
             scores={scores}
-            gamesPerSquad={gamesPerSquad}
+            gamesPerSquad={pot.participant === "team" ? bakerGames : gamesPerSquad}
           />
         ) : (
           <HighSeriesPot

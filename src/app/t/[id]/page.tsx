@@ -123,6 +123,7 @@ export default async function PublicTournamentPage({
             </Link>
           </div>
           <SideResultsPanel
+            bakerGames={tournament.baker_games ?? 6}
             tournamentId={tournament.id}
             gamesPerSquad={tournament.games_per_squad}
           />

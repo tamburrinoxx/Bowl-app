@@ -195,25 +195,25 @@ export default function TeamEntryPanel({
           return (
             <div key={e.id} className={`my-2 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border-l-4 px-3 py-2.5 ${idx % 2 ? "border-l-[#B6FF2E]/60 bg-white/[0.05]" : "border-l-white/25 bg-white/[0.02]"} ${done ? "opacity-50" : ""}`}>
               <div className="w-52 shrink-0 text-sm">
-                <span className="font-score mr-2 text-white/70">{e.lane ?? "—"}</span>
+                <span className="font-score mr-2 text-white">{e.lane ?? "—"}</span>
                 <span className="font-semibold">{e.entry_name}</span>
               </div>
               {r.map((b) => (
                 <div key={b.slot} className="flex items-center gap-1">
-                  <span className="w-24 truncate text-xs font-medium text-white/85">{b.name}</span>
+                  <span className="w-24 truncate text-xs font-medium text-white">{b.name}</span>
                   {iCols.map((g) => (
                     <input key={g} inputMode="numeric" className={box} value={drafts[`g:${e.id}:${b.slot}:${g}`] ?? ""} onChange={(ev) => set(`g:${e.id}:${b.slot}:${g}`, ev.target.value)} />
                   ))}
                 </div>
               ))}
               <div className="flex items-center gap-1">
-                <span className="w-8 text-xs font-semibold uppercase text-white/70">Bkr</span>
+                <span className="w-8 text-xs font-semibold uppercase text-white">Bkr</span>
                 {bCols.map((g) => (
                   <input key={g} inputMode="numeric" className={box} value={drafts[`b:${e.id}:${g}`] ?? ""} onChange={(ev) => set(`b:${e.id}:${g}`, ev.target.value)} />
                 ))}
               </div>
               <div className="ml-auto whitespace-nowrap text-right text-sm tabular-nums">
-                <span className="text-white/60">{t.scratch}+{t.hcpPins}</span> <b>{t.total}</b>
+                <span className="text-white">{t.scratch}+{t.hcpPins}</span> <b>{t.total}</b>
               </div>
             </div>
           );

@@ -330,6 +330,7 @@ export default async function HostTournamentPage({
             />
           </div>
           <SideResultsPanel
+            bakerGames={tournament.baker_games ?? 6}
             tournamentId={tournament.id}
             gamesPerSquad={tournament.games_per_squad}
           />
