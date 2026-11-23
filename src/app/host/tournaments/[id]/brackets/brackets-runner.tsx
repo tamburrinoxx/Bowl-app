@@ -105,7 +105,7 @@ export default function BracketsRunner({
     }[]) ?? []) {
       const key = `${b.entry_id}:${b.position}`;
       const team = (teamOf[b.entry_id] ?? "").replace(/^MOCK /, "");
-      map[key] = `${b.name ?? `Bowler ${b.position}`}${team ? ` · ${team}` : ""}`;
+      map[key] = b.name ?? `Bowler ${b.position}`;
       hdcp[key] = Number(b.handicap ?? 0);
     }
     setNames(map);
@@ -142,6 +142,26 @@ export default function BracketsRunner({
   useEffect(() => {
     load();
   }, [load]);
+
+  async function clearBrackets(pot: Pot) {
+    if (!window.confirm(`Delete all brackets for ${pot.name}?`)) return;
+    setBusy(true);
+    setMessage(null);
+    setIsError(false);
+    const { error } = await supabase
+      .from("tournament_matches")
+      .delete()
+      .eq("tournament_id", tournamentId)
+      .eq("side_pot_id", pot.id);
+    setBusy(false);
+    if (error) {
+      setIsError(true);
+      setMessage(error.message);
+      return;
+    }
+    await load();
+    setMessage(`Cleared ${pot.name} — generate again when ready.`);
+  }
 
   async function generate(pot: Pot) {
     setBusy(true);
@@ -270,10 +290,12 @@ export default function BracketsRunner({
 
       const gameNumber = chosen[r - 1];
 
-      for (const m of (fresh as Match[]) ?? []) {
+      for (const m of (fresh as (Match & { slot_a: number | null; slot_b: number | null })[]) ?? []) {
         if (m.status === "complete" || !m.entry_a || !m.entry_b) continue;
-        const a = scoreFor(m.entry_a, gameNumber, useHandicap);
-        const b = scoreFor(m.entry_b, gameNumber, useHandicap);
+        const keyA = `${m.entry_a}:${m.slot_a ?? 1}`;
+        const keyB = `${m.entry_b}:${m.slot_b ?? 1}`;
+        const a = scoreFor(keyA, gameNumber, useHandicap);
+        const b = scoreFor(keyB, gameNumber, useHandicap);
         if (a === null || b === null || a === b) {
           missing++;
           continue;
@@ -283,8 +305,8 @@ export default function BracketsRunner({
           .update({
             score_a: a,
             score_b: b,
-            winner_entry_id: (a > b ? m.entry_a : m.entry_b)!.split(":")[0],
-            winner_slot: Number((a > b ? m.entry_a : m.entry_b)!.split(":")[1]),
+            winner_entry_id: a > b ? m.entry_a : m.entry_b,
+            winner_slot: a > b ? (m.slot_a ?? 1) : (m.slot_b ?? 1),
             status: "complete",
           })
           .eq("id", m.id);
@@ -389,6 +411,16 @@ export default function BracketsRunner({
             className="pill-button bg-flame text-on-flame px-6 py-2.5 hover:brightness-110 disabled:opacity-50"
           >
             {busy ? "Generating…" : "Generate brackets"}
+          </button>
+        )}
+        {groups.length > 0 && (
+          <button
+            type="button"
+            onClick={() => clearBrackets(pot)}
+            disabled={busy}
+            className="pill-button border border-white/20 px-6 py-2.5 text-sm hover:bg-white/5 disabled:opacity-50"
+          >
+            {busy ? "Working…" : "Clear & regenerate"}
           </button>
         )}
       </div>

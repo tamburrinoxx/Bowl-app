@@ -109,7 +109,7 @@ export default function SideResultsPanel({
           const team = (teamName.get(b.entry_id) ?? "").replace(/^MOCK /, "");
           return {
             entryId: key,
-            name: who ? `${who.name} · ${team}` : team || "—",
+            name: who ? who.name : team || "Bowler",
             handicap: who?.handicap ?? 0,
             quantity: b.quantity,
           };
