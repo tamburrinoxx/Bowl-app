@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/payouts";
 
-type Pot = { id: string; name: string; buy_in: number };
+type Pot = { id: string; name: string; buy_in: number; scoring: string };
 type Row = {
   entryId: string;
   name: string;
@@ -31,47 +31,88 @@ export default function EliminatorPanel({
   const [cutCount, setCutCount] = useState("");
   const [sortGame, setSortGame] = useState<number | null>(null);
 
+  const [pots, setPots] = useState<Pot[]>([]);
+  const [potId, setPotId] = useState<string | null>(null);
+
   const load = useCallback(async () => {
-    const { data: pots } = await supabase
-      .from("side_pots").select("id, name, buy_in")
-      .eq("tournament_id", tournamentId).eq("pot_type", "eliminator").limit(1);
-    const p = (pots as Pot[])?.[0];
+    const { data: potData } = await supabase
+      .from("side_pots")
+      .select("id, name, buy_in, scoring")
+      .eq("tournament_id", tournamentId)
+      .eq("pot_type", "eliminator")
+      .order("sort_order");
+    const list = (potData as Pot[]) ?? [];
+    setPots(list);
+    const p = list.find((x) => x.id === potId) ?? list[0];
     setPot(p ?? null);
-    if (!p) return;
+    if (!p) {
+      setRows([]);
+      setBuyerCount(0);
+      return;
+    }
 
     const { data: buys } = await supabase
-      .from("side_pot_entries").select("entry_id").eq("side_pot_id", p.id);
-    const ids = ((buys as { entry_id: string }[]) ?? []).map((b) => b.entry_id);
-    setBuyerCount(ids.length);
-    if (!ids.length) { setRows([]); return; }
+      .from("side_pot_entries")
+      .select("entry_id, bowler_slot")
+      .eq("side_pot_id", p.id);
+    const buyRows = (buys as { entry_id: string; bowler_slot: number | null }[]) ?? [];
+    setBuyerCount(buyRows.length);
+    if (!buyRows.length) {
+      setRows([]);
+      return;
+    }
 
-    const [{ data: ents }, { data: games }, { data: cuts }] = await Promise.all([
+    const ids = [...new Set(buyRows.map((b) => b.entry_id))];
+
+    const [{ data: ents }, { data: eb }, { data: games }, { data: cuts }] = await Promise.all([
       supabase.from("entries").select("id, entry_name").in("id", ids),
-      supabase.from("games").select("entry_id, game_number, scratch_score").in("entry_id", ids),
-      supabase.from("eliminator_cuts").select("entry_id, cut_after_game").eq("side_pot_id", p.id),
+      supabase.from("entry_bowlers").select("entry_id, position, name, handicap").in("entry_id", ids),
+      supabase.from("games").select("entry_id, bowler_slot, game_number, scratch_score").in("entry_id", ids),
+      supabase.from("eliminator_cuts").select("entry_id, bowler_slot, cut_after_game").eq("side_pot_id", p.id),
     ]);
 
-    const cutMap: Record<string, number> = {};
-    for (const c of (cuts as { entry_id: string; cut_after_game: number }[]) ?? []) {
-      cutMap[c.entry_id] = c.cut_after_game;
-    }
-    const byEntry: Record<string, Record<number, number>> = {};
-    for (const g of (games as { entry_id: string; game_number: number; scratch_score: number }[]) ?? []) {
-      (byEntry[g.entry_id] ||= {})[g.game_number] =
-        (byEntry[g.entry_id][g.game_number] ?? 0) + g.scratch_score;
+    const nameOf = new Map<string, string>();
+    const hcpOf = new Map<string, number>();
+    for (const b of (eb as { entry_id: string; position: number; name: string | null; handicap: number | null }[]) ?? []) {
+      const k = `${b.entry_id}:${b.position}`;
+      nameOf.set(k, b.name ?? `Bowler ${b.position}`);
+      hcpOf.set(k, Number(b.handicap ?? 0));
     }
 
-    const out: Row[] = ((ents as { id: string; entry_name: string }[]) ?? []).map((e) => {
-      const sc = byEntry[e.id] ?? {};
-      const cutAfter = cutMap[e.id] ?? null;
+    const cutMap: Record<string, number> = {};
+    for (const c of (cuts as { entry_id: string; bowler_slot: number | null; cut_after_game: number }[]) ?? []) {
+      cutMap[`${c.entry_id}:${c.bowler_slot ?? 1}`] = c.cut_after_game;
+    }
+
+    const useH = p.scoring === "handicap";
+    const byKey: Record<string, Record<number, number>> = {};
+    for (const g of (games as { entry_id: string; bowler_slot: number | null; game_number: number; scratch_score: number }[]) ?? []) {
+      const k = `${g.entry_id}:${g.bowler_slot ?? 1}`;
+      (byKey[k] ||= {})[g.game_number] = g.scratch_score + (useH ? hcpOf.get(k) ?? 0 : 0);
+    }
+
+    const teamOf = new Map(
+      ((ents as { id: string; entry_name: string }[]) ?? []).map((e) => [e.id, e.entry_name])
+    );
+
+    const out: Row[] = buyRows.map((b) => {
+      const k = `${b.entry_id}:${b.bowler_slot ?? 1}`;
+      const sc = byKey[k] ?? {};
+      const cutAfter = cutMap[k] ?? null;
       const counted = Object.entries(sc)
         .filter(([n]) => cutAfter === null || Number(n) <= cutAfter)
         .reduce((s, [, v]) => s + v, 0);
-      return { entryId: e.id, name: e.entry_name, scores: sc, total: counted, cutAfter };
+      return {
+        entryId: k,
+        name: nameOf.get(k) ?? teamOf.get(b.entry_id) ?? "Bowler",
+        scores: sc,
+        total: counted,
+        cutAfter,
+      };
     });
 
     setRows(out);
-  }, [supabase, tournamentId]);
+  }, [supabase, tournamentId, potId]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -108,7 +149,8 @@ export default function EliminatorPanel({
       drop.map((d) => ({
         tournament_id: tournamentId,
         side_pot_id: pot.id,
-        entry_id: d.entryId,
+        entry_id: d.entryId.split(":")[0],
+        bowler_slot: Number(d.entryId.split(":")[1]),
         cut_after_game: nextGame,
       })),
     );
@@ -150,6 +192,22 @@ export default function EliminatorPanel({
 
   return (
     <div>
+      {pots.length > 1 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {pots.map((x) => (
+            <button
+              key={x.id}
+              type="button"
+              onClick={() => setPotId(x.id)}
+              className={`rounded-full px-3 py-1.5 text-sm ${
+                pot.id === x.id ? "bg-[#B6FF2E] font-bold text-black" : "bg-white/10"
+              }`}
+            >
+              {x.name}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="mb-3 flex flex-wrap items-end gap-3">
         <span className="text-ink-soft text-sm">
           {alive.length} alive of {buyerCount} · fund {formatMoney(fund)} · cutting {perGameCut} per game
