@@ -211,12 +211,14 @@ export default async function HostTournamentPage({
           />
         </CollapseSection>
 
+        {!tournament.baker_games && (
         <CollapseSection title="Enter Scores">
           <ScoreEntryPanel
             entries={entries ?? []}
             gamesPerSquad={tournament.games_per_squad}
           />
         </CollapseSection>
+        )}
 
         <section className="glass-panel mb-6">
           <div className="mb-4 flex items-baseline justify-between">

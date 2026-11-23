@@ -219,7 +219,7 @@ export default function TeamEntryPanel({
           );
         })}
       </div>
-      <div className="sticky bottom-0 mt-3 flex items-center gap-3 bg-black/70 py-2 backdrop-blur">
+      <div className="sticky bottom-0 mt-3 flex items-center gap-3 py-2">
         <button onClick={saveAll} disabled={saving} className="rounded-xl bg-[var(--flame)] px-5 py-2 font-semibold text-[var(--on-flame)] disabled:opacity-40">{saving ? "Saving..." : "Save all scores"}</button>
         {msg && <span className="text-sm opacity-70">{msg}</span>}
       </div>
