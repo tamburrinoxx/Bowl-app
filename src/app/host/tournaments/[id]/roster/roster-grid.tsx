@@ -72,6 +72,15 @@ export default function RosterGrid({
     );
   }
 
+
+  function bowlerOwed(entryId: string, slot: number) {
+    return sold
+      .filter((s) => s.entry_id === entryId && s.bowler_slot === slot)
+      .reduce((sum, s) => {
+        const p = pots.find((x) => x.id === s.side_pot_id);
+        return sum + (p ? Number(p.buy_in) * s.quantity : 0);
+      }, 0);
+  }
   async function setQty(pot: Pot, entryId: string, slot: number | null, qty: number) {
     const existing = buyOf(pot.id, entryId, slot);
     if (qty <= 0) {
@@ -172,7 +181,7 @@ export default function RosterGrid({
             {shown.map((e) => {
               const team = byEntry.get(e.id) ?? [];
               const owed = entryFee + (e.scratch_division ? scratchFee : 0) + sold
-                .filter((s) => s.entry_id === e.id)
+                .filter((s) => s.entry_id === e.id && s.bowler_slot == null)
                 .reduce((sum, s) => {
                   const p = pots.find((x) => x.id === s.side_pot_id);
                   return sum + (p ? Number(p.buy_in) * s.quantity : 0);
@@ -262,7 +271,9 @@ export default function RosterGrid({
                           </td>
                         );
                       })}
-                      <td className={cell}></td>
+                      <td className={`${cell} text-right font-semibold tabular-nums`}>
+                        ${bowlerOwed(e.id, b.position)}
+                      </td>
                     </tr>
                   ))}
                 </Fragment>
