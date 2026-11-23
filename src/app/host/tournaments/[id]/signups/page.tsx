@@ -27,7 +27,7 @@ export default async function HostSignupsPage({
   const { data: signups } = await supabase
     .from("team_signups")
     .select(
-      "id,squad_id,entry_id,team_name,captain_email,waitlisted,created_at," +
+      "id,squad_id,entry_id,team_name,captain_email,waitlisted,scratch_division,created_at," +
         "team_signup_bowlers(id,slot,bowler_name,phone,reported_average,verified_average,handicap)"
     )
     .eq("tournament_id", id)

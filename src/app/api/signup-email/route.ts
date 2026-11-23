@@ -14,6 +14,7 @@ type Receipt = {
   squad: string | null;
   starts_at: string | null;
   bowlers: Bowler[] | null;
+  scratch: boolean;
 };
 
 export async function POST(req: Request) {
@@ -80,6 +81,7 @@ export async function POST(req: Request) {
       <p style="margin:0 0 16px;font-size:14px">
         Baker handicap: <b>${baker}</b> pins each game
       </p>
+      ${r.scratch ? `<p style="margin:0 0 12px;font-size:14px">Scratch division: <b>entered</b> (+$60)</p>` : ""}
       <p style="margin:0;color:#555;font-size:14px">${note}</p>
       <p style="margin:16px 0 0;color:#888;font-size:12px">
         Averages are verified before squad day. Reply to this email with any corrections.

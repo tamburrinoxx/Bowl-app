@@ -20,6 +20,7 @@ type Signup = {
   team_name: string;
   captain_email: string;
   waitlisted: boolean;
+  scratch_division: boolean;
   created_at: string;
   team_signup_bowlers: Bowler[];
 };
@@ -84,7 +85,14 @@ export default function SignupsList({
       <div className="glass-panel">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate font-semibold">{s.team_name}</p>
+            <p className="truncate font-semibold">
+              {s.team_name}
+              {s.scratch_division && (
+                <span className="ml-2 rounded bg-[#B6FF2E] px-1.5 py-0.5 text-[10px] font-bold text-black">
+                  SCRATCH
+                </span>
+              )}
+            </p>
             <a href={`mailto:${s.captain_email}`} className="text-xs underline opacity-60">
               {s.captain_email}
             </a>
