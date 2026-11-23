@@ -71,39 +71,62 @@ export default function BracketsRunner({
 
     const { data: buyData } = await supabase
       .from("side_pot_entries")
-      .select("side_pot_id, entry_id, quantity")
+      .select("side_pot_id, entry_id, bowler_slot, quantity")
       .in("side_pot_id", potList.map((p) => p.id));
 
     const grouped: Record<string, { entryId: string; quantity: number }[]> = {};
-    for (const b of (buyData as { side_pot_id: string; entry_id: string; quantity: number }[]) ?? []) {
-      (grouped[b.side_pot_id] ??= []).push({ entryId: b.entry_id, quantity: b.quantity });
+    for (const b of (buyData as { side_pot_id: string; entry_id: string; bowler_slot: number | null; quantity: number }[]) ?? []) {
+      (grouped[b.side_pot_id] ??= []).push({ entryId: `${b.entry_id}:${b.bowler_slot ?? 1}`, quantity: b.quantity });
     }
     setBuys(grouped);
 
     const { data: entryData } = await supabase
       .from("entries")
-      .select("id, entry_name, locked_handicap")
+      .select("id, entry_name")
       .eq("tournament_id", tournamentId);
+
+    const entryRows = (entryData as { id: string; entry_name: string }[]) ?? [];
+    const entryIds = entryRows.map((e) => e.id);
+    const teamOf: Record<string, string> = {};
+    for (const e of entryRows) teamOf[e.id] = e.entry_name;
+
+    const { data: eb } = await supabase
+      .from("entry_bowlers")
+      .select("entry_id, position, name, handicap")
+      .in("entry_id", entryIds);
 
     const map: Record<string, string> = {};
     const hdcp: Record<string, number> = {};
-    for (const e of (entryData as
-      | { id: string; entry_name: string; locked_handicap: number | null }[]
-      | null) ?? []) {
-      map[e.id] = e.entry_name;
-      hdcp[e.id] = e.locked_handicap ?? 0;
+    for (const b of (eb as {
+      entry_id: string;
+      position: number;
+      name: string | null;
+      handicap: number | null;
+    }[]) ?? []) {
+      const key = `${b.entry_id}:${b.position}`;
+      const team = (teamOf[b.entry_id] ?? "").replace(/^MOCK /, "");
+      map[key] = `${b.name ?? `Bowler ${b.position}`}${team ? ` · ${team}` : ""}`;
+      hdcp[key] = Number(b.handicap ?? 0);
     }
     setNames(map);
     setHandicaps(hdcp);
 
     const { data: gs } = await supabase
       .from("games")
-      .select("entry_id, game_number, scratch_score")
-      .in("entry_id", Object.keys(map));
+      .select("entry_id, bowler_slot, game_number, scratch_score")
+      .in("entry_id", entryIds);
     setGameScores(
-      (gs as { entry_id: string; game_number: number; scratch_score: number }[]) ?? [],
+      ((gs as {
+        entry_id: string;
+        bowler_slot: number | null;
+        game_number: number;
+        scratch_score: number;
+      }[]) ?? []).map((g) => ({
+        entry_id: `${g.entry_id}:${g.bowler_slot ?? 1}`,
+        game_number: g.game_number,
+        scratch_score: g.scratch_score,
+      })),
     );
-
     const { data: matchData } = await supabase
       .from("tournament_matches")
       .select("*")
@@ -113,7 +136,7 @@ export default function BracketsRunner({
       .order("round_number")
       .order("match_number");
 
-    setMatches((matchData as Match[]) ?? []);
+    setMatches((((matchData as (Match & { slot_a: number | null; slot_b: number | null; winner_slot: number | null })[]) ?? []).map((m) => ({ ...m, entry_a: m.entry_a ? `${m.entry_a}:${m.slot_a ?? 1}` : null, entry_b: m.entry_b ? `${m.entry_b}:${m.slot_b ?? 1}` : null, winner_entry_id: m.winner_entry_id ? `${m.winner_entry_id}:${m.winner_slot ?? 1}` : null }))));
   }, [supabase, tournamentId, active]);
 
   useEffect(() => {
@@ -155,11 +178,14 @@ export default function BracketsRunner({
             bracket_group: g + 1,
             round_number: m.round_number,
             match_number: m.match_number,
-            entry_a: m.entry_a,
-            entry_b: m.entry_b,
+            entry_a: m.entry_a ? m.entry_a.split(":")[0] : null,
+            slot_a: m.entry_a ? Number(m.entry_a.split(":")[1]) : null,
+            entry_b: m.entry_b ? m.entry_b.split(":")[0] : null,
+            slot_b: m.entry_b ? Number(m.entry_b.split(":")[1]) : null,
             seed_a: m.seed_a,
             seed_b: m.seed_b,
-            winner_entry_id: m.winner_entry_id,
+            winner_entry_id: m.winner_entry_id ? m.winner_entry_id.split(":")[0] : null,
+            winner_slot: m.winner_entry_id ? Number(m.winner_entry_id.split(":")[1]) : null,
             status: m.status,
           })),
         )
@@ -257,7 +283,8 @@ export default function BracketsRunner({
           .update({
             score_a: a,
             score_b: b,
-            winner_entry_id: a > b ? m.entry_a : m.entry_b,
+            winner_entry_id: (a > b ? m.entry_a : m.entry_b)!.split(":")[0],
+            winner_slot: Number((a > b ? m.entry_a : m.entry_b)!.split(":")[1]),
             status: "complete",
           })
           .eq("id", m.id);
@@ -296,7 +323,8 @@ export default function BracketsRunner({
       .update({
         score_a: a,
         score_b: b,
-        winner_entry_id: a > b ? m.entry_a : m.entry_b,
+        winner_entry_id: (a > b ? m.entry_a : m.entry_b)!.split(":")[0],
+        winner_slot: Number((a > b ? m.entry_a : m.entry_b)!.split(":")[1]),
         status: "complete",
       })
       .eq("id", m.id);

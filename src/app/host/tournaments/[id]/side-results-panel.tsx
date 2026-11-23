@@ -52,11 +52,11 @@ export default function SideResultsPanel({
 
     const { data: buys } = await supabase
       .from("side_pot_entries")
-      .select("side_pot_id, entry_id, quantity")
+      .select("side_pot_id, entry_id, bowler_slot, quantity")
       .in("side_pot_id", potList.map((p) => p.id));
 
     const buyList =
-      (buys as { side_pot_id: string; entry_id: string; quantity: number }[]) ?? [];
+      (buys as { side_pot_id: string; entry_id: string; bowler_slot: number | null; quantity: number }[]) ?? [];
     const entryIds = [...new Set(buyList.map((b) => b.entry_id))];
     if (!entryIds.length) {
       setBuyers({});
@@ -64,39 +64,71 @@ export default function SideResultsPanel({
       return;
     }
 
+    const { data: bowlerData } = await supabase
+      .from("entry_bowlers")
+      .select("entry_id, position, name, handicap")
+      .in("entry_id", entryIds);
+
     const { data: entryData } = await supabase
       .from("entries")
-      .select("id, entry_name, locked_handicap")
+      .select("id, entry_name")
       .in("id", entryIds);
 
     const { data: gameData } = await supabase
       .from("games")
-      .select("entry_id, game_number, scratch_score")
+      .select("entry_id, bowler_slot, game_number, scratch_score")
       .in("entry_id", entryIds);
 
-    const entryMap = new Map(
-      (entryData as { id: string; entry_name: string; locked_handicap: number | null }[])
-        ?.map((e) => [e.id, e]) ?? [],
+    const teamName = new Map(
+      ((entryData as { id: string; entry_name: string }[]) ?? []).map((e) => [
+        e.id,
+        e.entry_name,
+      ]),
     );
+
+    const bowlerMap = new Map<string, { name: string; handicap: number }>();
+    for (const b of (bowlerData as {
+      entry_id: string;
+      position: number;
+      name: string | null;
+      handicap: number | null;
+    }[]) ?? []) {
+      bowlerMap.set(`${b.entry_id}:${b.position}`, {
+        name: b.name ?? `Bowler ${b.position}`,
+        handicap: Number(b.handicap ?? 0),
+      });
+    }
 
     const grouped: Record<string, Buyer[]> = {};
     for (const pot of potList) {
       grouped[pot.id] = buyList
         .filter((b) => b.side_pot_id === pot.id)
         .map((b) => {
-          const e = entryMap.get(b.entry_id);
+          const key = `${b.entry_id}:${b.bowler_slot ?? 1}`;
+          const who = bowlerMap.get(key);
+          const team = (teamName.get(b.entry_id) ?? "").replace(/^MOCK /, "");
           return {
-            entryId: b.entry_id,
-            name: e?.entry_name ?? "—",
-            handicap: e?.locked_handicap ?? 0,
+            entryId: key,
+            name: who ? `${who.name} · ${team}` : team || "—",
+            handicap: who?.handicap ?? 0,
             quantity: b.quantity,
           };
         });
     }
 
     setBuyers(grouped);
-    setScores((gameData as GameScore[]) ?? []);
-  }, [supabase, tournamentId]);
+    setScores(
+      ((gameData as {
+        entry_id: string;
+        bowler_slot: number | null;
+        game_number: number;
+        scratch_score: number;
+      }[]) ?? []).map((g) => ({
+        entry_id: `${g.entry_id}:${g.bowler_slot ?? 1}`,
+        game_number: g.game_number,
+        scratch_score: g.scratch_score,
+      })),
+    );  }, [supabase, tournamentId]);
 
   useEffect(() => {
     load();

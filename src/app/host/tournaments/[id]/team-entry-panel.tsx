@@ -174,7 +174,7 @@ export default function TeamEntryPanel({
 
   const set = (k: string, v: string) => setDrafts((p) => ({ ...p, [k]: v }));
   const box =
-    "w-11 rounded border border-white/15 bg-black/30 px-1 py-1 text-center text-xs tabular-nums";
+    "w-12 rounded border border-white/30 bg-neutral-900 px-1 py-1 text-center text-sm font-semibold text-white tabular-nums";
   const pill = (on: boolean) =>
     `rounded-full px-3 py-1.5 text-sm ${on ? "bg-[#B6FF2E] font-bold text-black" : "bg-white/5"}`;
   const [hideDone, setHideDone] = useState(false);
@@ -187,33 +187,33 @@ export default function TeamEntryPanel({
         <button onClick={() => setHideDone((v) => !v)} className={pill(hideDone)}>Hide done</button>
         <span className="ml-auto text-sm opacity-70">{doneCount} of {shown.length} complete</span>
       </div>
-      <div className="divide-y divide-white/5 border-y border-white/10">
-        {vis.map((e) => {
+      <div className="">
+        {vis.map((e, idx) => {
           const r = [...(roster[e.id] ?? [])].sort((a, b) => a.slot - b.slot);
           const t = totals(e);
           const done = filled(e) >= needed(e);
           return (
-            <div key={e.id} className={`flex flex-wrap items-center gap-x-4 gap-y-1 py-1.5 ${done ? "opacity-50" : ""}`}>
-              <div className="w-40 shrink-0 truncate text-sm">
-                <span className="font-score mr-2 opacity-50">{e.lane ?? "—"}</span>
+            <div key={e.id} className={`my-2 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border-l-4 px-3 py-2.5 ${idx % 2 ? "border-l-[#B6FF2E]/60 bg-white/[0.05]" : "border-l-white/25 bg-white/[0.02]"} ${done ? "opacity-50" : ""}`}>
+              <div className="w-52 shrink-0 text-sm">
+                <span className="font-score mr-2 text-white/70">{e.lane ?? "—"}</span>
                 <span className="font-semibold">{e.entry_name}</span>
               </div>
               {r.map((b) => (
                 <div key={b.slot} className="flex items-center gap-1">
-                  <span className="w-20 truncate text-xs opacity-60">{b.name}</span>
+                  <span className="w-24 truncate text-xs font-medium text-white/85">{b.name}</span>
                   {iCols.map((g) => (
                     <input key={g} inputMode="numeric" className={box} value={drafts[`g:${e.id}:${b.slot}:${g}`] ?? ""} onChange={(ev) => set(`g:${e.id}:${b.slot}:${g}`, ev.target.value)} />
                   ))}
                 </div>
               ))}
               <div className="flex items-center gap-1">
-                <span className="w-8 text-xs uppercase opacity-50">Bkr</span>
+                <span className="w-8 text-xs font-semibold uppercase text-white/70">Bkr</span>
                 {bCols.map((g) => (
                   <input key={g} inputMode="numeric" className={box} value={drafts[`b:${e.id}:${g}`] ?? ""} onChange={(ev) => set(`b:${e.id}:${g}`, ev.target.value)} />
                 ))}
               </div>
               <div className="ml-auto whitespace-nowrap text-right text-sm tabular-nums">
-                <span className="opacity-50">{t.scratch}+{t.hcpPins}</span> <b>{t.total}</b>
+                <span className="text-white/60">{t.scratch}+{t.hcpPins}</span> <b>{t.total}</b>
               </div>
             </div>
           );
