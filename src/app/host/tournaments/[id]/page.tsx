@@ -18,6 +18,7 @@ import CheckInPanel from "./check-in-panel";
 import SideResultsPanel from "./side-results-panel";
 import PotRecap from "./pot-recap";
 import ScoreEntryPanel from "./score-entry-panel";
+import TeamEntryPanel from "./team-entry-panel";
 import StatusSwitch from "./status-switch";
 
 export default async function HostTournamentPage({
@@ -198,6 +199,15 @@ export default async function HostTournamentPage({
             entrySize={tournament.entry_size ?? 1}
             squads={squads ?? []}
             activeSquad={activeSquad}
+          />
+        </CollapseSection>
+
+        <CollapseSection title="Team Scores">
+          <TeamEntryPanel
+            tournamentId={tournament.id}
+            entries={(entries ?? []) as never}
+            gamesPerSquad={tournament.games_per_squad ?? 3}
+            bakerGames={tournament.baker_games ?? 6}
           />
         </CollapseSection>
 

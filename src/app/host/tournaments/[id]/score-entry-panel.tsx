@@ -259,18 +259,18 @@ export default function ScoreEntryPanel({
             </tr>
           </thead>
           <tbody>
-            {ordered.flatMap((entry) => {
+            {ordered.flatMap((entry, entryIdx) => {
               const roster = rosters[entry.id] ?? [];
               return roster.length > 1
-                ? roster.map((b) => ({ entry, bowlerKey: b.key, label: b.name }))
-                : [{ entry, bowlerKey: "solo", label: entry.entry_name }];
-          }).map(({ entry, bowlerKey, label }, rowIdx) => (
-            <tr key={`${entry.id}:${bowlerKey ?? "x"}:${rowIdx}`} className="border-t border-white/5">
+                ? roster.map((b) => ({ entry, entryIdx, bowlerKey: b.key, label: b.name }))
+                : [{ entry, entryIdx, bowlerKey: "solo", label: entry.entry_name }];
+          }).map(({ entry, entryIdx, bowlerKey, label }, rowIdx) => (
+            <tr key={`${entry.id}:${bowlerKey ?? "x"}:${rowIdx}`} className={entryIdx % 2 ? "border-t border-white/5 bg-white/[0.03]" : "border-t border-white/5"}>
                 <td className="font-score text-ink-soft px-3 py-2 text-center text-sm">
                   {entry.lane ?? "—"}
                 </td>
                 <td className="text-ink px-4 py-2 text-sm whitespace-nowrap">
-                  {label}
+                  {label}{entry.entry_name !== label ? <span className="block text-xs text-ink-soft opacity-60">{entry.entry_name}</span> : null}
                 </td>
                 {cols.map((n) => {
                   const key = `${entry.id}:${bowlerKey}:${n}`;

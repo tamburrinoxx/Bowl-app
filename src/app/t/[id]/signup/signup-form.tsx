@@ -99,6 +99,13 @@ export default function SignupForm({
       setError(err.message);
       return;
     }
+    if (data?.signup_id) {
+      fetch("/api/signup-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signupId: data.signup_id }),
+      }).catch(() => {});
+    }
     setDone({
       waitlisted: Boolean(data?.waitlisted),
       teamName: String(data?.team_name ?? ""),
