@@ -19,6 +19,7 @@ import SideResultsPanel from "./side-results-panel";
 import PotRecap from "./pot-recap";
 import ScoreEntryPanel from "./score-entry-panel";
 import TeamEntryPanel from "./team-entry-panel";
+import Reorderable from "./reorderable";
 import StatusSwitch from "./status-switch";
 
 export default async function HostTournamentPage({
@@ -153,14 +154,15 @@ export default async function HostTournamentPage({
           </div>
         )}
 
-        <CollapseSection title="Status" id="status">
+        <Reorderable storageKey={`host-sections-${tournament.id}`}>
+        <CollapseSection key="status" title="Status" id="status">
           <StatusSwitch tournamentId={tournament.id} status={tournament.status} />
           <TickerSwitch tournamentId={tournament.id} showTicker={tournament.show_ticker ?? true} />
         </CollapseSection>
 
 
         {tournament.is_ryder && (
-          <CollapseSection title="Ryder Cup">
+          <CollapseSection key="ryder" title="Ryder Cup">
             <Link
               href={`/host/tournaments/${tournament.id}/ryder`}
               className="inline-block rounded bg-[#B6FF2E] px-4 py-2 font-bold text-black"
@@ -170,13 +172,19 @@ export default async function HostTournamentPage({
           </CollapseSection>
         )}
 
-        <CollapseSection title="Team Signups">
+        <CollapseSection key="signups" title="Team Signups">
           <div className="flex flex-col gap-3">
             <Link
               href={`/host/tournaments/${tournament.id}/signups`}
               className="inline-block rounded bg-[#B6FF2E] px-4 py-2 text-center font-bold text-black"
             >
               View submitted teams
+            </Link>
+            <Link
+              href={`/host/tournaments/${tournament.id}/roster`}
+              className="inline-block rounded border border-white/25 px-4 py-2 text-center font-semibold"
+            >
+              Roster &amp; side action
             </Link>
             <p className="text-xs opacity-60">
               Public signup link: /t/{tournament.id}/signup
@@ -185,12 +193,21 @@ export default async function HostTournamentPage({
         </CollapseSection>
 
         {tournament.uses_squads && (
-        <CollapseSection title="Squads">
+        <CollapseSection key="squads" title="Squads">
           <SquadsPanel tournamentId={tournament.id} entries={entries ?? []} />
         </CollapseSection>
         )}
 
-        <CollapseSection title="Add Entry">
+        <CollapseSection key="entries" title="Entries &amp; Check-In" id="entries">
+          <CheckInPanel
+            tournamentId={tournament.id}
+            entries={entries ?? []}
+            entryFee={tournament.entry_fee}
+            locked={tournament.check_in_locked ?? false}
+          />
+        </CollapseSection>
+
+        <CollapseSection key="addentry" title="Add Entry">
           <AddEntryPanel
             tournamentId={tournament.id}
             eventType={tournament.event_type}
@@ -202,7 +219,7 @@ export default async function HostTournamentPage({
           />
         </CollapseSection>
 
-        <CollapseSection title="Team Scores">
+        <CollapseSection key="teamscores" title="Team Scores">
           <TeamEntryPanel
             tournamentId={tournament.id}
             entries={(entries ?? []) as never}
@@ -212,7 +229,7 @@ export default async function HostTournamentPage({
         </CollapseSection>
 
         {!tournament.baker_games && (
-        <CollapseSection title="Enter Scores">
+        <CollapseSection key="enterscores" title="Enter Scores">
           <ScoreEntryPanel
             entries={entries ?? []}
             gamesPerSquad={tournament.games_per_squad}
@@ -220,7 +237,7 @@ export default async function HostTournamentPage({
         </CollapseSection>
         )}
 
-        <section className="glass-panel mb-6">
+        <section key="sideaction" className="glass-panel mb-6">
           <div className="mb-4 flex items-baseline justify-between">
             <h2 id="side" className="font-display text-xl text-ink">Side Action</h2>
             <Link
@@ -233,7 +250,7 @@ export default async function HostTournamentPage({
           <SidePotsPanel tournamentId={tournament.id} />
         </section>
 
-        <CollapseSection title="Baker Games">
+        <CollapseSection key="baker" title="Baker Games">
           <BakerPanel
             tournamentId={tournament.id}
             entries={entries ?? []}
@@ -241,16 +258,7 @@ export default async function HostTournamentPage({
           />
         </CollapseSection>
 
-        <CollapseSection title="Entries &amp; Check-In" id="entries">
-          <CheckInPanel
-            tournamentId={tournament.id}
-            entries={entries ?? []}
-            entryFee={tournament.entry_fee}
-            locked={tournament.check_in_locked ?? false}
-          />
-        </CollapseSection>
-
-        <CollapseSection title="Standings" id="standings">
+        <CollapseSection key="standings" title="Standings" id="standings">
           <div className="overflow-x-auto rounded-2xl bg-white/5">
             <table className="w-full text-sm">
               <thead>
@@ -316,14 +324,14 @@ export default async function HostTournamentPage({
             </table>
           </div>
         </CollapseSection>
-        <CollapseSection title="Eliminator">
+        <CollapseSection key="eliminator" title="Eliminator">
           <EliminatorPanel
             tournamentId={tournament.id}
             gamesPerSquad={tournament.games_per_squad}
           />
         </CollapseSection>
 
-        <CollapseSection title="Side Action Results" id="results">
+        <CollapseSection key="results" title="Side Action Results" id="results">
           <div className="mb-8 rounded-2xl bg-white/[0.03] p-5">
             <p className="font-display text-ink mb-3 text-lg">Payout recap</p>
             <PotRecap
@@ -338,7 +346,7 @@ export default async function HostTournamentPage({
           />
         </CollapseSection>
 
-        <CollapseSection title="Payouts" id="payouts">
+        <CollapseSection key="payouts" title="Payouts" id="payouts">
           <PayoutsPanel
             tournamentId={tournament.id}
             entryCount={entries?.length ?? 0}
@@ -347,6 +355,7 @@ export default async function HostTournamentPage({
             cashersRatio={tournament.cashers_ratio ?? 5}
           />
         </CollapseSection>
+        </Reorderable>
 
       </div>
     </main>
