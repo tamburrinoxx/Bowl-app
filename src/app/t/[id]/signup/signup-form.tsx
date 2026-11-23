@@ -128,6 +128,16 @@ export default function SignupForm({
             ? `That squad filled up. We'll email ${email} if a spot opens. To take the other squad instead, sign up again with at least one different bowler.`
             : `A confirmation is on its way to ${email}.`}
         </p>
+        <div className="mt-5 border-t border-white/10 pt-4">
+          <p className="text-sm font-semibold">Follow your scores live</p>
+          <p className="mt-1 text-xs opacity-60">
+            A free Pinfall account tracks your games, averages and milestones
+            across every tournament and league you bowl.
+          </p>
+          <a href="/login" className="mt-3 inline-block rounded-lg bg-[#B6FF2E] px-4 py-2 text-sm font-bold text-black">
+            Create an account
+          </a>
+        </div>
       </div>
     );
   }
@@ -137,6 +147,10 @@ export default function SignupForm({
 
   return (
     <div>
+      <p className="mb-3 text-center text-xs opacity-60">
+        No Pinfall account needed — fill this out and your team is entered.
+      </p>
+
       <section className="glass-panel">
         <h2 className="text-sm font-semibold uppercase tracking-wide opacity-70">
           Pick a squad
