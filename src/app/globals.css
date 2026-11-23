@@ -169,3 +169,24 @@ body {
 @media (min-width: 640px) {
   html { font-size: 104%; }
 }
+
+.pin-checks input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: all 0.12s ease;
+}
+.pin-checks input[type="checkbox"]:hover {
+  border-color: rgba(255, 255, 255, 0.65);
+}
+.pin-checks input[type="checkbox"]:checked {
+  background: #b6ff2e;
+  border-color: #b6ff2e;
+  box-shadow: 0 0 10px rgba(182, 255, 46, 0.55);
+}

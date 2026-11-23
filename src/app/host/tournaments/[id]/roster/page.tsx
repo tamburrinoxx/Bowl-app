@@ -39,6 +39,7 @@ export default async function RosterPage({
   const { data: pots } = await supabase
     .from("side_pots")
     .select("id,name,pot_type,buy_in,scoring,participant,allow_multiple")
+    .order("sort_order")
     .eq("tournament_id", id);
 
   const { data: buys } = await supabase
