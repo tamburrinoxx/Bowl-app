@@ -264,8 +264,8 @@ export default function ScoreEntryPanel({
               return roster.length > 1
                 ? roster.map((b) => ({ entry, bowlerKey: b.key, label: b.name }))
                 : [{ entry, bowlerKey: "solo", label: entry.entry_name }];
-            }).map(({ entry, bowlerKey, label }) => (
-              <tr key={`${entry.id}:${bowlerKey}`} className="border-t border-white/5">
+          }).map(({ entry, bowlerKey, label }, rowIdx) => (
+            <tr key={`${entry.id}:${bowlerKey ?? "x"}:${rowIdx}`} className="border-t border-white/5">
                 <td className="font-score text-ink-soft px-3 py-2 text-center text-sm">
                   {entry.lane ?? "—"}
                 </td>

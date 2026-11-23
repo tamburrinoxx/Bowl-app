@@ -33,6 +33,7 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
   const [nameB, setNameB] = useState("Team Blue");
   const [mSession, setMSession] = useState("Session 1");
   const [filterSession, setFilterSession] = useState("all");
+  const [matchPlayers, setMatchPlayers] = useState<{ match_id: string; roster_id: string; side: string }[]>([]);
   const [mFormat, setMFormat] = useState("Singles");
   const [mA, setMA] = useState("");
   const [mB, setMB] = useState("");
@@ -133,6 +134,16 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
 
   useEffect(() => { load(); }, [load]);
 
+  useEffect(() => {
+    (async () => {
+      const ids = matches.map((m) => m.id);
+      if (!ids.length) { setMatchPlayers([]); return; }
+      const { data } = await supabase.from("ryder_match_players")
+        .select("match_id, roster_id, side").in("match_id", ids);
+      setMatchPlayers((data as { match_id: string; roster_id: string; side: string }[]) ?? []);
+    })();
+  }, [matches, supabase]);
+
   function gameWinColor(m: Match, side: "a" | "b", i: number) {
     const a = (m.scores_a ?? [])[i] ?? 0;
     const b = (m.scores_b ?? [])[i] ?? 0;
@@ -169,6 +180,24 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
 
   const totalA = matches.reduce((s, m) => s + resultFor(m).a, 0);
   const totalB = matches.reduce((s, m) => s + resultFor(m).b, 0);
+
+  // One point per match won, half for a tie, per bowler.
+  const playerPoints = roster
+    .map((p) => {
+      let pts = 0;
+      let played = 0;
+      for (const mp of matchPlayers.filter((x) => x.roster_id === p.id)) {
+        const m = matches.find((x) => x.id === mp.match_id);
+        if (!m) continue;
+        const r = resultFor(m);
+        if (!r.decided) continue;
+        played++;
+        if (r.a === r.b) pts += 0.5;
+        else if ((mp.side === "A" && r.a > r.b) || (mp.side === "B" && r.b > r.a)) pts += 1;
+      }
+      return { ...p, pts, played };
+    })
+    .sort((a, b) => b.pts - a.pts);
   const teamA = teams.find((t) => t.side === "A");
   const teamB = teams.find((t) => t.side === "B");
   const colorA = teamA?.color ?? "#FF4D4D";
@@ -424,6 +453,25 @@ export default function RyderPanel({ tournamentId }: { tournamentId: string }) {
           </button>
         </div>
       )}
+      {playerPoints.some((p) => p.played > 0) && (
+        <div className="mt-6 border-t border-white/10 pt-4">
+          <p className="text-ink-soft mb-2 text-[11px] uppercase tracking-wide">Bowler points</p>
+          <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
+            {(["A", "B"] as const).map((sd) => (
+              <div key={sd} className="space-y-1">
+                {playerPoints.filter((p) => p.side === sd && p.played > 0).map((p) => (
+                  <div key={p.id} className="flex items-center gap-2 rounded-lg bg-white/5 px-3 py-1.5 text-sm">
+                    <span className="text-ink flex-1 truncate">{p.name}</span>
+                    <span className="text-ink-soft/50 text-[11px]">{p.played}</span>
+                    <span className="font-score w-10 text-right" style={{ color: sd === "A" ? colorA : colorB }}>{p.pts}</span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {msg && <p className="text-ink-soft mt-2 text-sm">{msg}</p>}
     </div>
   );

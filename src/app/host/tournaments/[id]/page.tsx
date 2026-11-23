@@ -169,6 +169,20 @@ export default async function HostTournamentPage({
           </CollapseSection>
         )}
 
+        <CollapseSection title="Team Signups">
+          <div className="flex flex-col gap-3">
+            <Link
+              href={`/host/tournaments/${tournament.id}/signups`}
+              className="inline-block rounded bg-[#B6FF2E] px-4 py-2 text-center font-bold text-black"
+            >
+              View submitted teams
+            </Link>
+            <p className="text-xs opacity-60">
+              Public signup link: /t/{tournament.id}/signup
+            </p>
+          </div>
+        </CollapseSection>
+
         {tournament.uses_squads && (
         <CollapseSection title="Squads">
           <SquadsPanel tournamentId={tournament.id} entries={entries ?? []} />
