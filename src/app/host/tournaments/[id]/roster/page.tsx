@@ -20,7 +20,7 @@ export default async function RosterPage({
 
   const { data: entries } = await supabase
     .from("entries")
-    .select("id,entry_name,lane,paid,squad_id,locked_handicap")
+    .select("id,entry_name,lane,paid,squad_id,locked_handicap,scratch_division")
     .eq("tournament_id", id);
 
   const entryIds = (entries ?? []).map((e) => e.id);

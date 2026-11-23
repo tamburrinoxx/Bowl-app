@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
-type Entry = { id: string; entry_name: string; lane: number | null; paid: boolean | null; squad_id: string | null; locked_handicap: number | null };
+type Entry = { id: string; entry_name: string; lane: number | null; paid: boolean | null; squad_id: string | null; locked_handicap: number | null; scratch_division: boolean };
 type Squad = { id: string; label: string };
 type Bowler = { id: string; entry_id: string; position: number; name: string | null; average: number | null; handicap: number | null };
 type Pot = { id: string; name: string; pot_type: string; buy_in: number; scoring: string; participant: string; allow_multiple: boolean | null };
@@ -116,6 +116,12 @@ export default function RosterGrid({
     await supabase.from("entries").update({ paid: v }).eq("id", e.id);
   }
 
+  async function toggleScratch(e: Entry) {
+    const v = !e.scratch_division;
+    setEnts((p) => p.map((x) => (x.id === e.id ? { ...x, scratch_division: v } : x)));
+    await supabase.from("entries").update({ scratch_division: v }).eq("id", e.id);
+  }
+
   async function setLane(e: Entry, lane: string) {
     const n = Number(lane);
     const v = lane.trim() === "" || Number.isNaN(n) ? null : n;
@@ -186,6 +192,14 @@ export default function RosterGrid({
                         <label className="flex items-center gap-1 text-xs">
                           <input type="checkbox" checked={!!e.paid} onChange={() => togglePaid(e)} />
                           Entry paid
+                        </label>
+                        <label className="flex items-center gap-1 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={!!e.scratch_division}
+                            onChange={() => toggleScratch(e)}
+                          />
+                          Scratch division
                         </label>
                         {teamPots.map((p) => (
                           <label key={p.id} className="flex items-center gap-1 text-xs">
