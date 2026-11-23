@@ -14,7 +14,7 @@ export default async function RosterPage({
 
   const { data: tournament } = await supabase
     .from("tournaments")
-    .select("id,name,handicap_base,handicap_percent")
+    .select("id,name,handicap_base,handicap_percent,entry_fee,scratch_fee")
     .eq("id", id)
     .single();
 
@@ -64,6 +64,8 @@ export default async function RosterPage({
       <RosterGrid
         base={Number(tournament?.handicap_base ?? 230)}
         percent={Number(tournament?.handicap_percent ?? 0.8)}
+        entryFee={Number(tournament?.entry_fee ?? 0)}
+        scratchFee={Number(tournament?.scratch_fee ?? 0)}
         entries={(entries ?? []) as never}
         squads={(squads ?? []) as never}
         bowlers={(bowlers ?? []) as never}

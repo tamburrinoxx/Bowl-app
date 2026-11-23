@@ -12,6 +12,8 @@ type Buy = { id: string; side_pot_id: string; entry_id: string; bowler_slot: num
 export default function RosterGrid({
   base,
   percent,
+  entryFee,
+  scratchFee,
   entries,
   squads,
   bowlers,
@@ -20,6 +22,8 @@ export default function RosterGrid({
 }: {
   base: number;
   percent: number;
+  entryFee: number;
+  scratchFee: number;
   entries: Entry[];
   squads: Squad[];
   bowlers: Bowler[];
@@ -167,7 +171,7 @@ export default function RosterGrid({
           <tbody>
             {shown.map((e) => {
               const team = byEntry.get(e.id) ?? [];
-              const owed = sold
+              const owed = entryFee + (e.scratch_division ? scratchFee : 0) + sold
                 .filter((s) => s.entry_id === e.id)
                 .reduce((sum, s) => {
                   const p = pots.find((x) => x.id === s.side_pot_id);
