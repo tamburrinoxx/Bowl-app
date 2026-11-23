@@ -91,7 +91,7 @@ export default function CheckInPanel({
       .order("created_at");
 
     const potList = (potData as SidePot[]) ?? [];
-    setPots(potList);
+    setPots([]);
 
     if (!potList.length || !entries.length) {
       setSold({});

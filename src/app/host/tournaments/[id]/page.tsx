@@ -198,7 +198,7 @@ export default async function HostTournamentPage({
         </CollapseSection>
         )}
 
-        <CollapseSection key="entries" title="Entries &amp; Check-In" id="entries">
+        <CollapseSection key="entries" title="Lanes &amp; Check-In" id="entries">
           <CheckInPanel
             tournamentId={tournament.id}
             entries={entries ?? []}

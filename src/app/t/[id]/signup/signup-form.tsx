@@ -50,6 +50,7 @@ export default function SignupForm({
   const [squadId, setSquadId] = useState<string | null>(null);
   const [teamName, setTeamName] = useState("");
   const [email, setEmail] = useState("");
+  const [scratch, setScratch] = useState(false);
   const [rows, setRows] = useState<Row[]>([
     { name: "", average: "", phone: "" },
     { name: "", average: "", phone: "" },
@@ -88,6 +89,7 @@ export default function SignupForm({
       p_squad: squadId,
       p_team_name: teamName.trim() || null,
       p_captain_email: email.trim(),
+      p_scratch: scratch,
       p_bowlers: rows.map((r) => ({
         name: r.name.trim(),
         average: Number(r.average),
@@ -259,6 +261,24 @@ export default function SignupForm({
           />
         </div>
       </section>
+
+      <label className="glass-panel mt-4 flex cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          checked={scratch}
+          onChange={(e) => setScratch(e.target.checked)}
+          className="mt-1"
+        />
+        <span>
+          <span className="block text-sm font-semibold">
+            Also enter the scratch division
+          </span>
+          <span className="block text-xs opacity-60">
+            $60 extra per team. The main tournament is handicapped; this adds a
+            scratch standing on the same games.
+          </span>
+        </span>
+      </label>
 
       {complete && (
         <div className="glass-panel mt-4 text-sm">
