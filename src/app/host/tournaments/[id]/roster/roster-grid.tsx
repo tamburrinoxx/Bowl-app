@@ -142,7 +142,7 @@ export default function RosterGrid({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-left">
+        <table className="w-full min-w-[980px] border-collapse text-left">
           <thead>
             <tr className="border-b border-white/20 text-xs uppercase tracking-wide text-white/60">
               <th className={cell}>Bowler</th>

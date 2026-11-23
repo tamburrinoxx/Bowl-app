@@ -47,7 +47,7 @@ export default async function RosterPage({
     .in("side_pot_id", (pots ?? []).map((p) => p.id));
 
   return (
-    <main className="mx-auto max-w-[1600px] px-4 pb-24 pt-6">
+    <main className="mx-auto w-full max-w-full px-4 pb-24 pt-6">
       <Link
         href={`/host/tournaments/${id}`}
         className="text-sm underline opacity-60"
