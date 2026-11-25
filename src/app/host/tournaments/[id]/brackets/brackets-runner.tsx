@@ -46,6 +46,9 @@ export default function BracketsRunner({
   const [names, setNames] = useState<Record<string, string>>({});
   const [buys, setBuys] = useState<Record<string, { entryId: string; quantity: number }[]>>({});
   const [active, setActive] = useState<string | null>(null);
+  const [squads, setSquads] = useState<{ id: string; label: string }[]>([]);
+  const [squadId, setSquadId] = useState<string>("all");
+  const [squadOf, setSquadOf] = useState<Record<string, string | null>>({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
@@ -82,13 +85,22 @@ export default function BracketsRunner({
 
     const { data: entryData } = await supabase
       .from("entries")
-      .select("id, entry_name")
+      .select("id, entry_name, squad_id")
       .eq("tournament_id", tournamentId);
 
-    const entryRows = (entryData as { id: string; entry_name: string }[]) ?? [];
+    const entryRows = (entryData as { id: string; entry_name: string; squad_id: string | null }[]) ?? [];
     const entryIds = entryRows.map((e) => e.id);
     const teamOf: Record<string, string> = {};
     for (const e of entryRows) teamOf[e.id] = e.entry_name;
+    const sq: Record<string, string | null> = {};
+    for (const e of entryRows) sq[e.id] = e.squad_id;
+    setSquadOf(sq);
+    const { data: sqData } = await supabase
+      .from("squads")
+      .select("id,label,starts_at")
+      .eq("tournament_id", tournamentId)
+      .order("starts_at", { nullsFirst: false });
+    setSquads((sqData ?? []) as { id: string; label: string }[]);
 
     const { data: eb } = await supabase
       .from("entry_bowlers")
@@ -168,7 +180,7 @@ export default function BracketsRunner({
     setMessage(null);
     setIsError(false);
 
-    const potBuys = buys[pot.id] ?? [];
+    const potBuys = (buys[pot.id] ?? []).filter((b) => squadId === "all" || squadOf[b.entryId.split(":")[0]] === squadId);
     const plan = buildGroups(potBuys, pot.bracket_size || 8);
 
     if (!plan.groups.length) {
@@ -180,6 +192,7 @@ export default function BracketsRunner({
       return;
     }
 
+    const base = Math.max(0, ...matches.filter((m) => m.side_pot_id === pot.id).map((m) => m.bracket_group ?? 0));
     for (let g = 0; g < plan.groups.length; g++) {
       const seeded: SeededEntry[] = plan.groups[g].map((entryId, i) => ({
         entry_id: entryId,
@@ -195,7 +208,7 @@ export default function BracketsRunner({
           generated.map((m) => ({
             tournament_id: tournamentId,
             side_pot_id: pot.id,
-            bracket_group: g + 1,
+            bracket_group: base + g + 1,
             round_number: m.round_number,
             match_number: m.match_number,
             entry_a: m.entry_a ? m.entry_a.split(":")[0] : null,
@@ -373,11 +386,36 @@ export default function BracketsRunner({
   const groups = [...new Set(mine.map((m) => m.bracket_group))].sort(
     (a, b) => (a ?? 0) - (b ?? 0),
   );
-  const potBuys = buys[pot.id] ?? [];
+  const potBuys = (buys[pot.id] ?? []).filter((b) => squadId === "all" || squadOf[b.entryId.split(":")[0]] === squadId);
   const slots = potBuys.reduce((s, b) => s + b.quantity, 0);
 
   return (
     <div>
+      {squads.length > 1 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {squads.map((q) => (
+            <button
+              key={q.id}
+              type="button"
+              onClick={() => setSquadId(q.id)}
+              className={`rounded-full px-3 py-1.5 text-sm ${
+                squadId === q.id ? "bg-[#B6FF2E] font-bold text-black" : "bg-white/10"
+              }`}
+            >
+              {q.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setSquadId("all")}
+            className={`rounded-full px-3 py-1.5 text-sm ${
+              squadId === "all" ? "bg-[#B6FF2E] font-bold text-black" : "bg-white/10"
+            }`}
+          >
+            All squads
+          </button>
+        </div>
+      )}
       {pots.length > 1 && (
         <div className="mb-4 flex flex-wrap gap-2">
           {pots.map((p) => (

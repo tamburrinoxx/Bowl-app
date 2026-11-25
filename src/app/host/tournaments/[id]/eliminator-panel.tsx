@@ -33,6 +33,8 @@ export default function EliminatorPanel({
 
   const [pots, setPots] = useState<Pot[]>([]);
   const [potId, setPotId] = useState<string | null>(null);
+  const [squads, setSquads] = useState<{ id: string; label: string }[]>([]);
+  const [squadId, setSquadId] = useState<string>("all");
 
   const load = useCallback(async () => {
     const { data: potData } = await supabase
@@ -43,6 +45,13 @@ export default function EliminatorPanel({
       .order("sort_order");
     const list = (potData as Pot[]) ?? [];
     setPots(list);
+
+    const { data: sqData } = await supabase
+      .from("squads")
+      .select("id,label,starts_at")
+      .eq("tournament_id", tournamentId)
+      .order("starts_at", { nullsFirst: false });
+    setSquads((sqData ?? []) as { id: string; label: string }[]);
     const p = list.find((x) => x.id === potId) ?? list[0];
     setPot(p ?? null);
     if (!p) {
@@ -65,7 +74,7 @@ export default function EliminatorPanel({
     const ids = [...new Set(buyRows.map((b) => b.entry_id))];
 
     const [{ data: ents }, { data: eb }, { data: games }, { data: cuts }] = await Promise.all([
-      supabase.from("entries").select("id, entry_name").in("id", ids),
+      supabase.from("entries").select("id, entry_name, squad_id").in("id", ids),
       supabase.from("entry_bowlers").select("entry_id, position, name, handicap").in("entry_id", ids),
       supabase.from("games").select("entry_id, bowler_slot, game_number, scratch_score").in("entry_id", ids),
       supabase.from("eliminator_cuts").select("entry_id, bowler_slot, cut_after_game").eq("side_pot_id", p.id),
@@ -91,11 +100,15 @@ export default function EliminatorPanel({
       (byKey[k] ||= {})[g.game_number] = g.scratch_score + (useH ? hcpOf.get(k) ?? 0 : 0);
     }
 
+    const entRows = (ents as { id: string; entry_name: string; squad_id: string | null }[]) ?? [];
+    const squadOf = new Map(entRows.map((e) => [e.id, e.squad_id]));
     const teamOf = new Map(
-      ((ents as { id: string; entry_name: string }[]) ?? []).map((e) => [e.id, e.entry_name])
+      entRows.map((e) => [e.id, e.entry_name])
     );
 
-    const out: Row[] = buyRows.map((b) => {
+    const out: Row[] = buyRows
+      .filter((b) => squadId === "all" || squadOf.get(b.entry_id) === squadId)
+      .map((b) => {
       const k = `${b.entry_id}:${b.bowler_slot ?? 1}`;
       const sc = byKey[k] ?? {};
       const cutAfter = cutMap[k] ?? null;
@@ -111,8 +124,9 @@ export default function EliminatorPanel({
       };
     });
 
+    setBuyerCount(out.length);
     setRows(out);
-  }, [supabase, tournamentId, potId]);
+  }, [supabase, tournamentId, potId, squadId]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -192,6 +206,31 @@ export default function EliminatorPanel({
 
   return (
     <div>
+      {squads.length > 1 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {squads.map((q) => (
+            <button
+              key={q.id}
+              type="button"
+              onClick={() => setSquadId(q.id)}
+              className={`rounded-full px-3 py-1.5 text-sm ${
+                squadId === q.id ? "bg-[#B6FF2E] font-bold text-black" : "bg-white/10"
+              }`}
+            >
+              {q.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setSquadId("all")}
+            className={`rounded-full px-3 py-1.5 text-sm ${
+              squadId === "all" ? "bg-[#B6FF2E] font-bold text-black" : "bg-white/10"
+            }`}
+          >
+            All squads
+          </button>
+        </div>
+      )}
       {pots.length > 1 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {pots.map((x) => (
