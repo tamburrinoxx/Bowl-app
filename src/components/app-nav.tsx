@@ -63,8 +63,34 @@ export default function AppNav() {
   const MOBILE_QUICK = isHost
     ? HOST_QUICK.filter((l) => ["Tournaments", "Find", "Bowl"].includes(l.label))
     : BOWLER_QUICK;
-  const VISIBLE = isHost ? SECTIONS : SECTIONS.filter((x) => x.group === "Bowler");
-
+  const tid =
+    pathname.match(/\/(?:host\/tournaments|t)\/([0-9a-f-]{36})/)?.[1] ?? null;
+  const BASE = isHost ? SECTIONS : SECTIONS.filter((x) => x.group === "Bowler");
+  const VISIBLE = tid
+    ? [
+        {
+          group: "This tournament",
+          links: isHost
+            ? [
+                { label: "Overview", href: `/host/tournaments/${tid}` },
+                { label: "Roster & side action", href: `/host/tournaments/${tid}/roster` },
+                { label: "Team signups", href: `/host/tournaments/${tid}/signups` },
+                { label: "Brackets", href: `/host/tournaments/${tid}/brackets` },
+                { label: "TV board", href: `/t/${tid}/tv` },
+                { label: "Public roster", href: `/t/${tid}/roster` },
+                { label: "Public page", href: `/t/${tid}` },
+                { label: "Signup form", href: `/t/${tid}/signup` },
+              ]
+            : [
+                { label: "Standings", href: `/t/${tid}` },
+                { label: "Roster & handicaps", href: `/t/${tid}/roster` },
+                { label: "Brackets", href: `/t/${tid}/brackets` },
+                { label: "Your day", href: `/t/${tid}/me` },
+              ],
+        },
+        ...BASE,
+      ]
+    : BASE;
   if (pathname === "/" || pathname === "/login") return null;
 
   return (
