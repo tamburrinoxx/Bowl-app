@@ -19,6 +19,7 @@ interface Buyer {
   name: string;
   handicap: number;
   quantity: number;
+  squad: string | null;
 }
 
 interface GameScore {
@@ -40,6 +41,8 @@ export default function SideResultsPanel({
   const [pots, setPots] = useState<SidePot[]>([]);
   const [buyers, setBuyers] = useState<Record<string, Buyer[]>>({});
   const [scores, setScores] = useState<GameScore[]>([]);
+  const [squads, setSquads] = useState<{ id: string; label: string }[]>([]);
+  const [squadId, setSquadId] = useState<string>("all");
 
   const load = useCallback(async () => {
     const { data: potData } = await supabase
@@ -51,6 +54,13 @@ export default function SideResultsPanel({
 
     const potList = (potData as SidePot[]) ?? [];
     setPots(potList);
+
+    const { data: sqData } = await supabase
+      .from("squads")
+      .select("id,label,starts_at")
+      .eq("tournament_id", tournamentId)
+      .order("starts_at", { nullsFirst: false });
+    setSquads((sqData ?? []) as { id: string; label: string }[]);
     if (!potList.length) return;
 
     const { data: buys } = await supabase
@@ -74,7 +84,7 @@ export default function SideResultsPanel({
 
     const { data: entryData } = await supabase
       .from("entries")
-      .select("id, entry_name, locked_handicap")
+      .select("id, entry_name, locked_handicap, squad_id")
       .in("id", entryIds);
 
     const { data: gameData } = await supabase
@@ -89,13 +99,16 @@ export default function SideResultsPanel({
 
     const teamName = new Map<string, string>();
     const teamHcp = new Map<string, number>();
+    const teamSquad = new Map<string, string | null>();
     for (const e of (entryData as {
       id: string;
       entry_name: string;
       locked_handicap: number | null;
+      squad_id: string | null;
     }[]) ?? []) {
       teamName.set(e.id, e.entry_name);
       teamHcp.set(e.id, Number(e.locked_handicap ?? 0));
+      teamSquad.set(e.id, e.squad_id);
     }
 
     const bowlerMap = new Map<string, { name: string; handicap: number }>();
@@ -123,6 +136,7 @@ export default function SideResultsPanel({
               name: team || "Team",
               handicap: Math.round((teamHcp.get(b.entry_id) ?? 0) / 3),
               quantity: b.quantity,
+            squad: teamSquad.get(b.entry_id) ?? null,
             };
           }
           const key = `${b.entry_id}:${b.bowler_slot ?? 1}`;
@@ -132,6 +146,7 @@ export default function SideResultsPanel({
             name: who ? who.name : team || "Bowler",
             handicap: who?.handicap ?? 0,
             quantity: b.quantity,
+            squad: teamSquad.get(b.entry_id) ?? null,
           };
         });
     }
@@ -168,12 +183,37 @@ export default function SideResultsPanel({
 
   return (
     <div className="space-y-8">
+      {squads.length > 1 && (
+        <div className="flex flex-wrap gap-2">
+          {squads.map((q) => (
+            <button
+              key={q.id}
+              type="button"
+              onClick={() => setSquadId(q.id)}
+              className={`rounded-full px-3 py-1.5 text-sm ${
+                squadId === q.id ? "bg-[#B6FF2E] font-bold text-black" : "bg-white/10"
+              }`}
+            >
+              {q.label}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setSquadId("all")}
+            className={`rounded-full px-3 py-1.5 text-sm ${
+              squadId === "all" ? "bg-[#B6FF2E] font-bold text-black" : "bg-white/10"
+            }`}
+          >
+            All squads
+          </button>
+        </div>
+      )}
       {pots.map((pot) =>
         pot.pot_type === "high_game" ? (
           <HighGamePot
             key={pot.id}
             pot={pot}
-            buyers={buyers[pot.id] ?? []}
+            buyers={(buyers[pot.id] ?? []).filter((b) => squadId === "all" || b.squad === squadId)}
             scores={scores}
             gamesPerSquad={pot.participant === "team" ? bakerGames : gamesPerSquad}
           />
@@ -181,7 +221,7 @@ export default function SideResultsPanel({
           <HighSeriesPot
             key={pot.id}
             pot={pot}
-            buyers={buyers[pot.id] ?? []}
+            buyers={(buyers[pot.id] ?? []).filter((b) => squadId === "all" || b.squad === squadId)}
             scores={scores}
           />
         ),
