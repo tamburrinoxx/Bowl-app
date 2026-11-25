@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 
 type Standing = {
@@ -9,6 +9,7 @@ type Standing = {
   scratch_total: number;
   baker_total: number;
   handicap_total: number;
+  squad_label: string | null;
 };
 
 type Pot = { id: string; name: string; pot_type: string; scoring: string };
@@ -40,7 +41,7 @@ export default function TvBoard({ tournamentId }: { tournamentId: string }) {
 
     const { data: st } = await supabase
       .from("standings")
-      .select("entry_id,entry_name,scratch_total,baker_total,handicap_total")
+      .select("entry_id,entry_name,scratch_total,baker_total,handicap_total,squad_label")
       .eq("tournament_id", tournamentId);
     const rows = (st ?? []) as Standing[];
     setStandings(rows);
@@ -101,6 +102,9 @@ export default function TvBoard({ tournamentId }: { tournamentId: string }) {
       scoresOf.set(k, arr);
     }
 
+    const squadOf = new Map(rows.map((r) => [r.entry_id, r.squad_label ?? "No squad"]));
+    const squadNames = [...new Set(rows.map((r) => r.squad_label ?? "No squad"))];
+
     const boards: Record<string, Line[]> = {};
     for (const p of potList) {
       const inPot = new Set(
@@ -108,27 +112,29 @@ export default function TvBoard({ tournamentId }: { tournamentId: string }) {
           .filter((x) => x.side_pot_id === p.id)
           .map((x) => x.entry_id)
       );
-      const out: { name: string; team: string; score: number }[] = [];
-      for (const [k, scores] of scoresOf) {
-        const entryId = k.slice(0, k.lastIndexOf(":"));
-        if (!inPot.has(entryId) || !scores.length) continue;
-        const h = p.scoring === "handicap" ? hcpOf.get(k) ?? 0 : 0;
-        const score =
-          p.pot_type === "high_game"
-            ? Math.max(...scores.map((s) => s + h))
-            : scores.reduce((a, b) => a + b, 0) + h * scores.length;
-        out.push({
-          name: nameOf.get(k) ?? "Bowler",
-          team: teamOf.get(entryId) ?? "",
-          score,
-        });
+      for (const sq of squadNames) {
+        const out: { name: string; team: string; score: number }[] = [];
+        for (const [k, scores] of scoresOf) {
+          const entryId = k.slice(0, k.lastIndexOf(":"));
+          if (!inPot.has(entryId) || !scores.length) continue;
+          if ((squadOf.get(entryId) ?? "No squad") !== sq) continue;
+          const h = p.scoring === "handicap" ? hcpOf.get(k) ?? 0 : 0;
+          const score =
+            p.pot_type === "high_game"
+              ? Math.max(...scores.map((s) => s + h))
+              : scores.reduce((a, b) => a + b, 0) + h * scores.length;
+          out.push({
+            name: nameOf.get(k) ?? "Bowler",
+            team: teamOf.get(entryId) ?? "",
+            score,
+          });
+        }
+        boards[`${p.id}::${sq}`] = out
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 10)
+          .map((x, i) => ({ pos: i + 1, left: x.name, sub: x.team, right: x.score }));
       }
-      boards[p.id] = out
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 10)
-        .map((x, i) => ({ pos: i + 1, left: x.name, sub: x.team, right: x.score }));
-    }
-    setPotBoards(boards);
+    }    setPotBoards(boards);
     setUpdated(new Date().toLocaleTimeString());
   }, [supabase, tournamentId]);
 
@@ -152,6 +158,7 @@ export default function TvBoard({ tournamentId }: { tournamentId: string }) {
     return () => clearInterval(id);
   }, []);
 
+  const squadNames = [...new Set(standings.map((r) => r.squad_label ?? "No squad"))];
   const byHcp = [...standings]
     .sort((a, b) => b.handicap_total - a.handicap_total)
     .slice(0, 20)
@@ -175,7 +182,11 @@ export default function TvBoard({ tournamentId }: { tournamentId: string }) {
           <Board title="Handicap standings" lines={byHcp} />
           <Board title="Scratch pinfall" lines={byScr} />
           {pots.map((p) => (
-            <Board key={p.id} title={`${p.name} — ${p.scoring}`} lines={potBoards[p.id] ?? []} />
+            <Fragment key={p.id}>
+              {squadNames.map((sq) => (
+                <Board key={sq} title={`${p.name} — ${sq}`} lines={potBoards[`${p.id}::${sq}`] ?? []} />
+              ))}
+            </Fragment>
           ))}
         </div>
       </div>
