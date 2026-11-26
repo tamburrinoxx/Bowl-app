@@ -154,9 +154,15 @@ export default function ScoreEntryPage() {
     })();
   }, []);
 
+  // Load the pin log for whichever frame is now active. A fresh frame has an
+  // empty log; a frame reopened by "Fix last ball" (or a partly bowled frame in
+  // another game) keeps the rolls already bowled, so the next roll appends to
+  // them instead of overwriting the frame.
   useEffect(() => {
-    setPinLog([]);
+    const log = currentFrameIndex >= 0 ? pinLogs[activeGame]?.[currentFrameIndex] ?? [] : [];
+    setPinLog(log.map((r) => [...r]));
     setSelected(new Set());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeGame, currentFrameIndex]);
 
   function updateFrame(gameIdx: number, frameIdx: number, rolls: number[]) {
