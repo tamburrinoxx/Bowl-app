@@ -71,6 +71,21 @@ export default function CheckInPanel({
     router.refresh();
   }
   const [sortKey, setSortKey] = useState<SortKey>("lane");
+  const [squadLabels, setSquadLabels] = useState<Record<string, string>>({});
+  const squadKey = entries.map((e) => e.squad_id ?? "").join(",");
+  useEffect(() => {
+    const ids = [...new Set(entries.map((e) => e.squad_id).filter(Boolean))] as string[];
+    if (!ids.length) return;
+    let off = false;
+    (async () => {
+      const { data } = await supabase.from("squads").select("id,label").in("id", ids);
+      if (off) return;
+      const m: Record<string, string> = {};
+      for (const s of (data as { id: string; label: string }[]) ?? []) m[s.id] = s.label;
+      setSquadLabels(m);
+    })();
+    return () => { off = true; };
+  }, [supabase, squadKey]);
   const [sortDir, setSortDir] = useState<1 | -1>(1);
 
   function toggleSort(k: SortKey) {
@@ -285,6 +300,7 @@ export default function CheckInPanel({
           <thead>
             <tr className="text-ink-soft text-xs uppercase tracking-wide">
               <SortTh label="Lane" k="lane" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} center />
+              <th className="px-3 py-3 text-center font-medium">Squad</th>
               <SortTh label="Entry" k="name" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} />
               <SortTh label="Avg" k="avg" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} center />
               <SortTh label="Hdcp" k="hdcp" sortKey={sortKey} sortDir={sortDir} onClick={toggleSort} center />
@@ -321,6 +337,9 @@ export default function CheckInPanel({
                     onBlur={() => saveEntry(entry)}
                     className="glass-input font-score w-14 px-2 py-1.5 text-center text-sm text-ink"
                   />
+                </td>
+                <td className="px-3 py-2 text-center text-xs text-[#B6FF2E]">
+                  {squadLabels[entry.squad_id ?? ""] ?? "—"}
                 </td>
                 <td className="text-ink px-4 py-2 text-sm whitespace-nowrap">
                   <input
