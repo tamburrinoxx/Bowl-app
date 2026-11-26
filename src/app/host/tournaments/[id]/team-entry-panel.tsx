@@ -58,7 +58,6 @@ export default function TeamEntryPanel({
       .order("starts_at", { nullsFirst: false });
     const sqList = (sq ?? []) as Squad[];
     setSquads(sqList);
-    setSquadId((cur) => (cur === "all" && sqList[0] ? sqList[0].id : cur));
 
     if (!ids.length) return;
     const [{ data: rb }, { data: gm }, { data: bk }] = await Promise.all([
@@ -174,7 +173,7 @@ export default function TeamEntryPanel({
 
   const set = (k: string, v: string) => setDrafts((p) => ({ ...p, [k]: v }));
   const box =
-    "w-12 rounded border border-white/30 bg-neutral-900 px-1 py-1 text-center text-sm font-semibold text-white tabular-nums";
+    "w-11 rounded border border-white/30 bg-neutral-900 px-1 py-1 text-center text-sm font-semibold text-white tabular-nums";
   const pill = (on: boolean) =>
     `rounded-full px-3 py-1.5 text-sm ${on ? "bg-[#B6FF2E] font-bold text-black" : "bg-white/5"}`;
   const [hideDone, setHideDone] = useState(false);
@@ -182,8 +181,8 @@ export default function TeamEntryPanel({
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        {squads.map((s) => (<button key={s.id} onClick={() => setSquadId(s.id)} className={pill(squadId === s.id)}>{s.label}</button>))}
-        <button onClick={() => setSquadId("all")} className={pill(squadId === "all")}>All</button>
+        {squads.length > 1 && <button onClick={() => setSquadId("all")} className={pill(squadId === "all")}>All</button>}
+        {squads.length > 1 && squads.map((s) => (<button key={s.id} onClick={() => setSquadId(s.id)} className={pill(squadId === s.id)}>{s.label}</button>))}
         <button onClick={() => setHideDone((v) => !v)} className={pill(hideDone)}>Hide done</button>
         <span className="ml-auto text-sm opacity-70">{doneCount} of {shown.length} complete</span>
       </div>
@@ -193,27 +192,36 @@ export default function TeamEntryPanel({
           const t = totals(e);
           const done = filled(e) >= needed(e);
           return (
-            <div key={e.id} className={`my-2 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border-l-4 px-3 py-2.5 ${idx % 2 ? "border-l-[#B6FF2E]/60 bg-white/[0.05]" : "border-l-white/25 bg-white/[0.02]"} ${done ? "opacity-50" : ""}`}>
-              <div className="w-52 shrink-0 text-sm">
-                <span className="font-score mr-2 text-white">{e.lane ?? "—"}</span>
-                <span className="font-semibold">{e.entry_name}</span>
-              </div>
-              {r.map((b) => (
-                <div key={b.slot} className="flex items-center gap-1">
-                  <span className="w-24 truncate text-xs font-medium text-white">{b.name}</span>
-                  {iCols.map((g) => (
-                    <input key={g} inputMode="numeric" className={box} value={drafts[`g:${e.id}:${b.slot}:${g}`] ?? ""} onChange={(ev) => set(`g:${e.id}:${b.slot}:${g}`, ev.target.value)} />
+            <div key={e.id} className={`my-2 overflow-x-auto rounded-lg border-l-4 px-3 py-2.5 ${idx % 2 ? "border-l-[#B6FF2E]/60 bg-white/[0.05]" : "border-l-white/25 bg-white/[0.02]"} ${done ? "opacity-50" : ""}`}>
+              <div className="flex w-max min-w-full flex-col gap-2">
+                {/* Line 1: team name and every bowler's individual games */}
+                <div className="flex items-center gap-3">
+                  <div className="w-36 shrink-0 truncate text-sm" title={e.entry_name}>
+                    <span className="font-score mr-2 text-white">{e.lane ?? "—"}</span>
+                    <span className="font-semibold">{e.entry_name}</span>
+                  </div>
+                  {r.map((b) => (
+                    <div key={b.slot} className="flex shrink-0 items-center gap-1">
+                      <span className="w-20 truncate text-xs font-medium text-white" title={b.name}>{b.name}</span>
+                      {iCols.map((g) => (
+                        <input key={g} inputMode="numeric" className={box} value={drafts[`g:${e.id}:${b.slot}:${g}`] ?? ""} onChange={(ev) => set(`g:${e.id}:${b.slot}:${g}`, ev.target.value)} />
+                      ))}
+                    </div>
                   ))}
                 </div>
-              ))}
-              <div className="flex items-center gap-1">
-                <span className="w-8 text-xs font-semibold uppercase text-white">Bkr</span>
-                {bCols.map((g) => (
-                  <input key={g} inputMode="numeric" className={box} value={drafts[`b:${e.id}:${g}`] ?? ""} onChange={(ev) => set(`b:${e.id}:${g}`, ev.target.value)} />
-                ))}
-              </div>
-              <div className="ml-auto whitespace-nowrap text-right text-sm tabular-nums">
-                <span className="text-white">{t.scratch}+{t.hcpPins}</span> <b>{t.total}</b>
+                {/* Line 2: Baker games under the individual games, then totals */}
+                <div className="flex items-center gap-3">
+                  <div className="w-36 shrink-0" />
+                  <div className="flex shrink-0 items-center gap-1">
+                    <span className="w-20 text-xs font-semibold uppercase text-white">Baker</span>
+                    {bCols.map((g) => (
+                      <input key={g} inputMode="numeric" className={box} value={drafts[`b:${e.id}:${g}`] ?? ""} onChange={(ev) => set(`b:${e.id}:${g}`, ev.target.value)} />
+                    ))}
+                  </div>
+                  <div className="ml-auto shrink-0 whitespace-nowrap pl-4 text-right text-sm tabular-nums">
+                    <span className="text-white">{t.scratch}+{t.hcpPins}</span> <b>{t.total}</b>
+                  </div>
+                </div>
               </div>
             </div>
           );
